@@ -1,17 +1,37 @@
+#define ID_SIZ 31 // 31 + \0
+#define TOKEN_TXT_SIZ 63 // 63 + \0
+typedef struct {
+  Kind kind;
+  char text[TOKEN_TXT_SIZ];
+  int intVal;
+}
 
-
+// TODO : separate NOT and NOTEq
 typedef enum {
-  Lparen, Rparen, Lbrace, Rbrace
-  Plus, Minus, Multi, Div, Equal, Mod,
-  Not, NotEq, Less, LessEq, Great, GreatEq,
+  Lparen, Rparen, Lbrace, Rbrace,
+  Squote, Dquote,
+  Add, Sub, Mul, Div, Equal, Mod, Assign,
+  NotEq, Less, LessEq, EqLess, Great, GreatEq, EqGreat,
   And, Or, Xor, Rev,
-  Semicolon,
-  String, Int, 
+  Semicolon, END_list,
+  String, IntNum, FloatNum,
   Digit, Letter,
   If, Else, For, While,
-  Others,
+  Others, NulKind,
 } Kind;
 int cType[256];
+
+struct {
+  char *word;
+  Kind kind;
+} keyWdType[] = {
+  {"if", IF}, {"else", Else},
+  {"for", For}, {"while", While},
+  {"==", Equal}, {"!=", NotEq}, {"<", Less}, {"<=", LessEq}, {">=", EqLess}, {">", Great}, {">=", GreatEq}, {"=>", EqGreat},
+  {"+", Add}, {"-", Minus}, {"*", Mul}, {"/", Div}, {"%", Mod}, {"=", Assign},
+  {"(" Lparen}, {")", Rparen}, {"{" Lbrace}, {"}", Rbrace},
+  {";", Semicolon}, {"", END_list},
+};
 
 void initKind() {
   int i;
