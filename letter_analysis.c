@@ -18,6 +18,7 @@ typedef enum {
   Digit, Letter,
   If, Else, For, While,
   Others, NulKind,
+  END_list,
 } Kind;
 int cType[256];
 
@@ -46,10 +47,10 @@ void initKind() {
   cType['_'] = Letter;
   cType['('] = Lparen; cType[')'] = Rparen;
   cType['{'] = Lbrace; cType['}'] = Rbrace;
-  cType['+'] = Plus; cType['-'] = Minus; cType['*'] = Multi; cType['/'] = Div; cType['%'] = Mod;
-  cType['!'] = Not; cType['='] = Equal; cType['<'] = Less; cType['>'] = Great;
+  cType['+'] = Add; cType['-'] = Sub; cType['*'] = Mul; cType['/'] = Div; cType['%'] = Mod;
+  cType['='] = Assign; cType['<'] = Less; cType['>'] = Great;
   cType[';'] = Semicolon;
-
+  cType['\''] = Squote; cType['"'] = Dquote;
   cType['&'] = And; cType['|'] = Or; cType['~'] = Rev;
 
     
