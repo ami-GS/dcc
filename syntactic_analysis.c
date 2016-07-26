@@ -1,10 +1,5 @@
 #include <string.h>
-#include "syntactic_analysis.c"
-
-#define STACK_SIZ 64;
-int stack[STACK_SIZ];
-int stack_c;
-int variables[26]; // TODO : future, hash table?
+#include "syntactic_analysis.h"
 
 
 
