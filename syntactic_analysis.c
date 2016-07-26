@@ -4,86 +4,86 @@
 void expression(FILE *f, Token *t) {
   if (t->kind == VarName || checkNxtTokenKind(f, Assign)) {
     int varName = t->text[0];
-    nextToken(t); // skip '='
-    nextToken(t);
-    expression(t);
+    nextToken(f, t); // skip '='
+    nextToken(f, t);
+    expression(f, t);
     variables[varName] = stack[stack_c];
   } else {
-    or_exp(t);
+    or_exp(f, t);
   }
 }
 
-void or_exp(Token *t) {
-  and_exp(t);
+void or_exp(FILE *f, Token *t) {
+  and_exp(f, t);
   while (t->kind == Or) {
-    nextToken(t);
-    and_exp(t);
+    nextToken(f, t);
+    and_exp(f, t);
     operate(Or);
   }
 }
 
-void and_exp(Token *t) {
-  equ_exp(t);
+void and_exp(FILE *f, Token *t) {
+  equ_exp(f, t);
   while (t->kind == And) {
-    nextToken(t);
-    equ_exp(t);
+    nextToken(f, t);
+    equ_exp(f, t);
     operate(And);
   }
 }
 
-void equ_exp(Token *t) {
-  Kind op:
-  rel_exp(t);
+void equ_exp(FILE *f, Token *t) {
+  Kind op;
+  rel_exp(f, t);
   while (t->kind == Equal || t->kind == NotEq) {
     op = t->kind;
-    nextToken(t);
-    rel_exp(t);
+    nextToken(f, t);
+    rel_exp(f, t);
     operate(op);
   }
 }
 
-void rel_exp(Token *t) {
+void rel_exp(FILE *f, Token *t) {
   Kind op;
-  add_sub_exp(t);
+  add_sub_exp(f, t);
   while (strstr(" == <= >= =< => ", t->text) != NULL) {
     op = t->kind;
-    nextToken(t);
-    add_sub_exp(t);
+    nextToken(f, t);
+    add_sub_exp(f, t);
     operate(op);
   }
 }
 
-void add_sub_exp(Token *t) {
+void add_sub_exp(FILE *f, Token *t) {
   Kind op;
-  mul_div_mod_exp(t);
+  mul_div_mod_exp(f, t);
   while (t->kind == Add || t->kind == Sub) {
     op = t->kind;
-    nextToken(t);
-    mul_div_mod_exp(t);
+    nextToken(f, t);
+    mul_div_mod_exp(f, t);
     operate(op);
   }
 }
 
-void mul_div_mod_exp(Token *t) {
+void mul_div_mod_exp(FILE *f, Token *t) {
   Kind op;
-  factor(t);
+  factor(f, t);
   while (t->kind == Mul || t->kind == Div || t->kind == Mod) {
     op = t->kind;
-    nextToken(t);
-    factor(t);
+    nextToken(f, t);
+    factor(f, t);
     operate(op);
   }
 }
 
-void factor(Token *t) {
+void factor(FILE *f, Token *t) {
   Kind op;
 
   switch (t->kind) {
   case Add: case Sub: case Not:
     // like, +1, -1, !0
     op = t->kind;
-    nextToken(t);
-    factor();
+    nextToken(f, t);
+    factor(f, t);
     if (op == Sub) push(-pop());
     if (op == Not) push(!pop());
     return;
@@ -95,8 +95,8 @@ void factor(Token *t) {
     push(t->intVal);
     break;
   case Lparen:
-    nextToken(t);
-    expression(t);
+    nextToken(f, t);
+    expression(f, t);
     if (!checkNxtTokenKind(f, Rparen)) {
       // it must be Rparen
       return -1; // TODO : ')' required
