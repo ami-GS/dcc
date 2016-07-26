@@ -117,12 +117,16 @@ void operate(Kind op) {
 
   switch (op) {
   case Add:
+    push(v1+v2);
     break;
   case Sub:
+    push(v1-v2);
     break;
   case Mul:
+    push(v1*v2);
     break;
   case Div:
+    push(v1/v2);
     break;
   default:
     break
@@ -132,9 +136,16 @@ void operate(Kind op) {
 
 // TODO : consider the type pushed, Token might be good?
 void push(int n) {
-
+  if (stack_c >= STACK_SIZ) {
+    return; // TODO : stack overflow
+  }
+  stack[stack_c++] = n;
 }
+
 //TODO : same as the above
 int pop() {
-
+  if (stack_c <= 0) {
+    return -1; // TODO : stack underflow
+  }
+  return stack[--stack_c];
 }
