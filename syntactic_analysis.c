@@ -1,14 +1,8 @@
 #include <string.h>
 #include "syntactic_analysis.h"
 
-
-
-void expression(Token *t) {
-  Tokne *nxtTkn;
-  *nxtTkn = {NulKind, "", 0};
-  // TODO : after check the token, store it to buffer to share with nextToken()
-  checkNxtToken(nxtTkn);
-  if (t->kind == VarName || nxtTkn->kind == Assign) {
+void expression(FILE *f, Token *t) {
+  if (t->kind == VarName || checkNxtTokenKind(f, Assign)) {
     int varName = t->text[0];
     nextToken(t); // skip '='
     nextToken(t);
@@ -103,7 +97,10 @@ void factor(Token *t) {
   case Lparen:
     nextToken(t);
     expression(t);
-    checkToken(t); // it must be Rparen
+    if (!checkNxtTokenKind(f, Rparen)) {
+      // it must be Rparen
+      return -1; // TODO : ')' required
+    }
     break;
   default:
     return; // TODO error

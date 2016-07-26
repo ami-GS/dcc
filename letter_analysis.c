@@ -127,12 +127,12 @@ int nextToken(FILE *f, Token *t) {
     return -1; // maricious token
 }
 
-int checkNxtToken(FILE *f, Token *t) {
+int checkNxtTokenKind(FILE *f, Kind k) {
   if (t_buf_ptr >= TOKEN_BUFFER_SIZ) {
     return -1; // TODO : buffer overflow error
   }
-  *t = {NulKind, "", 0};
-  nextToken(f, t);
-  t_buf[t_buf_ptr++];
-  return 1;
+  Token t = {NulKind, "", 0};
+  nextToken(f, &t);
+  t_buf[t_buf_ptr++] =  t;
+  return t.kind == k;
 }

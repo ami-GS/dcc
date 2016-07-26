@@ -49,7 +49,6 @@ int nextChar(FILE *f, char *c);
 int is_ope2(const char *c1, const char c2);
 int set_kind(Token *t);
 int nextToken(FILE *f, Token *t);
-int checkNxtToken(FILE *f, Token *t);
-
+int checkNxtTokenKind(FILE *f, Kind k);
 
 #endif // DCC_LETTER_ANALYSIS_H_
