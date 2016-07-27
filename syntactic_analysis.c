@@ -110,7 +110,7 @@ void factor(FILE *f, Token *t) {
 
 void operate(Kind op) {
   int v2 = pop(), v1 = pop();
-  if (op == Div && v2 == 0) {
+  if ((op == Div || op == Mod) && v2 == 0) {
     // TODO : zero division
     return;
   }
@@ -127,6 +127,9 @@ void operate(Kind op) {
     break;
   case Div:
     push(v1/v2);
+    break;
+  case Mod:
+    push(v1%v2);
     break;
   default:
     break
