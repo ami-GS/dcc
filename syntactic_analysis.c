@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include "syntactic_analysis.h"
 
 void expression(FILE *f, Token *t) {
@@ -75,7 +76,7 @@ void mul_div_mod_exp(FILE *f, Token *t) {
   }
 }
 
-void factor(FILE *f, Token *t) {
+int factor(FILE *f, Token *t) {
   Kind op;
 
   switch (t->kind) {
@@ -103,9 +104,9 @@ void factor(FILE *f, Token *t) {
     }
     break;
   default:
-    return; // TODO error
+    return -1; // TODO error
     }
-  nextToken(t);
+  nextToken(f, t);
 }
 
 void operate(Kind op) {
@@ -132,8 +133,7 @@ void operate(Kind op) {
     push(v1%v2);
     break;
   default:
-    break
-
+    break;
   }
 }
 
