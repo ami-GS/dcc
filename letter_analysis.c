@@ -124,8 +124,8 @@ int nextToken(Token *t) {
   default:
     // TODO : add more cases?
     *(txt_ptr++) = c;
-    if (is_ope2(txt_ptr-1, c))
     nextChar(&c); //to check 2 length operaiton
+    if (is_ope2(txt_ptr-1, &c))
       *(txt_ptr++) = c;
     *txt_ptr = '\0';
   }

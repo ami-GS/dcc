@@ -14,11 +14,13 @@ typedef enum {
   Add, Sub, Mul, Div, Equal, Mod, Assign, Not,
   NotEq, Less, LessEq, EqLess, Great, GreatEq, EqGreat,
   And, Or, Xor, Rev,
+  Int, Void,
   Semicolon,
   String, IntNum, FloatNum,
   Digit, Letter, VarName,
   If, Else, For, While,
   Others, NulKind, Ident,
+  EOF_token,
   END_list,
 } Kind;
 int cType[256];
