@@ -22,9 +22,9 @@ void initKind() {
   cType['&'] = And; cType['|'] = Or; cType['~'] = Rev;
 }
 
-int nextChar(FILE *f, char *c) {
-  if ((*c = fgetc(f)) == EOF) {
-    fclose(f);
+int nextChar(char *c) {
+  if ((*c = fgetc(fin)) == EOF) {
+    fclose(fin);
     return -1;
   }
   return 1;
@@ -56,7 +56,7 @@ int set_kind(Token *t) {
 }
 
 // TODO : define error type?
-int nextToken(FILE *f, Token *t) {
+int nextToken(Token *t) {
   if (t_buf_ptr > 0) {
     *t = t_buf[t_buf_ptr--];
     return 1;
@@ -66,11 +66,11 @@ int nextToken(FILE *f, Token *t) {
   int err = 0;
   char c;
 
-  err = nextChar(f, &c);
+  err = nextChar(&c);
   if (err != 1)
     return err;
   while (c == ' ' || c == '\t') {
-    err = nextChar(f, &c);
+    err = nextChar(&c);
     if (err != 1)
       return err;
   }
@@ -78,7 +78,7 @@ int nextToken(FILE *f, Token *t) {
   char *txt_ptr = t->text;
   switch (cType[c]) {
   case Letter:
-    for (; cType[c] == Letter || cType[c] == Digit; nextChar(f, &c)) {
+    for (; cType[c] == Letter || cType[c] == Digit; nextChar(&c)) {
       if (txt_ptr - t->text < ID_SIZ)
 	*(txt_ptr++) = c;
       // TODO : if length exceeds the limit, emit error?
@@ -87,13 +87,13 @@ int nextToken(FILE *f, Token *t) {
     t->intVal = txt_ptr - t->text; // lenth
     break;
   case Digit:
-    for (; cType[c] == Digit; nextChar(f, &c))
+    for (; cType[c] == Digit; nextChar(&c))
       t->intVal = t->intVal*10 + (c - '0');
     t->kind = IntNum;
     // TODO : float case
     break;
   case Dquote:
-    for (nextChar(f, &c); c != '"' && c != EOF; nextChar(f, &c)) {
+    for (nextChar(&c); c != '"' && c != EOF; nextChar(&c)) {
       if (txt_ptr - t->text < TOKEN_TXT_SIZ)
 	*(txt_ptr++) = c;
       // TODO ; if length exceeds the limit, emit error
@@ -106,7 +106,7 @@ int nextToken(FILE *f, Token *t) {
     break;
   case Squote:
     // TODO : need to check how fgetc(FILE*) read escape. like '\' + 'n' or '\n';
-    for (nextChar(f, &c); c != '\'' && c != EOF; nextChar(f, &c))
+    for (nextChar(&c); c != '\'' && c != EOF; nextChar(&c))
       *(txt_ptr++) = t->intVal = c;
     if (c != '\'')
       return -1; // no end '
@@ -117,8 +117,8 @@ int nextToken(FILE *f, Token *t) {
   default:
     // TODO : add more cases?
     *(txt_ptr++) = c;
-    nextChar(f, &c); //to check 2 length operaiton
     if (is_ope2(txt_ptr-1, c))
+    nextChar(&c); //to check 2 length operaiton
       *(txt_ptr++) = c;
     *txt_ptr = '\0';
   }
@@ -128,12 +128,12 @@ int nextToken(FILE *f, Token *t) {
     return -1; // maricious token
 }
 
-int checkNxtTokenKind(FILE *f, Kind k) {
+int checkNxtTokenKind(Kind k) {
   if (t_buf_ptr >= TOKEN_BUFFER_SIZ) {
     return -1; // TODO : buffer overflow error
   }
   Token t = {NulKind, "", 0};
-  nextToken(f, &t);
+  nextToken(&t);
   t_buf[t_buf_ptr++] =  t;
   return t.kind == k;
 }
