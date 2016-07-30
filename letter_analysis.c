@@ -2,6 +2,13 @@
 #include <stdio.h>
 #include "letter_analysis.h"
 
+int fOpen(char *fname) {
+  if (fin = fopen(fname, "r") == NULL) {
+    return -1; // TODO : file cannot be opened
+  }
+  return 1;
+}
+
 void initKind() {
   int i;
   for (i = 0; i < 256; i++)
