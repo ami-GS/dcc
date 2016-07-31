@@ -22,9 +22,10 @@ void initKind() {
   cType['_'] = Letter;
   cType['('] = Lparen; cType[')'] = Rparen;
   cType['{'] = Lbrace; cType['}'] = Rbrace;
+  cType['['] = Lbracket; cType[']'] = Rbracket;
   cType['+'] = Add; cType['-'] = Sub; cType['*'] = Mul; cType['/'] = Div; cType['%'] = Mod;
   cType['='] = Assign; cType['<'] = Less; cType['>'] = Great;
-  cType[';'] = Semicolon;
+  cType[';'] = Semicolon; cType[','] = Comma;
   cType['\''] = Squote; cType['"'] = Dquote;
   cType['&'] = And; cType['|'] = Or; cType['~'] = Rev;
 }

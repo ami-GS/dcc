@@ -9,8 +9,8 @@ static FILE *fin;
 
 // TODO : separate NOT and NOTEq
 typedef enum {
-  Lparen, Rparen, Lbrace, Rbrace,
-  Squote, Dquote,
+  Lparen, Rparen, Lbrace, Rbrace, Lbracket, Rbracket,
+  Squote, Dquote, Comma,
   Add, Sub, Mul, Div, Equal, Mod, Assign, Not,
   NotEq, Less, LessEq, EqLess, Great, GreatEq, EqGreat,
   And, Or, Xor, Rev,
@@ -41,7 +41,7 @@ KeyWordType keyWdType[] = {
   {"for", For}, {"while", While},
   {"==", Equal}, {"!=", NotEq}, {"<", Less}, {"<=", LessEq}, {">=", EqLess}, {">", Great}, {">=", GreatEq}, {"=>", EqGreat},
   {"+", Add}, {"-", Sub}, {"*", Mul}, {"/", Div}, {"%", Mod}, {"=", Assign},
-  {"(", Lparen}, {")", Rparen}, {"{", Lbrace}, {"}", Rbrace},
+  {"(", Lparen}, {")", Rparen}, {"{", Lbrace}, {"}", Rbrace}, {"[", Lbracket}, {"]", Rbracket},
   {";", Semicolon}, {"", END_list},
 };
 
