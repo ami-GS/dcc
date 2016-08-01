@@ -15,7 +15,7 @@ void compile(char *fname) {
     case Int: case Void:
       set_type(&entryTmp, &t);
       set_name(&entryTmp, &t);
-      if (t->kind == Lparen) {
+      if (t.kind == Lparen) {
 	declare_func();
       } else { // in case of ',' or '['
 	declare_var(&entryTmp, &t);
@@ -28,7 +28,6 @@ void compile(char *fname) {
 
 
 void set_dtype(TableEntry* ent, Token* t) {
-  ent->name""
   switch(t->kind) {
   case Int:
     ent->dType = INT_T;
@@ -45,8 +44,8 @@ void set_dtype(TableEntry* ent, Token* t) {
 }
 
 int set_name(TableEntry* ent, Token* t) {
-  if (k != Ident) {
-    // TODO : error
+  if (t->kind != Ident) {
+    // TODO57 : error
     return -1;
   }
   int len;
@@ -55,7 +54,7 @@ int set_name(TableEntry* ent, Token* t) {
   for (len = 0; t->text+len != '\0'; len) {
     *(ent->name+len) = t->text+len;
   }
-  ent->name+len = '\0';
+  *(ent->name+len) = '\0';
   nextToken(t); // there are cases of ',', '[', '(', ';'
   return 1;
 }
@@ -69,7 +68,7 @@ int set_array(TableEntry* ent, Token *t) {
 
     expression(t); // TODO : validate error?
     ent->arrLen = pop(); // TODO : this is not cool, expression should return value
-    if (!checkNxtTokenKind(t, Rbracket)) {
+    if (!checkNxtTokenKind(Rbracket)) {
       return -1; // TODO : no end bracket?
     }
     nextToken(t); // point at ']' <-

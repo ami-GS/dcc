@@ -1,6 +1,9 @@
 #ifndef _DCC_PARSE_H_
 #define _DCC_PARSE_H_
 
+#include "symbol_table.h"
+#include "letter_analysis.h"
+
 void compile(char *fname);
 void set_dtype(TableEntry* ent, Token* t);
 int set_name(TableEntry* ent, Token* t);
