@@ -17,7 +17,7 @@ void compile(char *fname) {
       set_name(&entryTmp, &t);
       if (t->kind == Lparen) {
 	declare_func();
-      } else { // in case of ','
+      } else { // in case of ',' or '['
 	declare_var(&entryTmp, &t);
       }
     case Semicolon:
@@ -60,15 +60,30 @@ int set_name(TableEntry* ent, Token* t) {
   return 1;
 }
 
-int set_array() {
+int set_array(TableEntry* ent, Token *t) {
+  while (t->kind == Lbracket) {
+    nextToken(t);
+    if (t->kind == Rbracket) {
+      return -1; // TODO : ']' this case can be ok
+    }
+
+    expression(t); // TODO : validate error?
+    ent->arrLen = pop(); // TODO : this is not cool, expression should return value
+    if (!checkNxtTokenKind(t, Rbracket)) {
+      return -1; // TODO : no end bracket?
+    }
+    nextToken(t); // point at ']' <-
+    nextToken(t); // point at ',', ';' or '['
+    if (t->kind == Rbracket) {
+      return -1; // TODO : currently it doesn't support multi dimention
+    }
+  }
   return 1;
 }
 
 int declare_var(TableEntry* ent, Token* t) {
   while (1) {
-    if (t->kind == Lbracket) {
-      set_array(ent);
-    }
+    set_array(ent, t);
     enter_table_item(ent);
     if (t->kind == Semicolon || t->kind != Comma) {
       break; // TODO : suspicious
