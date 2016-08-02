@@ -92,3 +92,52 @@ int declare_var(TableEntry* ent, Token* t) {
   }
   return checkNxtTokenKind(Semicolon);
 }
+
+int declare_func(TableEntry* ent, Token* t) {
+  TableEntry entTmp = get_table_entry(ent->name);
+  if (entTmp != NULL && entTmp.kind == func_ID) {
+    // TODO : check all arguments for overload
+    return -1;
+  }
+  int* argnum_ptr = &(ent->args);
+  enter_table_item(ent); // TODO : why here?
+  nextToken(t); // point at ')' or arguments
+  switch(t->kind) {
+  case Void:
+    nextToken(t);
+    break;
+  case Rparen:
+    break;
+  default:
+    // TODO : make function of 'set_arguments'
+    while (1) {
+      set_type(ent, t);
+      set_name(ent, t);
+      enter_table_item(ent, t); // to avoid multiple declaration in case of using declare_var
+      if (t->kind != Comma) {
+	break;
+      }
+      nextToken(t);
+    }
+  }
+  if (!checkNxtTokenKind(Rparen)) {
+    return -1; // TODO : no ')' error
+  }
+  nextToken(t);
+  if (t->kind == Semicolon) {
+    // TODO : prototype declaration
+  }
+
+  // TODO : make function of set_func_process
+  switch (t->kind) {
+  case Semicolon:
+    break;
+  case Lbrace:
+    // TODO : if this is main(), then do special case
+
+    // TODO : write for the func contents
+    break;
+  default:
+    return -1; // TODO no '{' error
+  }
+}
