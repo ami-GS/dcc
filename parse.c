@@ -16,7 +16,7 @@ void compile(char *fname) {
       set_type(&entryTmp, &t);
       set_name(&entryTmp, &t);
       if (t.kind == Lparen) {
-	declare_func();
+	declare_func(&entryTmp, &t);
       } else { // in case of ',' or '['
 	declare_var(&entryTmp, &t);
       }
@@ -39,7 +39,7 @@ void set_dtype(TableEntry* ent, Token* t) {
     break;
     // TODO : other types can be placed
   }
-  nextToken(&t);
+  nextToken(t);
   return;
 }
 
@@ -55,7 +55,7 @@ int set_name(TableEntry* ent, Token* t) {
     *(ent->name+len) = t->text+len;
   }
   *(ent->name+len) = '\0';
-  nextToken(t); // there are cases of ',', '[', '(', ';'
+  nextToken(t); // pint at ',', '[', '(', ';'
   return 1;
 }
 
@@ -95,7 +95,7 @@ int declare_var(TableEntry* ent, Token* t) {
 
 int declare_func(TableEntry* ent, Token* t) {
   TableEntry entTmp = get_table_entry(ent->name);
-  if (entTmp != NULL && entTmp.kind == func_ID) {
+  if (&entTmp != NULL && entTmp.kind == func_ID) {
     // TODO : check all arguments for overload
     return -1;
   }
