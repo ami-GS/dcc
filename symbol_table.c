@@ -7,10 +7,10 @@ TableEntry get_table_entry(char *name) {
 int enter_table_item(TableEntry* ent) {
   // TODO : data validattion
   TableEntry e = get_table_entry(ent->name);
-  if (e != NULL && e->dType == ent->dType) {
+  if (e != NULL && e.dType == ent->dType) {
     return -1; // TODO : name duplication
   }
-  if (tblEnyryCnt >= TABLE_MAX) {
+  if (tblEntryCnt >= TABLE_MAX) {
     return -1; // TODO : table overflow error
   }
 
@@ -22,7 +22,7 @@ int enter_table_item(TableEntry* ent) {
     // TODO : apply func setting
   }
 
-  SymbolTable[++tblEnyryCnt] = *ent;
+  SymbolTable[++tblEntryCnt] = *ent;
   
   return 1;
 }

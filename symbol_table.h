@@ -2,14 +2,11 @@
 #define _DCC_SYMBOL_TABLE_H_
 
 #define TABLE_MAX 65536
-static TableEntry SymbolTable[TABLE_MAX];
-static int tblEntryCnt = 0;
 
 typedef enum {
     NO_LOCATION, GLOBAL, LOCAL, 
 } Level; //TODO : the locathion should be devided by each scope, which means each function have each level
 static int scopeCnt = 0;
-
 
 typedef enum {
     NON_T, VOID_T, INT_T, // TODO : increase
@@ -33,6 +30,9 @@ typedef struct {
     // for function
     int         args;
 } TableEntry;
+
+static TableEntry SymbolTable[TABLE_MAX];
+static int tblEntryCnt = 0;
 
 TableEntry get_table_entry(char *name);
 int enter_table_item(TableEntry* ent);

@@ -113,7 +113,7 @@ int declare_func(TableEntry* ent, Token* t) {
     while (1) {
       set_type(ent, t);
       set_name(ent, t);
-      enter_table_item(ent, t); // to avoid multiple declaration in case of using declare_var
+      enter_table_item(ent); // to avoid multiple declaration in case of using declare_var
       if (t->kind != Comma) {
 	break;
       }
