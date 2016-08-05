@@ -3,7 +3,7 @@
 #include "letter_analysis.h"
 
 int fOpen(char *fname) {
-  if (fin = fopen(fname, "r") == NULL) {
+  if ((fin = fopen(fname, "r")) == NULL) {
     return -1; // TODO : file cannot be opened
   }
   return 1;

@@ -1,6 +1,8 @@
+#include <stdlib.h>
 #include "letter_analysis.h"
 #include "parse.h"
 #include "symbol_table.h"
+#include "syntactic_analysis.c"
 
 void compile(char *fname) {
   fOpen(fname);
@@ -13,7 +15,7 @@ void compile(char *fname) {
     switch(t.kind) {
       // type, #, ;, }, )
     case Int: case Void:
-      set_type(&entryTmp, &t);
+      set_dtype(&entryTmp, &t);
       set_name(&entryTmp, &t);
       if (t.kind == Lparen) {
 	declare_func(&entryTmp, &t);
@@ -51,8 +53,8 @@ int set_name(TableEntry* ent, Token* t) {
   int len;
   for (len = 0; t->text+len != '\0'; len++) {}
   ent->name = malloc(sizeof(char) * (len + 1)); // TODO : error check, and must free
-  for (len = 0; t->text+len != '\0'; len) {
-    *(ent->name+len) = t->text+len;
+  for (len = 0; t->text+len != '\0'; len++) {
+    *(ent->name+len) = *(t->text+len);
   }
   *(ent->name+len) = '\0';
   nextToken(t); // pint at ',', '[', '(', ';'
@@ -111,7 +113,7 @@ int declare_func(TableEntry* ent, Token* t) {
   default:
     // TODO : make function of 'set_arguments'
     while (1) {
-      set_type(ent, t);
+      set_dtype(ent, t);
       set_name(ent, t);
       enter_table_item(ent); // to avoid multiple declaration in case of using declare_var
       if (t->kind != Comma) {

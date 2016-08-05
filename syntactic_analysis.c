@@ -87,7 +87,7 @@ int factor(Token *t) {
     factor(t);
     if (op == Sub) push(-pop());
     if (op == Not) push(!pop());
-    return;
+    return 1;
   case VarName:
     push(variables[t->text[0]]);
     break;
