@@ -95,6 +95,15 @@ int declare_var(TableEntry* ent, Token* t) {
   return checkNxtTokenKind(Semicolon);
 }
 
+
+int set_func_process() {
+  // TODO : if this is main(), then do special case
+
+  // TODO : write for the func contents
+  return 1;
+}
+
+
 int declare_func(TableEntry* ent, Token* t) {
   TableEntry* entTmp = get_table_entry(ent->name);
   if (entTmp != NULL && entTmp->kind == func_ID) {
@@ -102,44 +111,39 @@ int declare_func(TableEntry* ent, Token* t) {
     return -1;
   }
   int* argnum_ptr = &(ent->args);
-  enter_table_item(ent); // TODO : why here?
   nextToken(t); // point at ')' or arguments
-  switch(t->kind) {
-  case Void:
-    nextToken(t);
-    break;
-  case Rparen:
-    break;
-  default:
-    // TODO : make function of 'set_arguments'
-    while (1) {
-      set_dtype(ent, t);
-      set_name(ent, t);
-      enter_table_item(ent); // to avoid multiple declaration in case of using declare_var
-      if (t->kind != Comma) {
-	break;
+  SymbolKind k = get_func_type();
+  //enter_table_item(ent); // TODO : why here?
+  switch(f_type) {
+  case func_ID:
+    switch (t->kind) {
+    case Void:
+      nextToken(t); // point to ')'
+      break;
+    case Rparen:
+      break;
+    default:
+      while (1) {
+	set_dtype(ent, t);
+	set_name(ent, t);
+	enter_table_item(ent); // to avoid multiple declaration in case of using declare_var
+	if (t->kind != Comma) {
+	  break;
+	}
+	nextToken(t);
       }
-      nextToken(t);
+      break;
     }
-  }
-  if (!checkNxtTokenKind(Rparen)) {
-    return -1; // TODO : no ')' error
-  }
-  nextToken(t);
-  if (t->kind == Semicolon) {
+    if (!checkNxtTokenKind(Rparen)) {
+      return -1; // TODO : no ')' error (Is this conducted in get_func_type?)
+    }
+    set_func_process();
+  case proto_ID:
     // TODO : prototype declaration
+    break;
+  case no_ID:
+    return -1; // TODO : error
   }
 
-  // TODO : make function of set_func_process
-  switch (t->kind) {
-  case Semicolon:
-    break;
-  case Lbrace:
-    // TODO : if this is main(), then do special case
-
-    // TODO : write for the func contents
-    break;
-  default:
-    return -1; // TODO no '{' error
-  }
+  return 1;
 }
