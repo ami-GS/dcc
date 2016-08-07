@@ -145,3 +145,26 @@ int checkNxtTokenKind(Kind k) {
   t_buf[t_buf_ptr++] =  t;
   return t.kind == k;
 }
+
+SymbolKind get_func_type() {
+  // TODO : this might use many memory of t_buf
+  //        in case of there are many arguments
+  while (1) {
+    Token t = {NulKind, ""m 0}
+    if (t.kind == Rparen) {
+      nextToken(&t);
+      t_buf[t_buf_ptr++] = t;
+      switch (t.kind) {
+      case Semicolon: // prototype
+	return proto_ID;
+      case Lbrace:
+	return func_ID; // function
+      default:
+	return no_ID; // TODO : syntax error
+      }
+    }
+    nextToken(&t);
+    t_buf[t_buf_ptr++] = t;
+  }
+  return no_ID;
+}

@@ -45,7 +45,7 @@ KeyWordType keyWdType[] = {
   {";", Semicolon}, {"", END_list},
 };
 
-#define TOKEN_BUFFER_SIZ 10
+#define TOKEN_BUFFER_SIZ 1000
 Token t_buf[TOKEN_BUFFER_SIZ];
 int t_buf_ptr;
 // TODO : research about function name decisionning
@@ -56,5 +56,6 @@ int is_ope2(const char *c1, const char *c2);
 int set_kind(Token *t);
 int nextToken(Token *t);
 int checkNxtTokenKind(Kind k);
+SymbolKind get_func_type();
 
 #endif // DCC_LETTER_ANALYSIS_H_

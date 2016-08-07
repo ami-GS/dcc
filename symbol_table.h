@@ -13,7 +13,7 @@ typedef enum {
 } DataType;
 
 typedef enum {
-    no_ID, var_ID, func_ID, arg_ID, // TODO : increase
+    no_ID, var_ID, func_ID, proto_ID, arg_ID, // TODO : increase
 } SymbolKind;
 
 typedef struct {
