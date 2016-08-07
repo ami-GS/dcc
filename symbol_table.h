@@ -34,7 +34,7 @@ typedef struct {
 static TableEntry SymbolTable[TABLE_MAX];
 static int tblEntryCnt = 0;
 
-TableEntry get_table_entry(char *name);
+TableEntry* get_table_entry(char *name);
 int enter_table_item(TableEntry* ent);
 
 #endif // _DCC_SYMBOL_TABLE_H_

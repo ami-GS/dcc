@@ -96,8 +96,8 @@ int declare_var(TableEntry* ent, Token* t) {
 }
 
 int declare_func(TableEntry* ent, Token* t) {
-  TableEntry entTmp = get_table_entry(ent->name);
-  if (&entTmp != NULL && entTmp.kind == func_ID) {
+  TableEntry* entTmp = get_table_entry(ent->name);
+  if (entTmp != NULL && entTmp->kind == func_ID) {
     // TODO : check all arguments for overload
     return -1;
   }
