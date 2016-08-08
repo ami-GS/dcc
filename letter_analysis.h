@@ -2,6 +2,7 @@
 #define DCC_LETTER_ANALYSIS_H_
 
 #include <stdio.h>
+#include "symbol_table.h"
 
 #define ID_SIZ 31 // 31 + \0
 #define TOKEN_TXT_SIZ 63 // 63 + \0

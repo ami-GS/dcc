@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "letter_analysis.h"
+#include "symbol_table.h"
 
 int fOpen(char *fname) {
   if ((fin = fopen(fname, "r")) == NULL) {
@@ -150,7 +151,7 @@ SymbolKind get_func_type() {
   // TODO : this might use many memory of t_buf
   //        in case of there are many arguments
   while (1) {
-    Token t = {NulKind, ""m 0}
+    Token t = {NulKind, "", 0};
     if (t.kind == Rparen) {
       nextToken(&t);
       t_buf[t_buf_ptr++] = t;

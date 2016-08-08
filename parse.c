@@ -114,7 +114,7 @@ int declare_func(TableEntry* ent, Token* t) {
   nextToken(t); // point at ')' or arguments
   SymbolKind k = get_func_type();
   //enter_table_item(ent); // TODO : why here?
-  switch(f_type) {
+  switch(k) {
   case func_ID:
     switch (t->kind) {
     case Void:
