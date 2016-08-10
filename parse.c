@@ -4,6 +4,8 @@
 #include "symbol_table.h"
 #include "syntactic_analysis.c"
 
+#define is_main(p) (strcmp(p, "main")==0)
+
 void compile(char *fname) {
   fOpen(fname);
   initKind();
@@ -95,10 +97,11 @@ int declare_var(TableEntry* ent, Token* t) {
   return checkNxtTokenKind(Semicolon);
 }
 
-
-int set_func_process() {
+int set_func_process(TableEntry* ent) {
   // TODO : if this is main(), then do special case
+  if (is_main(ent->name)) {
 
+  }
   // TODO : write for the func contents
   return 1;
 }
@@ -123,6 +126,7 @@ int declare_func(TableEntry* ent, Token* t) {
     case Rparen:
       break;
     default:
+      // declare arguments
       while (1) {
 	set_dtype(ent, t);
 	set_name(ent, t);
@@ -137,7 +141,7 @@ int declare_func(TableEntry* ent, Token* t) {
     if (!checkNxtTokenKind(Rparen)) {
       return -1; // TODO : no ')' error (Is this conducted in get_func_type?)
     }
-    set_func_process();
+    set_func_process(ent);
   case proto_ID:
     // TODO : prototype declaration
     break;
