@@ -1,5 +1,6 @@
 #include "letter_analysis.h"
 #include "syntactic_analysis.h"
+#include "parse_statement.h"
 
 
 void statement(Token *t) {
@@ -35,7 +36,7 @@ void statement(Token *t) {
     st_return(t);
     break;
 
-  case Printf case Exit:
+  case Printf: case Exit:
     // TODO : Built-in fucntion, no returns
     st_build_in_void(t);
     break;
@@ -47,7 +48,7 @@ void statement(Token *t) {
     st_ident(t);
     break;
   case Incre: case Decre:
-    st_inc_cec(t);
+    st_inc_dec(t);
     break;
   case Lbrace:
     st_lbrace(t);
@@ -59,6 +60,8 @@ void statement(Token *t) {
     st_EOF(t);
     break;
   default:
+    // TODO : syntax error
+    return; //?
   }
 }
 
@@ -84,7 +87,7 @@ void st_If(Token *t) {
   statement(t);
   if (t->kind != Else) {
     // TODO : set end label. (1)
-    break;
+    return;
   }
   // TODO : force jump to label (2) ???? suspicious
   // TODO : set end label. (1)

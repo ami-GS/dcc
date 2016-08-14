@@ -1,4 +1,4 @@
-#include "instructoin.h"
+#include "instruction.h"
 
 int genCode(OpCode op, int flag, int dat) {
   Instruction inst = {op, flag, dat};
