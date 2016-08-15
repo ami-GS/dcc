@@ -72,7 +72,7 @@ void st_break(Token *t) {
 void st_while(Token *t) {
   nextToken(t); // point at -> '('
   // TODO : set label to condition check. (1)
-  expr_with_paren_check(t);
+  expr_with_check(t, '(', ')');
   // TODO : jump to label (2) when condition is false.
   statement(t);
   // TODO : jump to label (1) to loop again
@@ -82,7 +82,7 @@ void st_while(Token *t) {
 
 void st_If(Token *t) {
   nextToken(t);
-  expr_with_paren_check(t);
+  expr_with_check(t, '(', ')');
   // TODO : jump to label (1) when condition is false.
   statement(t);
   if (t->kind != Else) {
@@ -104,7 +104,7 @@ void st_Do(Token *t) {
   //nextToken(t); //-> while
   if (t->kind == While) {
     nextToken(t); //-> condition
-    expr_with_paren_check(t);
+    expr_with_check(t, '(', ')');
     checkNxtTokenKind(Semicolon);
     // TODO : jump to label (1) when condition is True.
   } else {

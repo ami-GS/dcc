@@ -153,14 +153,13 @@ int pop() {
   return stack[--stack_c];
 }
 
-int expr_with_paren_check(Token *t) {
-  if (!checkNxtTokenKind(Lparen)) {
-    // TODO : error, no condition
+int expr_with_check(Token *t, char l, char r) {
+  if (l != 0 && t->text[0] != l) {
     return -1;
   }
   expression(t);
-  if (!checkNxtTokenKind(Rparen)) {
-    // TODO : error, no Rparen
+  if (r != 0 && t->text[0] != r) {
     return -1;
   }
+  return 1;
 }
