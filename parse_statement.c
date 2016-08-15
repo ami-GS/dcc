@@ -113,3 +113,37 @@ void st_Do(Token *t) {
   }
   return 1;
 }
+
+void st_For(Token *t) {
+  nextToken(t);
+  if (t->kind == Semicolon) {
+    // TODO : no expr 1
+  } else {
+    expr_with_check(t, 0, ';');
+    // TODO : remove result;
+  }
+
+  // TODO : set label to loop. (1)
+  if (t->kind == Semicolon) {
+    // TODO : no expr 2
+  } else {
+    expr_with_check(t, 0, ';');
+  }
+  // TODO : jump to end if false (3)
+  // TODO : jump to statement (2)
+
+  // TODO : set label to increment (4)
+  if (t->kind == Rparen) {
+    // TODO : no expr 3
+  } else {
+    expr_with_check(t, 0, ')');
+    // TODO : remove result;
+  }
+  // TODO : jump to label (1)
+
+  // TODO : set label (2)
+  statement(t);
+  // TODO : jump to label (4)
+  // TODO : set label end (3)
+  return;
+}
