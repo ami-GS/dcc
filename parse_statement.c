@@ -66,6 +66,18 @@ void statement(Token *t) {
 }
 
 void st_break(Token *t) {
+  if (break_list_ct > 0) {
+    return -1; // TODO : invalid break, or ignore
+  }
+  // TODO : set jump to loop end
+  loopNest[loopNest_ct].has_break = true;
+  checkNxtTokenKind(Semicolon);
+  return;
+}
+
+void st_continue(Token *t) {
+  // TODO : set jump to loop top
+  checkNxtTokenKind(Semicolon);
   return;
 }
 
@@ -146,4 +158,22 @@ void st_For(Token *t) {
   // TODO : jump to label (4)
   // TODO : set label end (3)
   return;
+}
+
+
+void begin_continue_break(Kind k, int top) {
+  // TODO : "int top" is temporally
+  if (loopNest_ct >= MAX_LOOP_NEXT_SIZ) {
+    // TODO : error
+  }
+  loopNest[loopNest_ct].st_kind = k;
+  loopNest[loopNest_ct].loop_top = top;
+  loopNest[loopNest_ct++].has_break = false;
+}
+
+void end_continue_break() {
+  if (loopNext[loopNext_ct].has_break) {
+    // TODO : set loop top label ?
+  }
+  loopNext_ct--;
 }
