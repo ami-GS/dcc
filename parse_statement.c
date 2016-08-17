@@ -70,7 +70,7 @@ void st_break(Token *t) {
     return -1; // TODO : invalid break, or ignore
   }
   // TODO : set jump to loop end
-  loopNest[loopNest_ct].has_break = true;
+  loopNest[loopNest_ct].has_break = 1;
   checkNxtTokenKind(Semicolon);
   return;
 }
@@ -163,17 +163,17 @@ void st_For(Token *t) {
 
 void begin_continue_break(Kind k, int top) {
   // TODO : "int top" is temporally
-  if (loopNest_ct >= MAX_LOOP_NEXT_SIZ) {
+  if (loopNest_ct >= MAX_LOOP_NEST_SIZ) {
     // TODO : error
   }
   loopNest[loopNest_ct].st_kind = k;
   loopNest[loopNest_ct].loop_top = top;
-  loopNest[loopNest_ct++].has_break = false;
+  loopNest[loopNest_ct++].has_break = 0;
 }
 
 void end_continue_break() {
-  if (loopNext[loopNext_ct].has_break) {
+  if (loopNest[loopNest_ct].has_break) {
     // TODO : set loop top label ?
   }
-  loopNext_ct--;
+  loopNest_ct--;
 }
