@@ -81,6 +81,45 @@ void st_continue(Token *t) {
   return;
 }
 
+void st_switch(Token *t) {
+  nextToken(t);
+  expr_with_check(t, '(', ')');
+  // TODO : jump to condition table check (1)
+  begin_switch(); // initialize
+  statement();
+  // TODO : jump to end of switch (2)
+  // TODO : set label (1) for condition table
+  end_switch(); // apply gathered case list as table
+  // TODO : set label (2)
+  return;
+}
+
+void st_case(Token *t) {
+  nextToken(t);
+  int val;
+  // TODO : pick up const value for condition check
+  expr_with_check(t, 0 , ':');
+  if (switchNest_ct == 0) {
+    return -1; // TODO : no switch associating
+  }
+  int i;
+  for (i = switchNext[switchNest_ct].case_list_st_addr; i <= caseList_ct; i++) {
+    if (caseList[i].value == val) {
+      return -1; // TODO : case duplication
+    }
+  }
+  if (caseList_ct >= MAX_CASE_SIZ) {
+    return -1; // TODO : case size overflow
+  }
+  caseList[i].value = val;
+  // TODO : caseList[i].address =
+  statement();
+  return;
+}
+
+void st_default(Token *t) {
+}
+
 void st_while(Token *t) {
   nextToken(t); // point at -> '('
   // TODO : set label to condition check. (1)
