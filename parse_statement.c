@@ -160,6 +160,28 @@ void st_For(Token *t) {
   return;
 }
 
+void begin_switch() {
+  if (switchNest >= MAX_SWITCH_NEST_SIZ) {
+    return -1; // TODO : switch nest over limitation
+  }
+  switchNest[switchNest_ct].default_addr = -1;
+  switchNest[switchNest_ct++].case_list_st_addr = caseList_ct+1;
+}
+
+void end_switch() {
+  int i, st = switchNest[switchNest_ct].case_list_st_addr;
+  for (i = st; i <= caseList_ct; i++) {
+    // TODO : compare caseList[i].value and stack top?
+    // TODO : jump to caseList[i].addr if true
+  }
+  // TODO : remove top comparison result?
+  if (switchNest[switchNest_ct].default_addr != -1) {
+    // when this nest has default
+    // TODO : jump to switch_nest[switchNest_ct].default_addr
+  }
+  caseList_ct = start - 1;
+  switchNest_ct--;
+}
 
 void begin_continue_break(Kind k, int top) {
   // TODO : "int top" is temporally

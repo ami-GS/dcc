@@ -13,6 +13,21 @@ struct {
 } loopNest[MAX_LOOP_NEST_SIZ];
 int loopNest_ct = 0;
 
+
+#define MAX_CASE_SIZ 100
+struct {
+    int value;
+    int address;
+} caseList[MAX_CASE_SIZ];
+int caseList_ct; // TODO : this is not for each switch
+
+#define MAX_SWITCH_NEST_SIZ 10
+struct {
+    int default_addr;
+    int case_list_st_addr;
+} switchNest[MAX_SWITCH_NEST_SIZ];
+int switchNest_ct = 0;
+
 void statement(Token *t);
 void st_break(Token *t);
 void st_continue(Token *t);
