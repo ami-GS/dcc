@@ -86,7 +86,7 @@ void st_switch(Token *t) {
   expr_with_check(t, '(', ')');
   // TODO : jump to condition table check (1)
   begin_switch(); // initialize
-  statement();
+  statement(t);
   // TODO : jump to end of switch (2)
   // TODO : set label (1) for condition table
   end_switch(); // apply gathered case list as table
@@ -103,7 +103,7 @@ void st_case(Token *t) {
     return -1; // TODO : no switch associating
   }
   int i;
-  for (i = switchNext[switchNest_ct].case_list_st_addr; i <= caseList_ct; i++) {
+  for (i = switchNest[switchNest_ct].case_list_st_addr; i <= caseList_ct; i++) {
     if (caseList[i].value == val) {
       return -1; // TODO : case duplication
     }
@@ -113,7 +113,7 @@ void st_case(Token *t) {
   }
   caseList[i].value = val;
   // TODO : caseList[i].address =
-  statement();
+  statement(t);
   return;
 }
 
@@ -200,7 +200,7 @@ void st_For(Token *t) {
 }
 
 void begin_switch() {
-  if (switchNest >= MAX_SWITCH_NEST_SIZ) {
+  if (switchNest_ct >= MAX_SWITCH_NEST_SIZ) {
     return -1; // TODO : switch nest over limitation
   }
   switchNest[switchNest_ct].default_addr = -1;
@@ -218,7 +218,7 @@ void end_switch() {
     // when this nest has default
     // TODO : jump to switch_nest[switchNest_ct].default_addr
   }
-  caseList_ct = start - 1;
+  caseList_ct = st - 1;
   switchNest_ct--;
 }
 

@@ -46,5 +46,9 @@ void st_inc_dec(Token *t);
 void st_lbrace(Token *t);
 void st_semicolon(Token *t);
 void st_EOF(Token *t);
+void begin_switch();
+void end_switch();
+void begin_continue_break();
+void end_continue_break();
 
 #endif //DCC_PARSE_STATEMENT_H_
