@@ -78,3 +78,89 @@ int genCode_binary(Kind k) {
   gencode1(op);
 
 }
+
+int binary_expr(OpCode op, int d1, int d2) {
+  if ((op == DIV || op == MOD) && d2 == 0) {
+    return -1; // TODO : zero division
+  }
+  switch (op) {
+  case ADD:
+    return d1 + d2;
+  case SUB:
+    return d1 - s2;
+  case MUL:
+    return d1 * d2;
+  case Div:
+    return d1 / d2;
+  case Mod:
+    return d1 % d2;
+  case Equal:
+    return d1 == d2;
+  case NotEq:
+    return d1 != d2;
+  case Less:
+    return d1 < d2;
+  case LessEq: case EqLess:
+    return d1 <= d2;
+  case Great:
+    return d1 > d2;
+  case GreatEq: case EqGreat:
+    return d1 >= d2;
+  case And:
+    return d1 && d2;
+  case Or:
+    return d1 || d2;
+  }
+}
+
+int execute() {
+  pc = 0; // proram counter
+
+  int op, dat;
+  while (1) {
+    if (pc < 0 || code_ct < pc) {
+      return -1; // invalid operation
+    }
+    if (stack_ptr < OP_STACK_BUTTOM) {
+      return -1; // TODO : operand stack underflow
+    }
+    if (stack_ptr > OP_STACK_TOP) {
+      return -1; // TODO : operand stack overflow
+    }
+    /*
+      preprocessing
+    */
+    op = codes[pc].opcode;
+    dat = codes[pc].opdata;
+    switch (op) {
+    case DEL:
+      --stack_ptr;
+      break;
+    case STOP:
+      // TODO : study here
+      if (stp > 0) {
+	return POP();
+      }
+      return 0;
+    case JMP:
+      pc = dat;
+      break;
+    case JPT:
+      if (POP())
+	pc = dat;
+      break;
+    case JPF:
+      if (!POP())
+	pc = dat;
+      break;
+      /* TODO : study here
+    case LIB:
+    case LOD:
+    case LDA:
+    case LDI:
+      */
+    // case STO:
+    }
+
+  }
+}
