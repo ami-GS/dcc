@@ -80,27 +80,74 @@ int factor(Token *t) {
   Kind op;
 
   switch (t->kind) {
-  case Add: case Sub: case Not:
+  case Add: case Sub: case Not: case Incre: case Decre:
     // like, +1, -1, !0
-    op = t->kind;
     nextToken(t);
     factor(t);
-    if (op == Sub) push(-pop());
-    if (op == Not) push(!pop());
-    return 1;
+    if (t->kind == Incre || t->kind == Decre) {
+      to_left_val();
+    }
+    // TODO : set inc dec preprocessing
+    genCode_unary(t->kind);
+    break;
   case VarName:
     push(variables[t->text[0]]);
     break;
+  case Ident:
+    // TODO : search registered table item
+    Token *te_tmp = search(t);
+    switch (te_tmp->kind) {
+    case var_ID: case arg_ID:
+      if (te_tmp->arrLen == 0) {
+	genCode(LOD, te_tmp->level, te_tmp->addr);
+	nextToken(t);
+      } else {
+	nextToken(t);
+	if (t->kind == Lbrace) {
+	  // TODO : currently only [] based addressing
+	  nextToken(t);
+	  genCode(LDA, te_tmp->level, te_tmp->addr); // TODO : unsure here
+	  expr_with_check(t, '[', ']');
+	  genCode2(LDI, INT_SIZE);
+	  genCode1(MUL); // index * data size
+	  genCode1(Add); // add it to tp->adr
+	  genCode1(VAL); // pick up the value
+	} else {
+	  return -1; // TODO : no index
+	}
+      }
+      if (t->kind == Incre || t->kind == Decore) {
+	to_left_val();
+	// TODO : need to study below
+	if (t->kind == Incre) {
+	  genCode1(INC);
+	  genCode2(LDI, 1);
+	  genCode1(SUB);
+	} else {
+	  genCode1(DEC);
+	  genCode(LDI, 1);
+	  genCode(ADD);
+	}
+	nextToken(t);
+      }
+      break;
+    case func_ID: case proto_ID:
+      if (te_tmp->VOID_T) {
+	return -1; // TODO : void return function should not be in expression
+      }
+      callFunc(t);
+      break;
+    }
+    break;
   case IntNum:
     // TODO : also every type. Using TokenStack is the besy way?
-    push(t->intVal);
+    genCode2(LDI, t->intVal);
+    nextToken(t);
     break;
   case Lparen:
     nextToken(t);
-    expression(t);
-    if (!checkNxtTokenKind(Rparen)) {
-      // it must be Rparen
-      return -1; // TODO : ')' required
+    if (expr_with_check(t, '(', ')')) {
+      return -1; // TODO : error
     }
     break;
   default:
@@ -162,4 +209,25 @@ int expr_with_check(Token *t, char l, char r) {
     return -1;
   }
   return 1;
+}
+
+void callFunc(Token *t, TableEntry *te) {
+  nextToken(t); // point to '('
+  if (!checkNxtTokenKind(Rparen)) {
+    int arg_cnt = 0;
+    do {
+      nextToken(t);
+      expression(t);
+      ++arg_cnt;
+    } while (t->kind != Comma);
+  }
+  if (!checkNxtTokenKind(Rparen)) {
+    return -1; // TODO : no end paren
+  }
+
+  if (arg_cnt != te->args) {
+    return -1; // TODO : there are no enough arguments
+  }
+  genCode(CALL, fp->addr);
+  return;
 }
