@@ -54,7 +54,7 @@ void statement(Token *t) {
     st_lbrace(t);
     break;
   case Semicolon:
-    st_semicolon(t);
+    nextToken(t);
     break;
   case EOF_token:
     st_EOF(t);
@@ -118,6 +118,15 @@ void st_case(Token *t) {
 }
 
 void st_default(Token *t) {
+  if (switchNest_ct == 0) {
+    return -1; // TODO : no switch association
+  }
+  if (switchNest[switchNest_ct].default_addr != -1) {
+    return -1; // TODO : duplication of default
+  }
+  // TODO : set address of switchNest[switchNest_ct].default_addr = ;
+  statement();
+
 }
 
 void st_while(Token *t) {
@@ -196,6 +205,19 @@ void st_For(Token *t) {
   statement(t);
   // TODO : jump to label (4)
   // TODO : set label end (3)
+  return;
+}
+
+void st_return(Token *t) {
+  nextToken(t);
+  if (t->kind == Semicolon) {
+    // TODO : check func return type, if not void, then error
+  } else {
+    expression(t);
+    // TODO : return type comparison t->kind, func type
+  }
+  checkNxtTokenKind(Semicolon);
+  // TODO : jump to caller
   return;
 }
 
