@@ -79,6 +79,10 @@ int genCode_binary(Kind k) {
 
 }
 
+void backpatch(int c_ct, int addr) {
+  codes[c_ct].opdata = addr;
+}
+
 int binary_expr(OpCode op, int d1, int d2) {
   if ((op == DIV || op == MOD) && d2 == 0) {
     return -1; // TODO : zero division
@@ -110,6 +114,21 @@ int binary_expr(OpCode op, int d1, int d2) {
     return d1 && d2;
   case Or:
     return d1 || d2;
+  }
+}
+
+void to_left_val() {
+  // TODO : I need study more here
+  switch (codes[code_ct].opcode) {
+  case VAL:
+    --code_ct;
+    break;
+  case LOD:
+    code[code_ct].opcode = LDA;
+    break;
+  default:
+    return -1; // TODO : malicious left val
+
   }
 }
 
