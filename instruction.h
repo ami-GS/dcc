@@ -1,11 +1,6 @@
 #ifndef _DCC_INSTRUCTION_H_
 #define _DCC_INSTRUCTION_H_
 
-typedef enum {
-    ADD, SUB, MUL, DIV,
-    CALL,
-} OpCode;
-
 #define OP_STACK_TOP 200
 #define OP_STACK_BUTTOM 0
 int op_stack[OP_STACK_TOP];
