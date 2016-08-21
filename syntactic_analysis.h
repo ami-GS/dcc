@@ -20,6 +20,6 @@ void operate(Kind op);
 void push(int n);
 int pop();
 int expr_with_check(Token *t, char l, char r);
-
+void callFunc(Token *t, TableEntry *te);
 
 #endif // DCC_SYNTACTIC_ANALYSIS_H_

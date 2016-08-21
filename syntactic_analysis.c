@@ -1,6 +1,10 @@
 #include <string.h>
 #include <stdio.h>
 #include "syntactic_analysis.h"
+#include "opcode.h"
+#include "instruction.h"
+#include "data_declare.h"
+#include "symbol_table.h"
 
 void expression(Token *t) {
   if (t->kind == VarName || checkNxtTokenKind(Assign)) {
@@ -78,6 +82,8 @@ void mul_div_mod_exp(Token *t) {
 
 int factor(Token *t) {
   Kind op;
+  TableEntry *te_tmp;
+  int find;
 
   switch (t->kind) {
   case Add: case Sub: case Not: case Incre: case Decre:
@@ -95,7 +101,10 @@ int factor(Token *t) {
     break;
   case Ident:
     // TODO : search registered table item
-    Token *te_tmp = search(t);
+    find = search(t, te_tmp);
+    if (!find) {
+      return -1; // TODO : do something
+    }
     switch (te_tmp->kind) {
     case var_ID: case arg_ID:
       if (te_tmp->arrLen == 0) {
@@ -116,7 +125,7 @@ int factor(Token *t) {
 	  return -1; // TODO : no index
 	}
       }
-      if (t->kind == Incre || t->kind == Decore) {
+      if (t->kind == Incre || t->kind == Decre) {
 	to_left_val();
 	// TODO : need to study below
 	if (t->kind == Incre) {
@@ -125,17 +134,17 @@ int factor(Token *t) {
 	  genCode1(SUB);
 	} else {
 	  genCode1(DEC);
-	  genCode(LDI, 1);
-	  genCode(ADD);
+	  genCode2(LDI, 1);
+	  genCode1(ADD);
 	}
 	nextToken(t);
       }
       break;
     case func_ID: case proto_ID:
-      if (te_tmp->VOID_T) {
+      if (te_tmp->dType == VOID_T) {
 	return -1; // TODO : void return function should not be in expression
       }
-      callFunc(t);
+      callFunc(t, te_tmp);
       break;
     }
     break;
@@ -213,8 +222,8 @@ int expr_with_check(Token *t, char l, char r) {
 
 void callFunc(Token *t, TableEntry *te) {
   nextToken(t); // point to '('
+  int arg_cnt = 0;
   if (!checkNxtTokenKind(Rparen)) {
-    int arg_cnt = 0;
     do {
       nextToken(t);
       expression(t);
@@ -226,8 +235,8 @@ void callFunc(Token *t, TableEntry *te) {
   }
 
   if (arg_cnt != te->args) {
-    return -1; // TODO : there are no enough arguments
+    return -1; // TODO : few or more arguments
   }
-  genCode(CALL, fp->addr);
+  genCode2(CALL, te->addr);
   return;
 }

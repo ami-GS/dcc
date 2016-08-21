@@ -125,7 +125,7 @@ void st_default(Token *t) {
     return -1; // TODO : duplication of default
   }
   // TODO : set address of switchNest[switchNest_ct].default_addr = ;
-  statement();
+  statement(t);
 
 }
 

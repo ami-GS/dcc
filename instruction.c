@@ -1,20 +1,22 @@
 #include "instruction.h"
+#include "opcode.h"
+#include "letter_analysis.h"
 
 int genCode(OpCode op, int flag, int dat) {
   Instruction inst = {op, flag, dat};
-  if (codeCnt >= CODE_SIZ) {
+  if (code_ct >= CODE_SIZ) {
     return -1; // TODO : code size overflow
   }
-  codes[codeCnt++] = inst;
-  return codeCnt;
+  codes[code_ct++] = inst;
+  return code_ct;
 }
 
 int genCode_unary(Kind k) {
   OpCode op = NOP;
   switch (k) {
   case Add:
-    return;
-  case Minus:
+    return 1;
+  case Sub:
     op = NEG;
     break;
   case Not:
@@ -75,7 +77,7 @@ int genCode_binary(Kind k) {
     op = OR;
     break;
   }
-  gencode1(op);
+  genCode1(op);
 
 }
 
@@ -91,7 +93,7 @@ int binary_expr(OpCode op, int d1, int d2) {
   case ADD:
     return d1 + d2;
   case SUB:
-    return d1 - s2;
+    return d1 - d2;
   case MUL:
     return d1 * d2;
   case Div:
@@ -124,7 +126,7 @@ void to_left_val() {
     --code_ct;
     break;
   case LOD:
-    code[code_ct].opcode = LDA;
+    codes[code_ct].opcode = LDA;
     break;
   default:
     return -1; // TODO : malicious left val
@@ -157,7 +159,7 @@ int execute() {
       break;
     case STOP:
       // TODO : study here
-      if (stp > 0) {
+      if (stack_ptr > 0) {
 	return POP();
       }
       return 0;
