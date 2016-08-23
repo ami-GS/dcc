@@ -84,6 +84,25 @@ int set_array(TableEntry* ent, Token *t) {
   return 1;
 }
 
+int set_address(TableEntry *te) {
+  int size;
+  switch (te->kind) {
+  case var_ID:
+    if (te->arrLen != 0) {
+      size = INT_SIZE * te->arrLen; // TODO other type should be capable
+    }
+    if (te->level == GLOBAL) {
+      te->addr = malloc_G(size);
+      break;
+    }
+    te->addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
+    break;
+  case func_ID:
+    // TODO : need to study for seting func addr
+    break;
+  }
+}
+
 int declare_var(TableEntry* ent, Token* t) {
   while (1) {
     set_array(ent, t);

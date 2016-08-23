@@ -10,6 +10,12 @@ int op_stack[OP_STACK_TOP];
 int stack_ptr = OP_STACK_BUTTOM;
 #define PUSH(a) op_stack[stack_ptr++]=a
 #define POP()   op_stack[stack_ptr--]
+
+#define MEM_MAX 65535 // TODO : more ?
+char memory[MEM_MAX];
+int global_memory_addr = 0;
+
+
 int pc; // program counter
 int baseReg; // base register
 
