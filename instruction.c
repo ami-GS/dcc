@@ -181,7 +181,11 @@ int execute() {
     case LDI:
       */
     // case STO:
-    }
 
+    case INC:
+      INCDEC(1); break;
+    case DEC:
+      INCDEC(-1); break;
+    }
   }
 }
