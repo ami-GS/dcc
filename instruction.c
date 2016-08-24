@@ -190,6 +190,34 @@ int execute() {
       UNI_OP(!); break;
     case NEG:
       UNI_OP(-); break;
+    case DIV:
+      ZERO_CHK();
+      BIN_OP(/); break;
+    case MOD:
+      ZERO_CHK();
+      BIN_OP(%); break;
+    case ADD:
+      BIN_OP(%); break;
+    case SUB:
+      BIN_OP(-); break;
+    case MUL:
+      BIN_OP(*); break;
+    case LESS:
+      BIN_OP(<); break;
+    case LSEQ:
+      BIN_OP(<=); break;
+    case GRT:
+      BIN_OP(>); break;
+    case GTEQ:
+      BIN_OP(>=); break;
+    case EQU:
+      BIN_OP(==); break;
+    case NTEQ:
+      BIN_OP(!=); break;
+    case AND:
+      BIN_OP(&&); break;
+    case OR:
+      BIN_OP(||); break;
     }
   }
 }

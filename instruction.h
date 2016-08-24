@@ -41,7 +41,10 @@ void backpatch(int c_ct, int addr);
 int binary_expr(OpCode op, int d1, int d2);
 void to_left_val();
 
+#define ZERO_CHK() if(op_stack[stack_ptr] == 0) return -1; // TODO : zero division
+#define MEMINT(n) (* (int *)(memory+n)) // TODO : more flexible to data size like DWORD or something
 #define UNI_OP(op) op_stack[stack_ptr] = op op_stack[stack_ptr]
+#define BIN_OP(op) op_stack[stack_ptr-1] = op_stack[stack_ptr-1] op op_stack[stack_ptr], stack_ptr--
 #define INCDEC(num) MEMINT(op_stack[stack_ptr]) += num, op_stack[stack_ptr] = MEMINT(op_stack[stack_ptr])
 
 int execute();
