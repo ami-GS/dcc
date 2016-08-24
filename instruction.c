@@ -137,7 +137,7 @@ void to_left_val() {
 int execute() {
   pc = 0; // proram counter
 
-  int op, dat;
+  int op, dat, addr;
   while (1) {
     if (pc < 0 || code_ct < pc) {
       return -1; // invalid operation
@@ -153,10 +153,15 @@ int execute() {
     */
     op = codes[pc].opcode;
     dat = codes[pc].opdata;
+    if ( (codes[pc].flag & 0x01) ) {
+      addr = baseReg + dat; // reative addr
+    } else {
+      addr = dat; // absolute addr
+    }
+
     switch (op) {
     case DEL:
-      --stack_ptr;
-      break;
+      --stack_ptr; break;
     case STOP:
       // TODO : study here
       if (stack_ptr > 0) {
@@ -164,8 +169,7 @@ int execute() {
       }
       return 0;
     case JMP:
-      pc = dat;
-      break;
+      pc = dat; break;
     case JPT:
       if (POP())
 	pc = dat;
@@ -176,12 +180,40 @@ int execute() {
       break;
       /* TODO : study here
     case LIB:
-    case LOD:
-    case LDA:
-    case LDI:
       */
-    // case STO:
+    case LOD:
+      PUSH(MEMINT(addr)); break;
+    case LDA:
+      PUSH(addr); break;
+    case LDI:
+      PUSH(dat); break;
+    case STO:
+      ASSIGN(addr, op_stack[stack_ptr--]); break;
+    case ADBR:  // research frame for calling func
+      baseReg += dat;
+      //TODO : boundary chech for stack overflow
+      //if (baseReg < )
+      break;
 
+    case ASS:
+      ASSIGN(op_stack[stack_ptr-1], op_stack[stack_ptr]);
+      stack_ptr -= 2; break;
+    case ASSV:
+      ASSIGN(op_stack[stack_ptr-1], op_stack[stack_ptr]);
+      op_stack[stack_ptr-1] = op_stack[stack_ptr];
+      stack_ptr--; break;
+    case VAL: // address to value conversion
+      op_stack[stack_ptr] = MEMINT(op_stack[stack_ptr]); break;
+    case EQCMP:
+      // TODO : suspicious
+      if (dat == op_stack[stack_ptr]) {
+	op_stack[stack_ptr] = 1; break;
+      }
+      PUSH(0); break;
+    case CALL:
+      PUSH(pc); pc = dat; break;
+    case RET:
+      pc = POP(); break;
     case INC:
       INCDEC(1); break;
     case DEC:

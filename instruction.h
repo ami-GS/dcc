@@ -21,7 +21,7 @@ int baseReg; // base register
 
 typedef struct {
     char opcode;
-    char flat;
+    char flag;
     int  opdata;
 } Instruction;
 
@@ -46,6 +46,7 @@ void to_left_val();
 #define UNI_OP(op) op_stack[stack_ptr] = op op_stack[stack_ptr]
 #define BIN_OP(op) op_stack[stack_ptr-1] = op_stack[stack_ptr-1] op op_stack[stack_ptr], stack_ptr--
 #define INCDEC(num) MEMINT(op_stack[stack_ptr]) += num, op_stack[stack_ptr] = MEMINT(op_stack[stack_ptr])
+#define ASSING(addr, dat) MEMINT(addr) = dat
 
 int execute();
 
