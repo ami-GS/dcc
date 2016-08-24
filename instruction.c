@@ -186,6 +186,10 @@ int execute() {
       INCDEC(1); break;
     case DEC:
       INCDEC(-1); break;
+    case NOT:
+      UNI_OP(!); break;
+    case NEG:
+      UNI_OP(-); break;
     }
   }
 }

@@ -42,6 +42,7 @@ int binary_expr(OpCode op, int d1, int d2);
 void to_left_val();
 
 #define UNI_OP(op) op_stack[stack_ptr] = op op_stack[stack_ptr]
+#define INCDEC(num) MEMINT(op_stack[stack_ptr]) += num, op_stack[stack_ptr] = MEMINT(op_stack[stack_ptr])
 
 int execute();
 
