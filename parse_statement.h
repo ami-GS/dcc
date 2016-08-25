@@ -1,6 +1,15 @@
 #ifndef DCC_PARSE_STATEMENT_H_
 #define DCC_PARSE_STATEMENT_H_
 
+#include instruction.h
+
+#define LABEL_TOP(addr) addr=code_ct
+// TODO : here?
+#define GEN_JMP_TOP(addr) genCode2(JMP, addr)
+#define GEN_JMP_BUTTOM(addr) addr=genCode2(JMP, 0)
+#define GEN_JPF_BUTTOM(addr) addr=genCode2(JPF, 0)
+#define GEN_JPT_BUTTOM(addr) genCode2(JPT, addr)
+
 //#define BREAK_LIST_SIZ 64
 //int break_list[BREAK_LIST_SIZ];
 //int break_list_ct = 0;
