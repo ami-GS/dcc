@@ -59,5 +59,6 @@ void begin_switch();
 void end_switch();
 void begin_continue_break();
 void end_continue_break();
+int get_loop_top();
 
 #endif //DCC_PARSE_STATEMENT_H_

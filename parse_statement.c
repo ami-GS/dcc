@@ -268,3 +268,13 @@ void end_continue_break() {
   }
   loopNest_ct--;
 }
+
+int get_loop_top() {
+  int i;
+  // TODO : check textbook is using i > 0
+  if (i = loopNest_ct; i >=0 ; i--) {
+    if (loopNest[i].st_kind != switch)
+      return loopNest[i].loop_top;
+  }
+  return -1; // TODO : no loop associating
+}
