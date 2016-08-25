@@ -8,7 +8,7 @@ int genCode(OpCode op, int flag, int dat) {
     return -1; // TODO : code size overflow
   }
   codes[code_ct++] = inst;
-  return code_ct;
+  return code_ct-1;
 }
 
 int genCode_unary(Kind k) {
