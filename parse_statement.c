@@ -73,7 +73,7 @@ void statement(Token *t) {
 }
 
 void st_break(Token *t) {
-  if (break_list_ct > 0) {
+  if (loopNest_ct == 0) {
     return -1; // TODO : invalid break, or ignore
   }
   // TODO : set jump to loop end

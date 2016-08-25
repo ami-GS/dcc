@@ -1,9 +1,9 @@
 #ifndef DCC_PARSE_STATEMENT_H_
 #define DCC_PARSE_STATEMENT_H_
 
-#define BREAK_LIST_SIZ 64
-int break_list[BREAK_LIST_SIZ];
-int break_list_ct = 0;
+//#define BREAK_LIST_SIZ 64
+//int break_list[BREAK_LIST_SIZ];
+//int break_list_ct = 0;
 
 #define MAX_LOOP_NEST_SIZ 100
 struct {
