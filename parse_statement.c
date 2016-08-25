@@ -4,6 +4,10 @@
 
 
 void statement(Token *t) {
+  Kind tk = t->kind;
+  if (tk == While || tk == Do || tk == switch) {
+    begin_continue_break(tk);
+  }
   switch (t->kind) {
   case Break:
     st_break(t);
@@ -62,6 +66,9 @@ void statement(Token *t) {
   default:
     // TODO : syntax error
     return; //?
+  }
+  if (tk == While || tk == Do || tk == Switch || tk == For) {
+    end_continue_break();
   }
 }
 
@@ -193,6 +200,7 @@ void st_For(Token *t) {
   // TODO : jump to statement (2)
 
   // TODO : set label to increment (4)
+  begin_continue_break();
   if (t->kind == Rparen) {
     // TODO : no expr 3
   } else {
