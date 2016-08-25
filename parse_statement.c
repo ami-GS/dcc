@@ -84,6 +84,7 @@ void st_break(Token *t) {
 
 void st_continue(Token *t) {
   // TODO : set jump to loop top
+  GEN_JMP_TOP(get_loop_top());
   checkNxtTokenKind(Semicolon);
   return;
 }
@@ -137,43 +138,57 @@ void st_default(Token *t) {
 }
 
 void st_while(Token *t) {
+  int loop_top, loop_buttom;
   nextToken(t); // point at -> '('
-  // TODO : set label to condition check. (1)
+  // set label to condition check. (1)
+  LABEL_TOP(loop_top);
   expr_with_check(t, '(', ')');
-  // TODO : jump to label (2) when condition is false.
+  // jump to label (2) when condition is false.
+  GEN_JPF_BUTTOM(loop_buttom);
   statement(t);
-  // TODO : jump to label (1) to loop again
-  // TODO : set end label. (2)
+  // jump to label (1) to loop again
+  GEN_JMP_TOP(loop_top);
+  // set end label. (2)
+  backpatch(loop_buttom, code_ct);
   return;
 }
 
 void st_If(Token *t) {
+  int top, else_buttom, end_buttom;
   nextToken(t);
   expr_with_check(t, '(', ')');
-  // TODO : jump to label (1) when condition is false.
+  // jump to label (1) when condition is false.
+  GEN_JPF_BUTTOM(end_buttom);
   statement(t);
   if (t->kind != Else) {
-    // TODO : set end label. (1)
+    // set end label. (1)
+    backpatch(end_buttom, code_ct);
     return;
   }
-  // TODO : force jump to label (2) ???? suspicious
-  // TODO : set end label. (1)
+  // force jump to label (2) ???? suspicious
+  GEN_JMP_BUTTOM(else_buttom);
+  // set end label. (1)
+  backpatch(end_buttom, code_ct);
   nextToken(t); // point at -> 'if'?
   statement(t);
-  // TODO : set end label. (2)
+  // set end label. (2)
+  backpatch(else_buttom, code_ct);
   return;  
 }
 
 void st_Do(Token *t) {
+  int loop_top, loop_buttom;
   nextToken(t); // point at -> '{'
-  // TODO : set label to loop. (1)
+  // set label to loop. (1)
+  LABEL_TOP(loop_top);
   statement(t);
   //nextToken(t); //-> while
   if (t->kind == While) {
     nextToken(t); //-> condition
     expr_with_check(t, '(', ')');
     checkNxtTokenKind(Semicolon);
-    // TODO : jump to label (1) when condition is True.
+    // jump to label (1) when condition is True.
+    GEN_JPT_BUTTOM(loop_top);
   } else {
     // error when While is not existing
     return -1;
@@ -182,37 +197,52 @@ void st_Do(Token *t) {
 }
 
 void st_For(Token *t) {
+  int loop_top, loop_buttom, inst_top, exp_label;
   nextToken(t);
   if (t->kind == Semicolon) {
-    // TODO : no expr 1
+    // no expr 1
+    nextToken(t);
   } else {
     expr_with_check(t, 0, ';');
-    // TODO : remove result;
+    // remove result;
+    remove_op_stack_top();
   }
 
-  // TODO : set label to loop. (1)
+  // set label to loop. (1)
+  LABEL_TOP(loop_top);
   if (t->kind == Semicolon) {
-    // TODO : no expr 2
+    // no expr 2
+    genCode(LDI, 1); // true
+    nextToken(t);
   } else {
     expr_with_check(t, 0, ';');
   }
-  // TODO : jump to end if false (3)
-  // TODO : jump to statement (2)
+  // jump to end if false (3)
+  GEN_JPF_BUTTOM(loop_buttom);
+  // jump to statement (2)
+  GEN_JMP_BUTTOM(inst_top);
 
-  // TODO : set label to increment (4)
+  // set label to increment (4)
   begin_continue_break();
+  LABEL_TOP(exp_label);
   if (t->kind == Rparen) {
-    // TODO : no expr 3
+    // no expr 3
+    nextToken(t);
   } else {
     expr_with_check(t, 0, ')');
-    // TODO : remove result;
+    // remove result;
+    remove_op_stack_top();
   }
-  // TODO : jump to label (1)
+  // jump to label (1)
+  GEN_JMP_TOP(loop_top);
 
-  // TODO : set label (2)
+  // set label (2)
+  backpatch(inst_top, code_ct);
   statement(t);
-  // TODO : jump to label (4)
-  // TODO : set label end (3)
+  // jump to label (4)
+  GEN_JMP_TOP(exp_label);
+  // set label end (3)
+  backpatch(loop_bottom);
   return;
 }
 
@@ -252,13 +282,12 @@ void end_switch() {
   switchNest_ct--;
 }
 
-void begin_continue_break(Kind k, int top) {
-  // TODO : "int top" is temporally
+void begin_continue_break(Kind k) {
   if (loopNest_ct >= MAX_LOOP_NEST_SIZ) {
     // TODO : error
   }
   loopNest[loopNest_ct].st_kind = k;
-  loopNest[loopNest_ct].loop_top = top;
+  loopNest[loopNest_ct].loop_top = code_ct;
   loopNest[loopNest_ct++].has_break = 0;
 }
 
