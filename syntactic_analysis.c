@@ -101,7 +101,7 @@ int factor(Token *t) {
     break;
   case Ident:
     // TODO : search registered table item
-    find = search(t, te_tmp);
+    find = search(t->text, te_tmp);
     if (!find) {
       return -1; // TODO : do something
     }

@@ -1,7 +1,6 @@
 #include <string.h>
 #include <stdio.h>
 #include "letter_analysis.h"
-#include "symbol_table.h"
 
 int fOpen(char *fname) {
   if ((fin = fopen(fname, "r")) == NULL) {

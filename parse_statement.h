@@ -1,7 +1,8 @@
 #ifndef DCC_PARSE_STATEMENT_H_
 #define DCC_PARSE_STATEMENT_H_
 
-#include instruction.h
+#include "instruction.h"
+#include "opcode.h"
 
 #define LABEL_TOP(addr) addr=code_ct
 // TODO : here?

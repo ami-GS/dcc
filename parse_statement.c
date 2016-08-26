@@ -1,11 +1,12 @@
 #include "letter_analysis.h"
 #include "syntactic_analysis.h"
 #include "parse_statement.h"
+#include "opcode.h"
 
 
 void statement(Token *t) {
   Kind tk = t->kind;
-  if (tk == While || tk == Do || tk == switch) {
+  if (tk == While || tk == Do || tk == Switch) {
     begin_continue_break(tk);
   }
   switch (t->kind) {
@@ -212,7 +213,7 @@ void st_For(Token *t) {
   LABEL_TOP(loop_top);
   if (t->kind == Semicolon) {
     // no expr 2
-    genCode(LDI, 1); // true
+    genCode2(LDI, 1); // true
     nextToken(t);
   } else {
     expr_with_check(t, 0, ';');
@@ -242,7 +243,7 @@ void st_For(Token *t) {
   // jump to label (4)
   GEN_JMP_TOP(exp_label);
   // set label end (3)
-  backpatch(loop_bottom);
+  backpatch(loop_buttom, code_ct);
   return;
 }
 
@@ -301,8 +302,8 @@ void end_continue_break() {
 int get_loop_top() {
   int i;
   // TODO : check textbook is using i > 0
-  if (i = loopNest_ct; i >=0 ; i--) {
-    if (loopNest[i].st_kind != switch)
+  for (i = loopNest_ct; i >=0 ; i--) {
+    if (loopNest[i].st_kind != Switch)
       return loopNest[i].loop_top;
   }
   return -1; // TODO : no loop associating

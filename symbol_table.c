@@ -1,4 +1,5 @@
 #include "symbol_table.h"
+#include "letter_analysis.h"
 #include <stdlib.h>
 
 TableEntry* get_table_entry(char *name) {
@@ -40,20 +41,20 @@ int enter_table_item(TableEntry* ent) {
 }
 
 // TODO : text book uses search and search_name separately. why?
-int search(Token *t, TableEntry *te) {
+int search(char *text, TableEntry *te) {
   int i;
   for (i = tblEntryCnt; i >= LTBL_START; i--) {
-    if (strcmp(SymbolTable[i].name, t->text) == 0) {
+    if (strcmp(SymbolTable[i].name, text) == 0) {
       te = &SymbolTable[i];
       return i;
     }
   }
   for (; i >= GTBL_START; i--) {
-    if (SymbolTable[i].kind != arg_ID && strcmp(SymbolTable[i].name, t->text) == 0) {
+    if (SymbolTable[i].kind != arg_ID && strcmp(SymbolTable[i].name, text) == 0) {
       te = &SymbolTable[i];
       return i;
     }
   }
-  *te = NULL;
+  te = NULL;
   return -1;
 }
