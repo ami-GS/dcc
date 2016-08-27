@@ -4,6 +4,8 @@
 #include "symbol_table.h"
 #include "letter_analysis.h"
 
+static int blockNest_ct = 0;
+
 void compile(char *fname);
 void set_dtype(TableEntry* ent, Token* t);
 int set_name(TableEntry* ent, Token* t);

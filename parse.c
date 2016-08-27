@@ -70,7 +70,7 @@ int set_array(TableEntry* ent, Token *t) {
       return -1; // TODO : ']' this case can be ok
     }
 
-    expression(t); // TODO : validate error?
+    expr_with_check(t, 0, ']'); // TODO : validate error?
     ent->arrLen = pop(); // TODO : this is not cool, expression should return value
     if (!checkNxtTokenKind(Rbracket)) {
       return -1; // TODO : no end bracket?
@@ -107,7 +107,7 @@ int declare_var(TableEntry* ent, Token* t) {
   while (1) {
     set_array(ent, t);
     enter_table_item(ent);
-    if (t->kind == Semicolon || t->kind != Comma) {
+    if (t->kind != Comma) {
       break; // TODO : suspicious
     }
     nextToken(t); // next to ','
@@ -119,9 +119,16 @@ int declare_var(TableEntry* ent, Token* t) {
 int set_func_process(TableEntry* ent) {
   // TODO : if this is main(), then do special case
   if (is_main(ent->name)) {
-
+    if (ent->dType != INT_T || ent->args != 0) {
+      // invalid main
+      return -1; // TODO : this is temporal
+    }
+    backpatch(0, ent->addr);
+    return 1;
   }
-  // TODO : write for the func contents
+  begin_declare_func(ent);
+  SymbolKind last_statement = block(1);
+  end_declare_func(ent, last_statement);
   return 1;
 }
 
@@ -134,39 +141,85 @@ int declare_func(TableEntry* ent, Token* t) {
   }
   int* argnum_ptr = &(ent->args);
   nextToken(t); // point at ')' or arguments
-  SymbolKind k = get_func_type();
-  //enter_table_item(ent); // TODO : why here?
-  switch(k) {
-  case func_ID:
-    switch (t->kind) {
-    case Void:
-      nextToken(t); // point to ')'
-      break;
-    case Rparen:
-      break;
-    default:
-      // declare arguments
-      while (1) {
-	set_dtype(ent, t);
-	set_name(ent, t);
-	enter_table_item(ent); // to avoid multiple declaration in case of using declare_var
-	if (t->kind != Comma) {
-	  break;
-	}
-	nextToken(t);
+  ent->kind = get_func_type();
+  enter_table_item(ent);
+  // TODO : open local table
+  switch (t->kind) {
+  case Void:
+    nextToken(t); // point to ')'
+    break;
+  case Rparen:
+    break;
+  default:
+    // declare arguments
+    TableEntry *arg;
+    while (1) {
+      set_dtype(arg, t);
+      set_name(arg, t);
+      enter_table_item(arg); // to avoid multiple declaration in case of using declare_var
+      (ent->args)++;
+      if (t->kind != Comma) {
+	break;
       }
-      break;
+      nextToken(t);
     }
-    if (!checkNxtTokenKind(Rparen)) {
-      return -1; // TODO : no ')' error (Is this conducted in get_func_type?)
-    }
+  }
+  if (!checkNxtTokenKind(Rparen)) {
+    return -1; // TODO : no ')' error (Is this conducted in get_func_type?)
+  }
+
+  set_address(ent);
+  // TODO : put func chck
+
+  switch(ent->k) {
+  case func_ID:
     set_func_process(ent);
   case proto_ID:
-    // TODO : prototype declaration
-    break;
-  case no_ID:
-    return -1; // TODO : error
+    nextToken(t); // point next to ';'
   }
 
   return 1;
+}
+
+int begin_declare_func(TableEntry *func) {
+  genCode2(ADBR, 0); // contents will be filled in end_declare_func()
+  genCode(STO, LOCAL, 0);
+  int i;
+  for (i = func->args; i > 0; i--) {
+    genCode(STO, LOCAL, (func+i)->addr);
+  }
+}
+
+int end_declare_func(TableEntry *func, SymbolKind last) {
+  backpatch(func->addr, -1 /* TODO : temporally */);
+  if (last_statement != Return) {
+    // TODO : here
+  }
+  genCode(LOD, LOCAL, 0); // load return address to op_stack
+  genCode2(ADBR, 0 /* TODO : temporally */); // release local frame
+  genCode1(RET); // Return
+}
+
+SymbolKind block(Token *t, int is_func) {
+  nextToken(t);
+  blockNest_ct++;
+  if (is_func) {
+    // TODO : here is dcc specific declaration method in function block
+    TableEntry *tmp;
+    while (t->kind == Int) {
+      set_dtype(tmp);
+      set_name(tmp);
+      declare_var(tmp, t);
+    }
+  }
+
+  Kind k = Others;
+  while (t->kind != '}') {
+    k = t->kind; // TODO : here? I think later of statement is better?
+    statement(t);
+  }
+
+  blockNest_ct--;
+  nextToken(t); // point to next to '}'
+  return k;
 }
