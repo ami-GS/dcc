@@ -90,14 +90,11 @@ int factor(Token *t) {
     // like, +1, -1, !0
     nextToken(t);
     factor(t);
+    // set inc dec preprocessing
     if (t->kind == Incre || t->kind == Decre) {
       to_left_val();
     }
-    // TODO : set inc dec preprocessing
     genCode_unary(t->kind);
-    break;
-  case VarName:
-    push(variables[t->text[0]]);
     break;
   case Ident:
     // TODO : search registered table item
@@ -154,11 +151,12 @@ int factor(Token *t) {
     nextToken(t);
     break;
   case Lparen:
-    nextToken(t);
     if (expr_with_check(t, '(', ')')) {
       return -1; // TODO : error
     }
     break;
+  //case Printf: case Input: case Exit: // TODO : not yet implemented
+
   default:
     return -1; // TODO error
     }
