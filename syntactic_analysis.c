@@ -191,22 +191,6 @@ void operate(Kind op) {
   }
 }
 
-// TODO : consider the type pushed, Token might be good?
-void push(int n) {
-  if (stack_c >= STACK_SIZ) {
-    return; // TODO : stack overflow
-  }
-  stack[stack_c++] = n;
-}
-
-//TODO : same as the above
-int pop() {
-  if (stack_c <= 0) {
-    return -1; // TODO : stack underflow
-  }
-  return stack[--stack_c];
-}
-
 int expr_with_check(Token *t, char l, char r) {
   if (l != 0 && t->text[0] != l) {
     return -1;
