@@ -3,7 +3,11 @@
 #include "letter_analysis.h"
 
 int genCode(OpCode op, int flag, int dat) {
+  if (const_fold(op)) {
+    return code_ct-1;
+  }
   Instruction inst = {op, flag, dat};
+
   if (code_ct >= CODE_SIZ) {
     return -1; // TODO : code size overflow
   }
@@ -133,6 +137,26 @@ void to_left_val() {
 
   }
 }
+
+int const_fold(OpCode op) {
+  if (codes[code_ct-1].opcode == LDI) {
+    if (op == NOT) {
+      codes[code_ct-1].opdata = !codes[code_ct-1].opdata;
+      return 1;
+    } else if (op == NEG) {
+      codes[code_ct-1].opdata = -codes[code_ct-1].opdata;
+      return 1;
+    } else if (is_binaryOP(op) && codes[code_ct-2].opcode == LDI) {
+      codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2], codes[code_ct-1]);
+      code_ct--;
+      return 1;
+    }
+  }
+  return -1;
+}
+
+int is_const() {}
+
 
 int execute() {
   pc = 0; // proram counter
