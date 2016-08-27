@@ -2,7 +2,7 @@
 #define _DCC_SYMBOL_TABLE_H_
 
 typedef enum {
-    NO_LOCATION, GLOBAL, LOCAL, 
+    GLOBAL, LOCAL,
 } Level; //TODO : the locathion should be devided by each scope, which means each function have each level
 static int scopeCnt = 0;
 
