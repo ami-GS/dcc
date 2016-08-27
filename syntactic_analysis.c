@@ -7,76 +7,30 @@
 #include "symbol_table.h"
 
 void expression(Token *t) {
-  if (t->kind == VarName || checkNxtTokenKind(Assign)) {
-    int varName = t->text[0];
-    nextToken(t); // skip '='
+  term(2);
+  if (t->kind == Assign) {
+    // TODO : need to study
+    to_left_val();
     nextToken(t);
     expression(t);
-    variables[varName] = stack[stack_c];
-  } else {
-    or_exp(t);
+    genCode1(ASSV);
   }
 }
 
-void or_exp(Token *t) {
-  and_exp(t);
-  while (t->kind == Or) {
-    nextToken(t);
-    and_exp(t);
-    operate(Or);
-  }
-}
-
-void and_exp(Token *t) {
-  equ_exp(t);
-  while (t->kind == And) {
-    nextToken(t);
-    equ_exp(t);
-    operate(And);
-  }
-}
-
-void equ_exp(Token *t) {
-  Kind op;
-  rel_exp(t);
-  while (t->kind == Equal || t->kind == NotEq) {
-    op = t->kind;
-    nextToken(t);
-    rel_exp(t);
-    operate(op);
-  }
-}
-
-void rel_exp(Token *t) {
-  Kind op;
-  add_sub_exp(t);
-  while (strstr(" == <= >= =< => ", t->text) != NULL) {
-    op = t->kind;
-    nextToken(t);
-    add_sub_exp(t);
-    operate(op);
-  }
-}
-
-void add_sub_exp(Token *t) {
-  Kind op;
-  mul_div_mod_exp(t);
-  while (t->kind == Add || t->kind == Sub) {
-    op = t->kind;
-    nextToken(t);
-    mul_div_mod_exp(t);
-    operate(op);
-  }
-}
-
-void mul_div_mod_exp(Token *t) {
-  Kind op;
-  factor(t);
-  while (t->kind == Mul || t->kind == Div || t->kind == Mod) {
-    op = t->kind;
-    nextToken(t);
+void term(Token *t, int n) {
+  // TODO : need to study
+  if (n == 8) {
     factor(t);
-    operate(op);
+    return;
+  }
+  term(n+1);
+
+  kind k;
+  whlie (n == opOder(t->kind)) {
+    k = t->kind;
+    nextToken(t);
+    term(n+1);
+    genCode_binary(k);
   }
 }
 
@@ -161,34 +115,6 @@ int factor(Token *t) {
     return -1; // TODO error
     }
   nextToken(t);
-}
-
-void operate(Kind op) {
-  int v2 = pop(), v1 = pop();
-  if ((op == Div || op == Mod) && v2 == 0) {
-    // TODO : zero division
-    return;
-  }
-
-  switch (op) {
-  case Add:
-    push(v1+v2);
-    break;
-  case Sub:
-    push(v1-v2);
-    break;
-  case Mul:
-    push(v1*v2);
-    break;
-  case Div:
-    push(v1/v2);
-    break;
-  case Mod:
-    push(v1%v2);
-    break;
-  default:
-    break;
-  }
 }
 
 int expr_with_check(Token *t, char l, char r) {
