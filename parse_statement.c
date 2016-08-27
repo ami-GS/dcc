@@ -56,14 +56,13 @@ void statement(Token *t) {
     st_inc_dec(t);
     break;
   case Lbrace:
-    st_lbrace(t);
+    block(0);
     break;
   case Semicolon:
     nextToken(t);
     break;
   case EOF_token:
-    st_EOF(t);
-    break;
+    return; // TODO : unexpected error (occures when ';' is forgotten etc..)
   default:
     // TODO : syntax error
     return; //?
@@ -257,6 +256,19 @@ void st_return(Token *t) {
   }
   checkNxtTokenKind(Semicolon);
   // TODO : jump to caller
+  return;
+}
+
+void st_ident(Token *t) {
+  TableEntry *te;
+  int idx = search(t->text, te);
+  if ((te->kind == func_ID || te->kind == proto_ID) && te->dtype == VOID_T) {
+    callFunc(t, te); // TODO : currently 'callFunc' is distributed in 2 files
+    checkNxtTokenKind(Semicolon);
+    return;
+  }
+  expr_with_check(t, 0, ';');
+  remove_op_stack_top();
   return;
 }
 
