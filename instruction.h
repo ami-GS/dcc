@@ -41,8 +41,6 @@ void backpatch(int c_ct, int addr);
 int binary_expr(OpCode op, int d1, int d2);
 void to_left_val();
 int const_fold(OpCode op);
-// TODO : this is my own implementation. suspicious
-int is_const(); // for array length setting.
 
 #define ZERO_CHK() if(op_stack[stack_ptr] == 0) return -1; // TODO : zero division
 #define MEMINT(n) (* (int *)(memory+n)) // TODO : more flexible to data size like DWORD or something

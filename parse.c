@@ -70,15 +70,24 @@ int set_array(TableEntry* ent, Token *t) {
       return -1; // TODO : ']' this case can be ok
     }
 
+    if (!is_const_expr()) {
+      return -1; // TODO : array length must be const
+    }
     expr_with_check(t, 0, ']'); // TODO : validate error?
-    ent->arrLen = pop(); // TODO : this is not cool, expression should return value
+    // expr_with_check folds const expression.
+    // the result assigned arrLen and it is not needed on codes
+    ent->arrLen = codes[--codes_ct].opdata; // TODO : suspicious, my implementation
+    if (ent->arrLen <= 0) {
+      return -1; // TODO : invalid array length;
+    }
+
     if (!checkNxtTokenKind(Rbracket)) {
       return -1; // TODO : no end bracket?
     }
     nextToken(t); // point at ']' <-
     nextToken(t); // point at ',', ';' or '['
     if (t->kind == Rbracket) {
-      return -1; // TODO : currently it doesn't support multi dimention
+      return 1; // TODO : currently it doesn't support multi dimention
     }
   }
   return 1;

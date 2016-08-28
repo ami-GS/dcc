@@ -155,9 +155,6 @@ int const_fold(OpCode op) {
   return -1;
 }
 
-int is_const() {}
-
-
 int execute() {
   pc = 0; // proram counter
 

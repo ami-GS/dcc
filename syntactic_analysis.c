@@ -128,6 +128,23 @@ int expr_with_check(Token *t, char l, char r) {
   return 1;
 }
 
+int is_const_expr() {
+  Token t = {NulKind, "", 0};
+  do {
+    if (t_buf_ptr >= TOKEN_BUFFER_SIZ) {
+      return -1; // TODO : buffer overflow
+    }
+    nextToken(&t);
+    t_buf[t_buf_ptr++] = t;
+    // TODO : Can ! and - be allowed?
+    if (!(t.kind == Int || is_ope(t.kind) || t.kind == Rbracket)) {
+      return -1; // TODO : invalid const expression
+    }
+  } while (t.kind != Rbracket); // TODO : this might cause forever loop?
+  return 1;
+}
+
+
 void callFunc(Token *t, TableEntry *te) {
   nextToken(t); // point to '('
   int arg_cnt = 0;
