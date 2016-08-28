@@ -70,10 +70,10 @@ int set_kind(Token *t) {
 // TODO : define error type?
 int nextToken(Token *t) {
   if (t_buf_ptr > 0) {
-    *t = t_buf[t_buf_ptr--];
+    *t = t_buf[--t_buf_ptr];
     return 1;
   }
-  //TODO : manage t initialization
+  // TODO : manage t initialization
 
   int err = 0;
   char c;
