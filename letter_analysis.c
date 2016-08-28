@@ -44,6 +44,10 @@ int is_ope2(const char *c1, const char *c2) {
   return strstr(" == <= >= =< => != ", s) != NULL;
 }
 
+int is_ope(Kind k) {
+  return k == Add || k == Sub || k == Mul || k == Div || k == Mod;
+}
+
 int set_kind(Token *t) {
   t->kind = Others;
   int i;

@@ -58,6 +58,7 @@ int fOpen(char *fname);
 void initKind();
 int nextChar(char *c);
 int is_ope2(const char *c1, const char *c2);
+int is_ope(Kind k);
 int set_kind(Token *t);
 int nextToken(Token *t);
 int checkNxtTokenKind(Kind k);
