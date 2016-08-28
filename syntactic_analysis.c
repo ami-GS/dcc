@@ -165,3 +165,17 @@ void callFunc(Token *t, TableEntry *te) {
   genCode2(CALL, te->addr);
   return;
 }
+
+int opOder(Kind k) {
+  // TODO : can operation kind itself have order integer?
+  switch(k) {
+  case Mul: case Div: case Mod:                                                return 7;
+  case Add: case Sub:                                                          return 6;
+  case Less: case LessEq: case EqLess: case Great: case GreatEq: case EqGreat: return 5;
+  case Equal: case NotEq:                                                      return 4;
+  case And:                                                                    return 3;
+  case Or:                                                                     return 2;
+  case Assign:                                                                 return 1;
+  default:                                                                     return 0;
+  }
+}
