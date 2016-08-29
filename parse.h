@@ -12,6 +12,10 @@ int set_name(TableEntry* ent, Token* t);
 int set_array();
 int declare_func();
 int declare_var(TableEntry* ent, Token* t);
+int begin_declare_func(TableEntry *func);
+int end_declare_func(TableEntry *func, SymbolKind last);
+SymbolKind block(Token *t, int is_func);
+int set_func_process(TableEntry *ent, Token *t);
 
 
 #endif // _DCC_PARSE_H_

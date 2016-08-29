@@ -4,14 +4,8 @@
 #include "letter_analysis.h"
 
 void expression(Token *t);
-void or_exp(Token *t);
-void and_exp(Token *t);
-void equ_exp(Token *t);
-void rel_exp(Token *t);
-void add_sub_exp(Token *t);
-void mul_div_mod_exp(Token *t);
+void term(Token *t, int n);
 int factor(Token *t);
-void operate(Kind op);
 int expr_with_check(Token *t, char l, char r);
 void callFunc(Token *t, TableEntry *te);
 // TODO : this is my own implementation. suspicious

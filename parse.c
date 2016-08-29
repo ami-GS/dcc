@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "letter_analysis.h"
+#include "parse_statement.h"
 #include "parse.h"
 #include "symbol_table.h"
 #include "syntactic_analysis.c"
@@ -76,7 +77,7 @@ int set_array(TableEntry* ent, Token *t) {
     expr_with_check(t, 0, ']'); // TODO : validate error?
     // expr_with_check folds const expression.
     // the result assigned arrLen and it is not needed on codes
-    ent->arrLen = codes[--codes_ct].opdata; // TODO : suspicious, my implementation
+    ent->arrLen = codes[--code_ct].opdata; // TODO : suspicious, my implementation
     if (ent->arrLen <= 0) {
       return -1; // TODO : invalid array length;
     }
@@ -125,7 +126,7 @@ int declare_var(TableEntry* ent, Token* t) {
   return checkNxtTokenKind(Semicolon);
 }
 
-int set_func_process(TableEntry* ent) {
+int set_func_process(TableEntry* ent, Token *t) {
   // TODO : if this is main(), then do special case
   if (is_main(ent->name)) {
     if (ent->dType != INT_T || ent->args != 0) {
@@ -136,7 +137,7 @@ int set_func_process(TableEntry* ent) {
     return 1;
   }
   begin_declare_func(ent);
-  SymbolKind last_statement = block(1);
+  SymbolKind last_statement = block(t, 1);
   end_declare_func(ent, last_statement);
   return 1;
 }
@@ -153,6 +154,9 @@ int declare_func(TableEntry* ent, Token* t) {
   ent->kind = get_func_type();
   enter_table_item(ent);
   // TODO : open local table
+
+  // declare arguments
+  TableEntry arg;
   switch (t->kind) {
   case Void:
     nextToken(t); // point to ')'
@@ -160,12 +164,10 @@ int declare_func(TableEntry* ent, Token* t) {
   case Rparen:
     break;
   default:
-    // declare arguments
-    TableEntry *arg;
     while (1) {
-      set_dtype(arg, t);
-      set_name(arg, t);
-      enter_table_item(arg); // to avoid multiple declaration in case of using declare_var
+      set_dtype(&arg, t);
+      set_name(&arg, t);
+      enter_table_item(&arg); // to avoid multiple declaration in case of using declare_var
       (ent->args)++;
       if (t->kind != Comma) {
 	break;
@@ -180,9 +182,9 @@ int declare_func(TableEntry* ent, Token* t) {
   set_address(ent);
   // TODO : put func chck
 
-  switch(ent->k) {
+  switch(ent->kind) {
   case func_ID:
-    set_func_process(ent);
+    set_func_process(ent, t);
   case proto_ID:
     nextToken(t); // point next to ';'
   }
@@ -201,7 +203,7 @@ int begin_declare_func(TableEntry *func) {
 
 int end_declare_func(TableEntry *func, SymbolKind last) {
   backpatch(func->addr, -1 /* TODO : temporally */);
-  if (last_statement != Return) {
+  if (last != Return) {
     // TODO : here
   }
   genCode(LOD, LOCAL, 0); // load return address to op_stack
@@ -216,8 +218,8 @@ SymbolKind block(Token *t, int is_func) {
     // TODO : here is dcc specific declaration method in function block
     TableEntry *tmp;
     while (t->kind == Int) {
-      set_dtype(tmp);
-      set_name(tmp);
+      set_dtype(tmp, t);
+      set_name(tmp, t);
       declare_var(tmp, t);
     }
   }

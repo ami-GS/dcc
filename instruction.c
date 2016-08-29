@@ -147,7 +147,7 @@ int const_fold(OpCode op) {
       codes[code_ct-1].opdata = -codes[code_ct-1].opdata;
       return 1;
     } else if (is_binaryOP(op) && codes[code_ct-2].opcode == LDI) {
-      codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2], codes[code_ct-1]);
+      codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
       code_ct--;
       return 1;
     }

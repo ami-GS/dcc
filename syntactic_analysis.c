@@ -7,7 +7,7 @@
 #include "symbol_table.h"
 
 void expression(Token *t) {
-  term(2);
+  term(t, 2);
   if (t->kind == Assign) {
     // TODO : need to study
     to_left_val();
@@ -23,13 +23,13 @@ void term(Token *t, int n) {
     factor(t);
     return;
   }
-  term(n+1);
+  term(t, n+1);
 
-  kind k;
-  whlie (n == opOder(t->kind)) {
+  Kind k;
+  while (n == opOder(t->kind)) {
     k = t->kind;
     nextToken(t);
-    term(n+1);
+    term(t, n+1);
     genCode_binary(k);
   }
 }
@@ -137,7 +137,7 @@ int is_const_expr() {
     nextToken(&t);
     t_buf[t_buf_ptr++] = t;
     // TODO : Can ! and - be allowed?
-    if (!(t.kind == Int || is_ope(t.kind) || t.kind == Rbracket)) {
+    if (!(t.kind == Int || is_binaryOP(t.kind) || t.kind == Rbracket)) {
       return -1; // TODO : invalid const expression
     }
   } while (t.kind != Rbracket); // TODO : this might cause forever loop?
