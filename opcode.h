@@ -7,4 +7,9 @@ typedef enum {
     NOP, INC, DEC, NEG, NOT, ADD, SUB, MUL, DIV, MOD, LESS, LSEQ, GRT, GTEQ, EQU, NTEQ, AND, OR, CALL, DEL, JMP, JPT, JPF, EQCMP, LOD, LDA, LDI, STO, ADBR, RET, ASS, ASSV, VAL, LIB, STOP,
 } OpCode;
 
+char *OpCodeStr[] = {
+    "NOP", "INC", "DEC", "NEG", "NOT", "ADD", "SUB", "MUL", "DIV", "MOD", "LESS", "LSEQ", "GRT", "GTEQ", "EQU", "NTEQ", "AND", "OR", "CALL", "DEL", "JMP", "JPT", "JPF", "EQCMP", "LOD", "LDA", "LDI", "STO", "ADBR", "RET", "ASS", "ASSV", "VAL", "LIB", "STOP",
+};
+
+
 #endif
