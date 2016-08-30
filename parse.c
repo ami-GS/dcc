@@ -1,9 +1,11 @@
 #include <stdlib.h>
+#include <string.h>
 #include "letter_analysis.h"
 #include "parse_statement.h"
 #include "parse.h"
 #include "symbol_table.h"
-#include "syntactic_analysis.c"
+#include "syntactic_analysis.h"
+#include "malloc.h"
 
 #define is_main(p) (strcmp(p, "main")==0)
 

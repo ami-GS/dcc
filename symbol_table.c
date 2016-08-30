@@ -1,6 +1,8 @@
+#include <stdlib.h>
+#include <string.h>
 #include "symbol_table.h"
 #include "letter_analysis.h"
-#include <stdlib.h>
+#include "parse.h"
 
 TableEntry* get_table_entry(char *name) {
   // TODO : use quick, binary, hash search

@@ -10,6 +10,7 @@ void compile(char *fname);
 void set_dtype(TableEntry* ent, Token* t);
 int set_name(TableEntry* ent, Token* t);
 int set_array();
+int set_address(TableEntry *te);
 int declare_func();
 int declare_var(TableEntry* ent, Token* t);
 int begin_declare_func(TableEntry *func);
