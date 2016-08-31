@@ -15,6 +15,8 @@ int stack_ptr = OP_STACK_BUTTOM;
 char memory[MEM_MAX];
 int global_memory_addr = 0;
 
+#define NO_FIX_BREAK_ADDR -10001
+#define NO_FIX_RET_ADDR -10002
 
 int pc; // program counter
 int baseReg; // base register

@@ -77,14 +77,18 @@ void st_break(Token *t) {
   if (loopNest_ct == 0) {
     return -1; // TODO : invalid break, or ignore
   }
-  // TODO : set jump to loop end
+  // set jump to loop end
+  genCode2(JMP, NO_FIX_BREAK_ADDR);
   loopNest[loopNest_ct].has_break = 1;
   checkNxtTokenKind(Semicolon);
   return;
 }
 
 void st_continue(Token *t) {
-  // TODO : set jump to loop top
+  if (loopNest_ct == 0) {
+    return -1; // TODO : invalid continue, or ignore
+  }
+  // set jump to loop top
   GEN_JMP_TOP(get_loop_top());
   checkNxtTokenKind(Semicolon);
   return;
@@ -306,16 +310,16 @@ void begin_continue_break(Kind k) {
 }
 
 void end_continue_break() {
-  if (loopNest[loopNest_ct].has_break) {
-    // TODO : set loop top label ?
-  }
+  if (loopNest[loopNest_ct].has_break)
+    // set loop top label
+    backpatch_break(loopNest[loopNest_ct--].loop_top);
   loopNest_ct--;
 }
 
 int get_loop_top() {
   int i;
   // TODO : check textbook is using i > 0
-  for (i = loopNest_ct; i >=0 ; i--) {
+  for (i = loopNest_ct-1; i >=0 ; i--) {
     if (loopNest[i].st_kind != Switch)
       return loopNest[i].loop_top;
   }

@@ -89,6 +89,22 @@ void backpatch(int c_ct, int addr) {
   codes[c_ct].opdata = addr;
 }
 
+void backpatch_break(int loop_top) {
+  int i;
+  for (i = code_ct-1; i >= loop_top; i--) {
+    if (codes[i].opcode == JMP) {
+      code_ct--;
+    } else {
+      break;
+    }
+  }
+  for (i = code_ct-1; i >= loop_top; i--) {
+    if (codes[i].opcode == JMP && codes[i].opdata == NO_FIX_BREAK_ADDR)
+      codes[i].opdata = code_ct;
+  }
+
+}
+
 int binary_expr(OpCode op, int d1, int d2) {
   if ((op == DIV || op == MOD) && d2 == 0) {
     return -1; // TODO : zero division
