@@ -254,13 +254,20 @@ void st_For(Token *t) {
 void st_return(Token *t) {
   nextToken(t);
   if (t->kind == Semicolon) {
-    // TODO : check func return type, if not void, then error
+    // check func return type, if not void, then error
+    if (funcPtr->dType != VOID_T) {
+      return -1; // this can be warning
+    }
   } else {
     expression(t);
-    // TODO : return type comparison t->kind, func type
+    // return type comparison t->kind, func type
+    if (funcPtr->dType == VOID_T) {
+      return -1; // TODO : data type should be validated properly
+    }
   }
+  // jump to caller
+  genCode2(JMP, NO_FIX_RET_ADDR);
   checkNxtTokenKind(Semicolon);
-  // TODO : jump to caller
   return;
 }
 
