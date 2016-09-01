@@ -155,7 +155,9 @@ int declare_func(TableEntry* ent, Token* t) {
   nextToken(t); // point at ')' or arguments
   ent->kind = get_func_type();
   enter_table_item(ent);
-  // TODO : open local table
+  funcPtr = ent; // TODO : funcPtr is not needed?
+  // open local table
+  open_local_table();
 
   // declare arguments
   TableEntry arg;
@@ -186,10 +188,15 @@ int declare_func(TableEntry* ent, Token* t) {
 
   switch(ent->kind) {
   case func_ID:
-    set_func_process(ent, t);
+    set_func_process(ent, t); // enter to statement()
   case proto_ID:
     nextToken(t); // point next to ';'
   }
+
+  // close local table
+  close_local_table();
+  // TODO : delete duplication
+  funcPtr = NULL; // finish function decleration
 
   return 1;
 }
