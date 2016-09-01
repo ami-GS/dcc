@@ -39,5 +39,7 @@ int LTBL_START = 0;
 TableEntry* get_table_entry(char *name);
 int enter_table_item(TableEntry* ent);
 int search(char *text, TableEntry *te);
+void open_local_table();
+void close_local_table();
 
 #endif // _DCC_SYMBOL_TABLE_H_

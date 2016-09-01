@@ -60,3 +60,14 @@ int search(char *text, TableEntry *te) {
   te = NULL;
   return -1;
 }
+
+
+void open_local_table() {
+  LTBL_START = tblEntryCnt + 1;
+}
+
+
+void close_local_table() {
+  tblEntryCnt = LTBL_START + funcPtr->args + 1; // to remain arguments
+  LTBL_START = 0;
+}
