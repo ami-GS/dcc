@@ -33,7 +33,7 @@ typedef struct {
 static TableEntry SymbolTable[TABLE_MAX];
 static int tblEntryCnt = 0;
 #define GTBL_START 0
-int LTBL_START = 0;
+static int LTBL_START = 0;
 #define LTBL_EMPTY TABLE_MAX+1
 
 TableEntry* get_table_entry(char *name);

@@ -41,7 +41,7 @@ typedef struct {
     Kind kind;
 } KeyWordType;
 
-KeyWordType keyWdType[] = {
+static KeyWordType keyWdType[] = {
   {"if", If}, {"else", Else},
   {"for", For}, {"while", While},
   {"==", Equal}, {"!=", NotEq}, {"<", Less}, {"<=", LessEq}, {">=", EqLess}, {">", Great}, {">=", GreatEq}, {"=>", EqGreat},
@@ -52,7 +52,7 @@ KeyWordType keyWdType[] = {
 
 #define TOKEN_BUFFER_SIZ 1000
 Token t_buf[TOKEN_BUFFER_SIZ];
-int t_buf_ptr;
+static int t_buf_ptr;
 // TODO : research about function name decisionning
 int fOpen(char *fname);
 void initKind();
