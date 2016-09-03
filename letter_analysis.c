@@ -31,11 +31,25 @@ void initKind() {
 }
 
 int nextChar(char *c) {
-  if ((*c = fgetc(fin)) == EOF) {
+  // TODO : here is my own implementation. suspicious
+  if (prevC > 0) {
+    *c = prevC;
+    prevC = -1;
+    return 1;
+  }
+
+  *c = fgetc(fin);
+  if (c == EOF) {
     fclose(fin);
     return -1;
   }
   return 1;
+}
+
+void notUseChar(char c) {
+  if (c == ' ' || c == '\t')
+    return;
+  prevC = c;
 }
 
 int is_ope2(const char *c1, const char *c2) {
@@ -95,6 +109,7 @@ int nextToken(Token *t) {
 	*(txt_ptr++) = c;
       // TODO : if length exceeds the limit, emit error?
     }
+    notUseChar(c);
     *txt_ptr = '\0';
     t->intVal = txt_ptr - t->text; // lenth
     break;
@@ -130,8 +145,11 @@ int nextToken(Token *t) {
     // TODO : add more cases?
     *(txt_ptr++) = c;
     nextChar(&c); //to check 2 length operaiton
-    if (is_ope2(txt_ptr-1, &c))
+    if (is_ope2(txt_ptr-1, &c)) {
       *(txt_ptr++) = c;
+    } else {
+      notUseChar(c);
+    }
     *txt_ptr = '\0';
   }
   if (t->kind == NulKind)
