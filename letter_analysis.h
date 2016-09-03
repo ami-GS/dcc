@@ -42,6 +42,7 @@ typedef struct {
 } KeyWordType;
 
 static KeyWordType keyWdType[] = {
+  {"void", Void}, {"int", Int},
   {"if", If}, {"else", Else},
   {"for", For}, {"while", While},
   {"==", Equal}, {"!=", NotEq}, {"<", Less}, {"<=", LessEq}, {">=", EqLess}, {">", Great}, {">=", GreatEq}, {"=>", EqGreat},
