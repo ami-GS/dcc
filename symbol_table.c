@@ -37,7 +37,7 @@ int enter_table_item(TableEntry* ent) {
     // TODO : apply func setting
   }
 
-  SymbolTable[++tblEntryCnt] = *ent;
+  SymbolTable[tblEntryCnt++] = *ent;
   
   return 1;
 }
@@ -45,7 +45,7 @@ int enter_table_item(TableEntry* ent) {
 // TODO : text book uses search and search_name separately. why?
 int search(char *text, TableEntry *te) {
   int i;
-  for (i = tblEntryCnt; i >= LTBL_START; i--) {
+  for (i = tblEntryCnt-1; i >= LTBL_START; i--) {
     if (strcmp(SymbolTable[i].name, text) == 0) {
       te = &SymbolTable[i];
       return i;
@@ -63,7 +63,7 @@ int search(char *text, TableEntry *te) {
 
 
 void open_local_table() {
-  LTBL_START = tblEntryCnt + 1;
+  LTBL_START = tblEntryCnt;
 }
 
 
