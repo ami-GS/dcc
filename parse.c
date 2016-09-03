@@ -10,8 +10,10 @@
 #define is_main(p) (strcmp(p, "main")==0)
 
 void compile(char *fname) {
-  fOpen(fname);
   initKind();
+  genCode2(CALL, -1); // for main
+  genCode1(STOP);
+  fOpen(fname);
   Token t = {NulKind, "", 0};
   TableEntry entryTmp = {no_ID, "", NON_T, NO_LOCATION, 0, 0, 0};
 
@@ -115,6 +117,14 @@ int set_address(TableEntry *te) {
   }
 }
 
+void set_main(TableEntry *ent) {
+    if (ent->dType != INT_T || ent->args != 0) {
+      return -1; // TODO : this is temporal, invalid main
+    }
+    backpatch(0, ent->addr);
+    return 1;
+}
+
 int declare_var(TableEntry* ent, Token* t) {
   while (1) {
     set_array(ent, t);
@@ -130,14 +140,8 @@ int declare_var(TableEntry* ent, Token* t) {
 
 int set_func_process(TableEntry* ent, Token *t) {
   // TODO : if this is main(), then do special case
-  if (is_main(ent->name)) {
-    if (ent->dType != INT_T || ent->args != 0) {
-      // invalid main
-      return -1; // TODO : this is temporal
-    }
-    backpatch(0, ent->addr);
-    return 1;
-  }
+  if (is_main(ent->name))
+    set_main(ent);
   begin_declare_func(ent);
   SymbolKind last_statement = block(t, 1);
   end_declare_func(ent, last_statement);
