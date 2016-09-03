@@ -3,6 +3,7 @@
 #include "parse_statement.h"
 #include "parse.h"
 #include "opcode.h"
+#include "instruction.h"
 
 
 void statement(Token *t) {

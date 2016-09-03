@@ -88,6 +88,9 @@ int nextToken(Token *t) {
     return 1;
   }
   // TODO : manage t initialization
+  *(t->text) = '\0';
+  t->kind = NulKind;
+  t->intVal;
 
   int err = 0;
   char c;

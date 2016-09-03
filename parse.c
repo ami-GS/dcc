@@ -29,10 +29,14 @@ void compile(char *fname) {
       } else { // in case of ',' or '['
 	declare_var(&entryTmp, &t);
       }
+      break;
     case Semicolon:
       nextToken(&t);
+      break;
     }
+    break;
   }
+  // TODO
 }
 
 
@@ -58,9 +62,8 @@ int set_name(TableEntry* ent, Token* t) {
     return -1;
   }
   int len;
-  for (len = 0; t->text+len != '\0'; len++) {}
-  ent->name = malloc(sizeof(char) * (len + 1)); // TODO : error check, and must free
-  for (len = 0; t->text+len != '\0'; len++) {
+  ent->name = malloc(sizeof(char) * (t->intVal + 1)); // TODO : error check, and must free
+  for (len = 0; len < t->intVal ; len++) {
     *(ent->name+len) = *(t->text+len);
   }
   *(ent->name+len) = '\0';
@@ -156,8 +159,10 @@ int declare_func(TableEntry* ent, Token* t) {
     return -1;
   }
   int* argnum_ptr = &(ent->args);
-  nextToken(t); // point at ')' or arguments
+  t_buf_open = 0;
   ent->kind = get_func_type();
+  t_buf_open = 1;
+  nextToken(t); // point at ')' or arguments
   enter_table_item(ent);
   funcPtr = ent; // TODO : funcPtr is not needed?
   // open local table
@@ -183,9 +188,10 @@ int declare_func(TableEntry* ent, Token* t) {
       nextToken(t);
     }
   }
-  if (!checkNxtTokenKind(Rparen)) {
+  if (t->kind != Rparen) {
     return -1; // TODO : no ')' error (Is this conducted in get_func_type?)
   }
+  nextToken(t);
 
   set_address(ent);
   // TODO : put func chck
@@ -209,7 +215,7 @@ int begin_declare_func(TableEntry *func) {
   genCode2(ADBR, 0); // contents will be filled in end_declare_func()
   genCode(STO, LOCAL, 0);
   int i;
-  for (i = func->args; i > 0; i--) {
+  for (i = func->args; i > 0; i--) { // store arguments
     genCode(STO, LOCAL, (func+i)->addr);
   }
 }
@@ -229,6 +235,7 @@ SymbolKind block(Token *t, int is_func) {
   blockNest_ct++;
   if (is_func) {
     // TODO : here is dcc specific declaration method in function block
+    //        declaration is allowed only begining of func
     TableEntry *tmp;
     while (t->kind == Int) {
       set_dtype(tmp, t);
@@ -237,7 +244,7 @@ SymbolKind block(Token *t, int is_func) {
     }
   }
 
-  Kind k = Others;
+  Kind k = Others; // store last statement (for in case of return)
   while (t->kind != '}') {
     k = t->kind; // TODO : here? I think later of statement is better?
     statement(t);
