@@ -53,7 +53,11 @@ static KeyWordType keyWdType[] = {
 
 #define TOKEN_BUFFER_SIZ 1000
 Token t_buf[TOKEN_BUFFER_SIZ];
-static int t_buf_ptr;
+static int t_buf_head = 0, t_buf_tail = 0;
+static int t_buf_open = 0; // TODO : workaround
+int t_buf_enqueue(Token t);
+int t_buf_dequeue(Token *t);
+
 // TODO : research about function name decisionning
 int fOpen(char *fname);
 void initKind();

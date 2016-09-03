@@ -69,8 +69,8 @@ int set_kind(Token *t) {
 
 // TODO : define error type?
 int nextToken(Token *t) {
-  if (t_buf_ptr > 0) {
-    *t = t_buf[--t_buf_ptr];
+  if (t_buf_head != t_buf_tail && t_buf_open) {
+    t_buf_dequeue(t);
     return 1;
   }
   // TODO : manage t initialization
@@ -141,24 +141,42 @@ int nextToken(Token *t) {
 }
 
 int checkNxtTokenKind(Kind k) {
-  if (t_buf_ptr >= TOKEN_BUFFER_SIZ) {
-    return -1; // TODO : buffer overflow error
-  }
   Token t = {NulKind, "", 0};
   nextToken(&t);
-  t_buf[t_buf_ptr++] =  t;
+  t_buf_enqueue(t);
   return t.kind == k;
+}
+
+int t_buf_enqueue(Token t) {
+  // TODO : not good, workaround here
+  if ((t_buf_tail + 1)%TOKEN_BUFFER_SIZ == t_buf_head) {
+    return -1; // TODO : queue is full
+  }
+  t_buf[t_buf_tail++] = t;
+  t_buf_tail %= TOKEN_BUFFER_SIZ;
+  return 1;
+}
+
+int t_buf_dequeue(Token *t) {
+  if (t_buf_head == t_buf_tail) {
+    return -1; // TODO : no contents
+  }
+  *t = t_buf[t_buf_head++];
+  t_buf_tail %= TOKEN_BUFFER_SIZ;
+  return 1;
 }
 
 SymbolKind get_func_type() {
   // TODO : this might use many memory of t_buf
   //        in case of there are many arguments
-  while (1) {
-    Token t = {NulKind, "", 0};
-    if (t.kind == Rparen) {
-      nextToken(&t);
-      t_buf[t_buf_ptr++] = t;
-      switch (t.kind) {
+  do {
+    Token tmp = {NulKind, "", 0};
+    nextToken(&tmp);
+    t_buf_enqueue(tmp);
+    if (tmp.kind == Rparen) {
+      nextToken(&tmp); //suspicious
+      t_buf_enqueue(tmp);
+      switch (tmp.kind) {
       case Semicolon: // prototype
 	return proto_ID;
       case Lbrace:
@@ -167,8 +185,6 @@ SymbolKind get_func_type() {
 	return no_ID; // TODO : syntax error
       }
     }
-    nextToken(&t);
-    t_buf[t_buf_ptr++] = t;
-  }
+  } while (1);
   return no_ID;
 }
