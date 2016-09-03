@@ -44,6 +44,7 @@ void backpatch_break(int loop_top);
 int binary_expr(OpCode op, int d1, int d2);
 void to_left_val();
 int const_fold(OpCode op);
+void remove_op_stack_top();
 
 #define ZERO_CHK() if(op_stack[stack_ptr] == 0) return -1; // TODO : zero division
 #define MEMINT(n) (* (int *)(memory+n)) // TODO : more flexible to data size like DWORD or something

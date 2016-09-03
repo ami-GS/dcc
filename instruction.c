@@ -154,6 +154,14 @@ void to_left_val() {
   }
 }
 
+void remove_op_stack_top() {
+  if (codes[code_ct-1].opcode == ASSV) {
+    codes[code_ct-1].opcode == ASS;
+  } else {
+    genCode1(DEL);
+  }
+}
+
 int const_fold(OpCode op) {
   if (codes[code_ct-1].opcode == LDI) {
     if (op == NOT) {
