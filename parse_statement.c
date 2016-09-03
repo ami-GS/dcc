@@ -158,7 +158,7 @@ void st_while(Token *t) {
   return;
 }
 
-void st_If(Token *t) {
+void st_if(Token *t) {
   int top, else_buttom, end_buttom;
   nextToken(t);
   expr_with_check(t, '(', ')');
@@ -181,7 +181,7 @@ void st_If(Token *t) {
   return;  
 }
 
-void st_Do(Token *t) {
+void st_do(Token *t) {
   int loop_top, loop_buttom;
   nextToken(t); // point at -> '{'
   // set label to loop. (1)
@@ -201,7 +201,7 @@ void st_Do(Token *t) {
   return 1;
 }
 
-void st_For(Token *t) {
+void st_for(Token *t) {
   int loop_top, loop_buttom, inst_top, exp_label;
   nextToken(t);
   if (t->kind == Semicolon) {
@@ -281,6 +281,18 @@ void st_ident(Token *t) {
   }
   expr_with_check(t, 0, ';');
   remove_op_stack_top();
+  return;
+}
+
+void st_build_in_void(Token *t) {
+  return;
+}
+
+void st_build_in(Token *t) {
+  return;
+}
+
+void st_inc_dec(Token *t) {
   return;
 }
 
