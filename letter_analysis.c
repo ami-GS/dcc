@@ -58,7 +58,7 @@ int is_ope2(const char *c1, const char *c2) {
   return strstr(" == <= >= =< => != ", s) != NULL;
 }
 
-int is_binaryOP(Kind k) {
+int is_ope1(Kind k) {
   return k == Add || k == Sub || k == Mul || k == Div || k == Mod;
 }
 
