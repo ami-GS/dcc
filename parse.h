@@ -16,7 +16,7 @@ int declare_func();
 int declare_var(TableEntry* ent, Token* t);
 int begin_declare_func(TableEntry *func);
 int end_declare_func(TableEntry *func, SymbolKind last);
-SymbolKind block(Token *t, int is_func);
+SymbolKind block(Token *t, TableEntry* funcPtr);
 int set_func_process(TableEntry *ent, Token *t);
 
 

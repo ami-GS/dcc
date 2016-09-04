@@ -58,7 +58,7 @@ void statement(Token *t) {
     st_inc_dec(t);
     break;
   case Lbrace:
-    block(t, 0);
+    block(t, NULL);
     break;
   case Semicolon:
     nextToken(t, 0);

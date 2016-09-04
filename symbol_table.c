@@ -67,7 +67,7 @@ void open_local_table() {
 }
 
 
-void close_local_table() {
-  tblEntryCnt = LTBL_START + funcPtr->args + 1; // to remain arguments
+void close_local_table(TableEntry *ent) {
+  tblEntryCnt = LTBL_START + ent->args + 1; // to remain arguments
   LTBL_START = 0;
 }

@@ -146,7 +146,7 @@ int set_func_process(TableEntry* ent, Token *t) {
   if (is_main(ent->name))
     set_main(ent);
   begin_declare_func(ent);
-  SymbolKind last_statement = block(t, 1);
+  SymbolKind last_statement = block(t, ent);
   end_declare_func(ent, last_statement);
   return 1;
 }
@@ -204,7 +204,7 @@ int declare_func(TableEntry* ent, Token* t) {
   }
 
   // close local table
-  close_local_table();
+  close_local_table(ent);
   // TODO : delete duplication
   funcPtr = NULL; // finish function decleration
 
@@ -230,10 +230,10 @@ int end_declare_func(TableEntry *func, SymbolKind last) {
   genCode1(RET); // Return
 }
 
-SymbolKind block(Token *t, int is_func) {
+SymbolKind block(Token *t, TableEntry *funcPtr) {
   nextToken(t, 0);
   blockNest_ct++;
-  if (is_func) {
+  if (funcPtr != NULL) {
     // TODO : here is dcc specific declaration method in function block
     //        declaration is allowed only begining of func
     TableEntry *tmp;
