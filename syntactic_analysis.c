@@ -11,7 +11,7 @@ void expression(Token *t) {
   if (t->kind == Assign) {
     // TODO : need to study
     to_left_val();
-    nextToken(t);
+    nextToken(t, 0);
     expression(t);
     genCode1(ASSV);
   }
@@ -28,7 +28,7 @@ void term(Token *t, int n) {
   Kind k;
   while (n == opOder(t->kind)) {
     k = t->kind;
-    nextToken(t);
+    nextToken(t, 0);
     term(t, n+1);
     genCode_binary(k);
   }
@@ -42,7 +42,7 @@ int factor(Token *t) {
   switch (t->kind) {
   case Add: case Sub: case Not: case Incre: case Decre:
     // like, +1, -1, !0
-    nextToken(t);
+    nextToken(t, 0);
     factor(t);
     // set inc dec preprocessing
     if (t->kind == Incre || t->kind == Decre) {
@@ -60,12 +60,12 @@ int factor(Token *t) {
     case var_ID: case arg_ID:
       if (te_tmp->arrLen == 0) {
 	genCode(LOD, te_tmp->level, te_tmp->addr);
-	nextToken(t);
+	nextToken(t, 0);
       } else {
-	nextToken(t);
+	nextToken(t, 0);
 	if (t->kind == Lbrace) {
 	  // TODO : currently only [] based addressing
-	  nextToken(t);
+	  nextToken(t, 0);
 	  genCode(LDA, te_tmp->level, te_tmp->addr); // TODO : unsure here
 	  expr_with_check(t, '[', ']');
 	  genCode2(LDI, INT_SIZE);
@@ -88,7 +88,7 @@ int factor(Token *t) {
 	  genCode2(LDI, 1);
 	  genCode1(ADD);
 	}
-	nextToken(t);
+	nextToken(t, 0);
       }
       break;
     case func_ID: case proto_ID:
@@ -102,7 +102,7 @@ int factor(Token *t) {
   case IntNum:
     // TODO : also every type. Using TokenStack is the besy way?
     genCode2(LDI, t->intVal);
-    nextToken(t);
+    nextToken(t, 0);
     break;
   case Lparen:
     if (expr_with_check(t, '(', ')')) {
@@ -114,7 +114,7 @@ int factor(Token *t) {
   default:
     return -1; // TODO error
     }
-  nextToken(t);
+  //nextToken(t, 0); // TODO : no need?
 }
 
 int expr_with_check(Token *t, char l, char r) {
@@ -132,7 +132,7 @@ int is_const_expr() {
   Token t = {NulKind, "", 0};
   t_buf_open = 0;
   do {
-    nextToken(&t);
+    nextToken(&t, 0);
     t_buf_enqueue(t);
     // TODO : Can ! and - be allowed?
     if (!(t.kind == Int || is_binaryOP(t.kind) || t.kind == Rbracket)) {
@@ -146,11 +146,11 @@ int is_const_expr() {
 
 
 void callFunc(Token *t, TableEntry *te) {
-  nextToken(t); // point to '('
+  nextToken(t, 0); // point to '('
   int arg_cnt = 0;
   if (!checkNxtTokenKind(Rparen)) {
     do {
-      nextToken(t);
+      nextToken(t, 0);
       expression(t);
       ++arg_cnt;
     } while (t->kind != Comma);

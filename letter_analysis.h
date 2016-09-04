@@ -66,7 +66,7 @@ int nextChar(char *c);
 int is_ope2(const char *c1, const char *c2);
 int is_ope1(Kind k);
 int set_kind(Token *t);
-int nextToken(Token *t);
+int nextToken(Token *t, int q_lock);
 int checkNxtTokenKind(Kind k);
 SymbolKind get_func_type();
 static int prevC = -1;

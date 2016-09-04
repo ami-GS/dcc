@@ -61,7 +61,7 @@ void statement(Token *t) {
     block(t, 0);
     break;
   case Semicolon:
-    nextToken(t);
+    nextToken(t, 0);
     break;
   case EOF_token:
     return; // TODO : unexpected error (occures when ';' is forgotten etc..)
@@ -96,7 +96,7 @@ void st_continue(Token *t) {
 }
 
 void st_switch(Token *t) {
-  nextToken(t);
+  nextToken(t, 0);
   expr_with_check(t, '(', ')');
   // TODO : jump to condition table check (1)
   begin_switch(); // initialize
@@ -109,7 +109,7 @@ void st_switch(Token *t) {
 }
 
 void st_case(Token *t) {
-  nextToken(t);
+  nextToken(t, 0);
   int val;
   // TODO : pick up const value for condition check
   expr_with_check(t, 0 , ':');
@@ -145,7 +145,7 @@ void st_default(Token *t) {
 
 void st_while(Token *t) {
   int loop_top, loop_buttom;
-  nextToken(t); // point at -> '('
+  nextToken(t, 0); // point at -> '('
   // set label to condition check. (1)
   LABEL_TOP(loop_top);
   expr_with_check(t, '(', ')');
@@ -161,7 +161,7 @@ void st_while(Token *t) {
 
 void st_if(Token *t) {
   int top, else_buttom, end_buttom;
-  nextToken(t);
+  nextToken(t, 0);
   expr_with_check(t, '(', ')');
   // jump to label (1) when condition is false.
   GEN_JPF_BUTTOM(end_buttom);
@@ -175,7 +175,7 @@ void st_if(Token *t) {
   GEN_JMP_BUTTOM(else_buttom);
   // set end label. (1)
   backpatch(end_buttom, code_ct);
-  nextToken(t); // point at -> 'if'?
+  nextToken(t, 0); // point at -> 'if'?
   statement(t);
   // set end label. (2)
   backpatch(else_buttom, code_ct);
@@ -184,13 +184,13 @@ void st_if(Token *t) {
 
 void st_do(Token *t) {
   int loop_top, loop_buttom;
-  nextToken(t); // point at -> '{'
+  nextToken(t, 0); // point at -> '{'
   // set label to loop. (1)
   LABEL_TOP(loop_top);
   statement(t);
-  //nextToken(t); //-> while
+  //nextToken(t, 0); //-> while
   if (t->kind == While) {
-    nextToken(t); //-> condition
+    nextToken(t, 0); //-> condition
     expr_with_check(t, '(', ')');
     checkNxtTokenKind(Semicolon);
     // jump to label (1) when condition is True.
@@ -204,10 +204,10 @@ void st_do(Token *t) {
 
 void st_for(Token *t) {
   int loop_top, loop_buttom, inst_top, exp_label;
-  nextToken(t);
+  nextToken(t, 0);
   if (t->kind == Semicolon) {
     // no expr 1
-    nextToken(t);
+    nextToken(t, 0);
   } else {
     expr_with_check(t, 0, ';');
     // remove result;
@@ -219,7 +219,7 @@ void st_for(Token *t) {
   if (t->kind == Semicolon) {
     // no expr 2
     genCode2(LDI, 1); // true
-    nextToken(t);
+    nextToken(t, 0);
   } else {
     expr_with_check(t, 0, ';');
   }
@@ -233,7 +233,7 @@ void st_for(Token *t) {
   LABEL_TOP(exp_label);
   if (t->kind == Rparen) {
     // no expr 3
-    nextToken(t);
+    nextToken(t, 0);
   } else {
     expr_with_check(t, 0, ')');
     // remove result;
@@ -253,7 +253,7 @@ void st_for(Token *t) {
 }
 
 void st_return(Token *t) {
-  nextToken(t);
+  nextToken(t, 0);
   if (t->kind == Semicolon) {
     // check func return type, if not void, then error
     if (funcPtr->dType != VOID_T) {

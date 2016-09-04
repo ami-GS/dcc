@@ -17,7 +17,7 @@ void compile(char *fname) {
   Token t = {NulKind, "", 0};
   TableEntry entryTmp = {no_ID, "", NON_T, NO_LOCATION, 0, 0, 0};
 
-  nextToken(&t);
+  nextToken(&t, 0);
   while (t.kind != EOF_token) {
     switch(t.kind) {
       // type, #, ;, }, )
@@ -31,7 +31,7 @@ void compile(char *fname) {
       }
       break;
     case Semicolon:
-      nextToken(&t);
+      nextToken(&t, 0);
       break;
     }
     break;
@@ -52,7 +52,7 @@ void set_dtype(TableEntry* ent, Token* t) {
     break;
     // TODO : other types can be placed
   }
-  nextToken(t);
+  nextToken(t, 0);
   return;
 }
 
@@ -67,13 +67,13 @@ int set_name(TableEntry* ent, Token* t) {
     *(ent->name+len) = *(t->text+len);
   }
   *(ent->name+len) = '\0';
-  nextToken(t); // pint at ',', '[', '(', ';'
+  nextToken(t, 0); // pint at ',', '[', '(', ';'
   return 1;
 }
 
 int set_array(TableEntry* ent, Token *t) {
   while (t->kind == Lbracket) {
-    nextToken(t);
+    nextToken(t, 0);
     if (t->kind == Rbracket) {
       return -1; // TODO : ']' this case can be ok
     }
@@ -92,8 +92,8 @@ int set_array(TableEntry* ent, Token *t) {
     if (!checkNxtTokenKind(Rbracket)) {
       return -1; // TODO : no end bracket?
     }
-    nextToken(t); // point at ']' <-
-    nextToken(t); // point at ',', ';' or '['
+    nextToken(t, 0); // point at ']' <-
+    nextToken(t, 0); // point at ',', ';' or '['
     if (t->kind == Rbracket) {
       return 1; // TODO : currently it doesn't support multi dimention
     }
@@ -135,7 +135,7 @@ int declare_var(TableEntry* ent, Token* t) {
     if (t->kind != Comma) {
       break; // TODO : suspicious
     }
-    nextToken(t); // next to ','
+    nextToken(t, 0); // next to ','
     set_name(ent, t);
   }
   return checkNxtTokenKind(Semicolon);
@@ -162,7 +162,7 @@ int declare_func(TableEntry* ent, Token* t) {
   t_buf_open = 0;
   ent->kind = get_func_type();
   t_buf_open = 1;
-  nextToken(t); // point at ')' or arguments
+  nextToken(t, 0); // point at ')' or arguments
   enter_table_item(ent);
   funcPtr = ent; // TODO : funcPtr is not needed?
   // open local table
@@ -172,7 +172,7 @@ int declare_func(TableEntry* ent, Token* t) {
   TableEntry arg;
   switch (t->kind) {
   case Void:
-    nextToken(t); // point to ')'
+    nextToken(t, 0); // point to ')'
     break;
   case Rparen:
     break;
@@ -185,13 +185,13 @@ int declare_func(TableEntry* ent, Token* t) {
       if (t->kind != Comma) {
 	break;
       }
-      nextToken(t);
+      nextToken(t, 0);
     }
   }
   if (t->kind != Rparen) {
     return -1; // TODO : no ')' error (Is this conducted in get_func_type?)
   }
-  nextToken(t);
+  nextToken(t, 0);
 
   set_address(ent);
   // TODO : put func chck
@@ -200,7 +200,7 @@ int declare_func(TableEntry* ent, Token* t) {
   case func_ID:
     set_func_process(ent, t); // enter to statement()
   case proto_ID:
-    nextToken(t); // point next to ';'
+    nextToken(t, 0); // point next to ';'
   }
 
   // close local table
@@ -231,7 +231,7 @@ int end_declare_func(TableEntry *func, SymbolKind last) {
 }
 
 SymbolKind block(Token *t, int is_func) {
-  nextToken(t);
+  nextToken(t, 0);
   blockNest_ct++;
   if (is_func) {
     // TODO : here is dcc specific declaration method in function block
@@ -251,6 +251,6 @@ SymbolKind block(Token *t, int is_func) {
   }
 
   blockNest_ct--;
-  nextToken(t); // point to next to '}'
+  nextToken(t, 0); // point to next to '}'
   return k;
 }

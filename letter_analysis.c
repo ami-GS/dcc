@@ -82,8 +82,8 @@ int set_kind(Token *t) {
 }
 
 // TODO : define error type?
-int nextToken(Token *t) {
-  if (t_buf_head != t_buf_tail && t_buf_open) {
+int nextToken(Token *t, int q_lock) {
+  if (t_buf_head != t_buf_tail && !q_lock) {
     t_buf_dequeue(t);
     return 1;
   }
@@ -165,7 +165,7 @@ int nextToken(Token *t) {
 
 int checkNxtTokenKind(Kind k) {
   Token t = {NulKind, "", 0};
-  nextToken(&t);
+  nextToken(&t, 1);
   t_buf_enqueue(t);
   return t.kind == k;
 }
@@ -194,10 +194,10 @@ SymbolKind get_func_type() {
   //        in case of there are many arguments
   do {
     Token tmp = {NulKind, "", 0};
-    nextToken(&tmp);
+    nextToken(&tmp, 1);
     t_buf_enqueue(tmp);
     if (tmp.kind == Rparen) {
-      nextToken(&tmp); //suspicious
+      nextToken(&tmp, 1); //suspicious
       t_buf_enqueue(tmp);
       switch (tmp.kind) {
       case Semicolon: // prototype
