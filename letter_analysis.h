@@ -10,6 +10,7 @@ static FILE *fin;
 
 // TODO : separate NOT and NOTEq
 typedef enum {
+  NulKind, Others, Ident,
   Lparen, Rparen, Lbrace, Rbrace, Lbracket, Rbracket,
   Squote, Dquote, Comma,
   Add, Sub, Mul, Div, Equal, Mod, Assign, Not,
@@ -22,7 +23,6 @@ typedef enum {
   Digit, Letter, VarName,
   If, Else, For, Do, While,
   Switch, Case, Default,
-  Others, NulKind, Ident,
   Break, Continue, Return,
   Printf, Exit, Input,
   EOF_token,
@@ -45,6 +45,7 @@ static KeyWordType keyWdType[] = {
   {"void", Void}, {"int", Int},
   {"if", If}, {"else", Else},
   {"for", For}, {"while", While},
+  {"return", Return},
   {"==", Equal}, {"!=", NotEq}, {"<", Less}, {"<=", LessEq}, {">=", EqLess}, {">", Great}, {">=", GreatEq}, {"=>", EqGreat},
   {"+", Add}, {"-", Sub}, {"*", Mul}, {"/", Div}, {"%", Mod}, {"=", Assign},
   {"(", Lparen}, {")", Rparen}, {"{", Lbrace}, {"}", Rbrace}, {"[", Lbracket}, {"]", Rbracket},

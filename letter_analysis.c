@@ -33,13 +33,13 @@ void initKind() {
 int nextChar(char *c) {
   // TODO : here is my own implementation. suspicious
   if (prevC > 0) {
-    *c = prevC;
+    *c = (char)prevC;
     prevC = -1;
     return 1;
   }
 
   *c = fgetc(fin);
-  if (c == EOF) {
+  if (c == -1) {
     fclose(fin);
     return -1;
   }
@@ -47,7 +47,7 @@ int nextChar(char *c) {
 }
 
 void notUseChar(char c) {
-  if (c == ' ' || c == '\t')
+  if (c == ' ' || c == '\t' || c == '\n')
     return;
   prevC = c;
 }
@@ -90,7 +90,7 @@ int nextToken(Token *t) {
   // TODO : manage t initialization
   *(t->text) = '\0';
   t->kind = NulKind;
-  t->intVal;
+  t->intVal = 0;
 
   int err = 0;
   char c;
@@ -98,7 +98,7 @@ int nextToken(Token *t) {
   err = nextChar(&c);
   if (err != 1)
     return err;
-  while (c == ' ' || c == '\t') {
+  while (c == ' ' || c == '\t' || c == '\n') {
     err = nextChar(&c);
     if (err != 1)
       return err;
@@ -119,6 +119,7 @@ int nextToken(Token *t) {
   case Digit:
     for (; cType[c] == Digit; nextChar(&c))
       t->intVal = t->intVal*10 + (c - '0');
+    notUseChar(c);
     t->kind = IntNum;
     // TODO : float case
     break;
@@ -159,6 +160,7 @@ int nextToken(Token *t) {
     set_kind(t);
   if (t->kind == Others)
     return -1; // maricious token
+  return 1;
 }
 
 int checkNxtTokenKind(Kind k) {
@@ -183,7 +185,7 @@ int t_buf_dequeue(Token *t) {
     return -1; // TODO : no contents
   }
   *t = t_buf[t_buf_head++];
-  t_buf_tail %= TOKEN_BUFFER_SIZ;
+  t_buf_head %= TOKEN_BUFFER_SIZ;
   return 1;
 }
 

@@ -245,7 +245,7 @@ SymbolKind block(Token *t, int is_func) {
   }
 
   Kind k = Others; // store last statement (for in case of return)
-  while (t->kind != '}') {
+  while (t->kind != Rbrace) {
     k = t->kind; // TODO : here? I think later of statement is better?
     statement(t);
   }

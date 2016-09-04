@@ -163,7 +163,7 @@ void remove_op_stack_top() {
 }
 
 int const_fold(OpCode op) {
-  if (codes[code_ct-1].opcode == LDI) {
+  if (code_ct >= 1 && codes[code_ct-1].opcode == LDI) {
     if (op == NOT) {
       codes[code_ct-1].opdata = !codes[code_ct-1].opdata;
       return 1;
@@ -176,7 +176,7 @@ int const_fold(OpCode op) {
       return 1;
     }
   }
-  return -1;
+  return 0;
 }
 
 int execute() {
