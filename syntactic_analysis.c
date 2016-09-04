@@ -135,7 +135,7 @@ int is_const_expr() {
     nextToken(&t, 0);
     t_buf_enqueue(t);
     // TODO : Can ! and - be allowed?
-    if (!(t.kind == Int || is_binaryOP(t.kind) || t.kind == Rbracket)) {
+    if (!(t.kind == Int || is_ope1(t.kind) || t.kind == Rbracket)) {
       t_buf_open = 1;
       return -1; // TODO : invalid const expression
     }

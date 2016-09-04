@@ -51,7 +51,7 @@ void statement(Token *t) {
     // TODO : Build-in function, non-void returns
     st_build_in(t);
     break;
-  case Ident:
+  case Ident: case IntNum: // TODO : correct?
     st_ident(t);
     break;
   case Incre: case Decre:
