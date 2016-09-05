@@ -226,22 +226,23 @@ int end_declare_func(TableEntry *func, SymbolKind last) {
   if (last != Return) {
     // TODO : here
   }
+  backpatch_return(funcPtr->addr);
   genCode(LOD, LOCAL, 0); // load return address to op_stack
   genCode2(ADBR, 0 /* TODO : temporally */); // release local frame
   genCode1(RET); // Return
 }
 
-SymbolKind block(Token *t, TableEntry *funcPtr) {
+SymbolKind block(Token *t, TableEntry *func) {
   nextToken(t, 0);
   blockNest_ct++;
-  if (funcPtr != NULL) {
+  if (func != NULL) {
     // TODO : here is dcc specific declaration method in function block
     //        declaration is allowed only begining of func
-    TableEntry *tmp;
+    TableEntry tmp;
     while (t->kind == Int) {
-      set_dtype(tmp, t);
-      set_name(tmp, t);
-      declare_var(tmp, t);
+      set_dtype(&tmp, t);
+      set_name(&tmp, t);
+      declare_var(&tmp, t);
     }
   }
 
