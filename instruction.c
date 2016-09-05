@@ -105,7 +105,21 @@ void backpatch_break(int loop_top) {
     if (codes[i].opcode == JMP && codes[i].opdata == NO_FIX_BREAK_ADDR)
       codes[i].opdata = code_ct;
   }
+}
 
+void backpatch_return(int return_address) {
+  int i;
+  for (i = code_ct-1; i >= return_address; i--) {
+    if (codes[i].opcode == JMP && codes[i].opdata == NO_FIX_RET_ADDR) {
+      code_ct--;
+    } else {
+      break;
+    }
+  }
+  for (i = code_ct-1; i >= return_address; i--) {
+    if (codes[i].opcode == JMP && codes[i].opdata == NO_FIX_RET_ADDR)
+      codes[i].opdata = code_ct;
+  }
 }
 
 int binary_expr(OpCode op, int d1, int d2) {
