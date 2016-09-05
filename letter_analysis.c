@@ -41,7 +41,7 @@ int nextChar(char *c) {
   }
 
   *c = fgetc(fin);
-  if (c == -1) {
+  if (*c == -1) {
     fclose(fin);
     return -1;
   }

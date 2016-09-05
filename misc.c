@@ -21,6 +21,7 @@ void code_dump() {
 	  printf("%s\t%d", OpCodeStr[op], codes[i].opdata);
 	  if (codes[i].flag && (op == LOD || op == LDA || op == STO))
 	    printf("[b]"); // TODO : ???
+	  printf("\n");
 	  break;
 	default:
 	  return -1; // TODO : invalid operand
