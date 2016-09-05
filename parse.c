@@ -7,6 +7,7 @@
 #include "syntactic_analysis.h"
 #include "malloc.h"
 
+TableEntry* funcPtr = NULL;
 #define is_main(p) (strcmp(p, "main")==0)
 
 void compile(char *fname) {

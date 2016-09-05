@@ -2,6 +2,9 @@
 #include "opcode.h"
 #include "letter_analysis.h"
 
+int code_ct = 0;
+int stack_ptr = OP_STACK_BUTTOM;
+
 int genCode(OpCode op, int flag, int dat) {
   if (const_fold(op)) {
     return code_ct-1;

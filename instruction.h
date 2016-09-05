@@ -7,7 +7,7 @@
 #define OP_STACK_TOP 200
 #define OP_STACK_BUTTOM 0
 int op_stack[OP_STACK_TOP];
-static int stack_ptr = OP_STACK_BUTTOM;
+extern int stack_ptr;
 #define PUSH(a) op_stack[stack_ptr++]=a
 #define POP()   op_stack[stack_ptr--]
 
@@ -30,7 +30,7 @@ typedef struct {
 // TODO : should this be big as much as possible?
 #define CODE_SIZ 65536
 Instruction codes[CODE_SIZ];
-static int code_ct = 0; // 0 for 'main'
+extern int code_ct;
 
 int genCode(OpCode op, int flag, int dat);
 #define genCode1(op) genCode(op, 0, 0)

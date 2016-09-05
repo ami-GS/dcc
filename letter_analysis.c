@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "letter_analysis.h"
 
+int t_buf_open = 0;
+
 int fOpen(char *fname) {
   if ((fin = fopen(fname, "r")) == NULL) {
     return -1; // TODO : file cannot be opened

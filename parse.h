@@ -5,7 +5,7 @@
 #include "letter_analysis.h"
 
 static int blockNest_ct = 0;
-static TableEntry* funcPtr = NULL;
+extern TableEntry* funcPtr;
 
 void compile(char *fname);
 void set_dtype(TableEntry* ent, Token* t);
