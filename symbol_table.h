@@ -20,7 +20,7 @@ typedef struct {
     DataType   dType;
     Level      level;  // local, global etc..
     //int        scope; // TODO : after finish implementation, this can change to Level
-    int         addr;
+    int         code_addr;
 
     // for variable
     int       arrLen;

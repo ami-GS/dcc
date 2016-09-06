@@ -59,14 +59,14 @@ int factor(Token *t) {
     switch (te_tmp->kind) {
     case var_ID: case arg_ID:
       if (te_tmp->arrLen == 0) {
-	genCode(LOD, te_tmp->level, te_tmp->addr);
+	genCode(LOD, te_tmp->level, te_tmp->code_addr);
 	nextToken(t, 0);
       } else {
 	nextToken(t, 0);
 	if (t->kind == Lbrace) {
 	  // TODO : currently only [] based addressing
 	  nextToken(t, 0);
-	  genCode(LDA, te_tmp->level, te_tmp->addr); // TODO : unsure here
+	  genCode(LDA, te_tmp->level, te_tmp->code_addr); // TODO : unsure here
 	  expr_with_check(t, '[', ']');
 	  genCode2(LDI, INT_SIZE);
 	  genCode1(MUL); // index * data size
@@ -162,7 +162,7 @@ void callFunc(Token *t, TableEntry *te) {
   if (arg_cnt != te->args) {
     return -1; // TODO : few or more arguments
   }
-  genCode2(CALL, te->addr);
+  genCode2(CALL, te->code_addr);
   return;
 }
 

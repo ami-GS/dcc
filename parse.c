@@ -111,16 +111,16 @@ int set_address(TableEntry *te) {
       size *= te->arrLen; // TODO other type should be capable
     }
     if (te->level == GLOBAL) {
-      te->addr = malloc_G(size);
+      te->code_addr = malloc_G(size);
       break;
     }
-    te->addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
+    te->code_addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
     break;
   case func_ID:
     // TODO : need to study for seting func addr
-    te->addr = code_ct;
+    te->code_addr = code_ct;
     for (i = 1; i <+ te->args; i++) {
-      (te+i)->addr = malloc_L(size);
+      (te+i)->code_addr = malloc_L(size);
     }
     break;
   }
@@ -130,7 +130,7 @@ void set_main(TableEntry *ent) {
     if (ent->dType != INT_T || ent->args != 0) {
       return -1; // TODO : this is temporal, invalid main
     }
-    backpatch(0, ent->addr); // set main func code addr
+    backpatch(0, ent->code_addr); // set main func code addr
     return 1;
 }
 
@@ -222,16 +222,16 @@ int begin_declare_func(TableEntry *func) {
   genCode(STO, LOCAL, 0);
   int i;
   for (i = func->args; i > 0; i--) { // store arguments
-    genCode(STO, LOCAL, (func+i)->addr);
+    genCode(STO, LOCAL, (func+i)->code_addr);
   }
 }
 
 int end_declare_func(TableEntry *func, SymbolKind last) {
-  backpatch(func->addr, -1 /* TODO : temporally */);
+  backpatch(func->code_addr, -1 /* TODO : temporally */);
   if (last != Return) {
     // TODO : here
   }
-  backpatch_return(funcPtr->addr);
+  backpatch_return(funcPtr->code_addr);
   genCode(LOD, LOCAL, 0); // load return address to op_stack
   genCode2(ADBR, 0 /* TODO : temporally */); // release local frame
   genCode1(RET); // Return
