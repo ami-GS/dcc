@@ -103,11 +103,11 @@ int set_array(TableEntry* ent, Token *t) {
 }
 
 int set_address(TableEntry *te) {
-  int size;
+  int i, size = INT_SIZE; // TODO : currently fixed size
   switch (te->kind) {
   case var_ID:
     if (te->arrLen != 0) {
-      size = INT_SIZE * te->arrLen; // TODO other type should be capable
+      size *= te->arrLen; // TODO other type should be capable
     }
     if (te->level == GLOBAL) {
       te->addr = malloc_G(size);
@@ -117,6 +117,10 @@ int set_address(TableEntry *te) {
     break;
   case func_ID:
     // TODO : need to study for seting func addr
+    te->addr = code_ct;
+    for (i = 1; i <+ te->args; i++) {
+      (te+i)->addr = malloc_L(size);
+    }
     break;
   }
 }
@@ -125,7 +129,7 @@ void set_main(TableEntry *ent) {
     if (ent->dType != INT_T || ent->args != 0) {
       return -1; // TODO : this is temporal, invalid main
     }
-    backpatch(0, ent->addr);
+    backpatch(0, ent->addr); // set main func code addr
     return 1;
 }
 
