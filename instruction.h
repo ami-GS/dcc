@@ -42,6 +42,7 @@ int genCode_binary(Kind k);
 void backpatch(int c_ct, int addr);
 void backpatch_break(int loop_top);
 void backpatch_return(int return_addr);
+void backpatch_calladdr();
 int binary_expr(OpCode op, int d1, int d2);
 void to_left_val();
 int const_fold(OpCode op);

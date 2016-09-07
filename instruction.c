@@ -122,6 +122,20 @@ void backpatch_return(int return_address) {
   }
 }
 
+void backpatch_calladdr() {
+  if (codes[0].opdata < 0)
+    return -1; // TODO : no main function
+  int i;
+  for (i = 0; i < code_ct; i++) {
+    if (codes[i].opcode == CALL && codes[i].opdata < 0) {
+      codes[i].opdata = SymbolTable[-(codes[i].opdata-1)].addr;
+      if (codes[i].opdata < 0) {
+	return -1; // TODO : unknow function //is this true?
+      }
+    }
+  }
+}
+
 int binary_expr(OpCode op, int d1, int d2) {
   if ((op == DIV || op == MOD) && d2 == 0) {
     return -1; // TODO : zero division

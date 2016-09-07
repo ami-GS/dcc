@@ -38,6 +38,7 @@ void compile(char *fname) {
     break;
   }
   // TODO
+  backpatch_calladdr();
 }
 
 
