@@ -9,7 +9,7 @@
 int op_stack[OP_STACK_TOP];
 extern int stack_ptr;
 #define PUSH(a) op_stack[stack_ptr++]=a
-#define POP()   op_stack[stack_ptr--]
+#define POP()   op_stack[--stack_ptr]
 
 #define MEM_MAX 65535 // TODO : more ?
 char memory[MEM_MAX];

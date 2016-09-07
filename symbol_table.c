@@ -47,13 +47,13 @@ int search(char *text, TableEntry *te) {
   int i;
   for (i = tblEntryCnt-1; i >= LTBL_START; i--) {
     if (strcmp(SymbolTable[i].name, text) == 0) {
-      te = &SymbolTable[i];
+      *te = SymbolTable[i];
       return i;
     }
   }
   for (; i >= GTBL_START; i--) {
     if (SymbolTable[i].kind != arg_ID && strcmp(SymbolTable[i].name, text) == 0) {
-      te = &SymbolTable[i];
+      *te = SymbolTable[i];
       return i;
     }
   }
