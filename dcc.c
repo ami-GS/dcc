@@ -1,3 +1,6 @@
+#include "parse.h"
+#include "instruction.h"
+#include "misc.h"
 
 int main(int argc, char *argv[]) {
   if (argc == 1) {
@@ -6,4 +9,6 @@ int main(int argc, char *argv[]) {
   }
 
   compile(argv[1]);
+  code_dump();
+  execute();
 }
