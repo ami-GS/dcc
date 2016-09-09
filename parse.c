@@ -135,6 +135,7 @@ void set_main(TableEntry *ent) {
 }
 
 int declare_var(TableEntry* ent, Token* t) {
+  ent->kind = var_ID;
   while (1) {
     set_array(ent, t);
     enter_table_item(ent);
@@ -243,7 +244,7 @@ SymbolKind block(Token *t, TableEntry *func) {
   if (func != NULL) {
     // TODO : here is dcc specific declaration method in function block
     //        declaration is allowed only begining of func
-    TableEntry tmp;
+    TableEntry tmp = {no_ID, "", NON_T, NO_LOCATION, 0, 0, 0};
     while (t->kind == Int) {
       set_dtype(&tmp, t);
       set_name(&tmp, t);
