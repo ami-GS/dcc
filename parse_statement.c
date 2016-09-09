@@ -273,8 +273,7 @@ void st_return(Token *t) {
 }
 
 void st_ident(Token *t) {
-  TableEntry *te;
-  int idx = search(t->text, te);
+  TableEntry *te = search(t->text);
   if ((te->kind == func_ID || te->kind == proto_ID) && te->dType == VOID_T) {
     callFunc(t, te); // TODO : currently 'callFunc' is distributed in 2 files
     checkNxtTokenKind(Semicolon);

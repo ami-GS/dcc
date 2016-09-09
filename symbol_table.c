@@ -38,27 +38,23 @@ int enter_table_item(TableEntry* ent) {
   }
 
   SymbolTable[tblEntryCnt++] = *ent;
-  
   return 1;
 }
 
 // TODO : text book uses search and search_name separately. why?
-int search(char *text, TableEntry *te) {
+TableEntry *search(char *text) {
   int i;
   for (i = tblEntryCnt-1; i >= LTBL_START; i--) {
     if (strcmp(SymbolTable[i].name, text) == 0) {
-      *te = SymbolTable[i];
-      return i;
+      return SymbolTable + i;
     }
   }
   for (; i >= GTBL_START; i--) {
     if (SymbolTable[i].kind != arg_ID && strcmp(SymbolTable[i].name, text) == 0) {
-      *te = SymbolTable[i];
-      return i;
+      return SymbolTable + i;
     }
   }
-  te = NULL;
-  return -1;
+  return NULL;
 }
 
 

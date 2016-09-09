@@ -36,7 +36,7 @@ void term(Token *t, int n) {
 
 int factor(Token *t) {
   Kind op;
-  TableEntry *te_tmp;
+  TableEntry *te_tmp = NULL;
   int find;
 
   switch (t->kind) {
@@ -52,8 +52,8 @@ int factor(Token *t) {
     break;
   case Ident:
     // TODO : search registered table item
-    find = search(t->text, te_tmp);
-    if (!find) {
+    te_tmp = search(t->text);
+    if (te_tmp == NULL) {
       return -1; // TODO : do something
     }
     switch (te_tmp->kind) {
