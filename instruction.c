@@ -172,12 +172,12 @@ int binary_expr(OpCode op, int d1, int d2) {
 
 void to_left_val() {
   // TODO : I need study more here
-  switch (codes[code_ct].opcode) {
+  switch (codes[code_ct-1].opcode) {
   case VAL:
     --code_ct;
     break;
   case LOD:
-    codes[code_ct].opcode = LDA;
+    codes[code_ct-1].opcode = LDA;
     break;
   default:
     return -1; // TODO : malicious left val
