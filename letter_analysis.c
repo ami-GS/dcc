@@ -55,6 +55,8 @@ void notUseChar(char c) {
 }
 
 int is_ope2(const char *c1, const char *c2) {
+  if (*c2 == ' ' || *c2 == '\t' || *c2 == '\n') // TODO : redundant
+    return 0;
   char s[2];
   s[0] = *c1; s[1] = *c2;
   return strstr(" == <= >= =< => != ", s) != NULL;
