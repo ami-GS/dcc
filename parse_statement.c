@@ -274,10 +274,15 @@ void st_return(Token *t) {
 
 void st_ident(Token *t) {
   TableEntry *te = search(t->text);
-  if ((te->kind == func_ID || te->kind == proto_ID) && te->dType == VOID_T) {
-    callFunc(t, te); // TODO : currently 'callFunc' is distributed in 2 files
-    checkNxtTokenKind(Semicolon);
-    return;
+  if (te != NULL) {
+    if ((te->kind == func_ID || te->kind == proto_ID) && te->dType == VOID_T) {
+      callFunc(t, te); // TODO : currently 'callFunc' is distributed in 2 files
+      checkNxtTokenKind(Semicolon);
+      return;
+    }
+    if (te->kind == Lbracket) {
+      expr_with_check(t, '[', ']'); // TODO : add address to base register
+    }
   }
   expr_with_check(t, 0, ';');
   remove_op_stack_top();
