@@ -44,12 +44,15 @@ typedef struct {
 static KeyWordType keyWdType[] = {
   {"void", Void}, {"int", Int},
   {"if", If}, {"else", Else},
-  {"for", For}, {"while", While},
+  {"for", For}, {"while", While}, {"do", Do},
+  {"switch", Switch}, {"case", Case}, {"continue", Continue},
+  {"default", Default}, {"break", Break},
   {"return", Return},
-  {"==", Equal}, {"!=", NotEq}, {"<", Less}, {"<=", LessEq}, {">=", EqLess}, {">", Great}, {">=", GreatEq}, {"=>", EqGreat},
+  {"==", Equal}, {"!=", NotEq}, {"<", Less}, {"<=", LessEq}, {"=<", EqLess}, {">", Great}, {">=", GreatEq}, {"=>", EqGreat},
+  {"++", Incre}, {"--", Decre}, {"&&", And}, {"||", Or},
   {"+", Add}, {"-", Sub}, {"*", Mul}, {"/", Div}, {"%", Mod}, {"=", Assign},
   {"(", Lparen}, {")", Rparen}, {"{", Lbrace}, {"}", Rbrace}, {"[", Lbracket}, {"]", Rbracket},
-  {";", Semicolon}, {"", END_list},
+  {",", Comma}, {";", Semicolon}, {"", END_list},
 };
 
 #define TOKEN_BUFFER_SIZ 1000

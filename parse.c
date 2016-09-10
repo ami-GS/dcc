@@ -91,12 +91,12 @@ int set_array(TableEntry* ent, Token *t) {
       return -1; // TODO : invalid array length;
     }
 
-    if (!checkNxtTokenKind(Rbracket)) {
+    if (t->kind != Rbracket) {
       return -1; // TODO : no end bracket?
     }
-    nextToken(t, 0); // point at ']' <-
-    nextToken(t, 0); // point at ',', ';' or '['
+    //nextToken(t, 0); // point at ']' <-
     if (t->kind == Rbracket) {
+      nextToken(t, 0); // point at ',', ';' or '['
       return 1; // TODO : currently it doesn't support multi dimention
     }
   }

@@ -52,7 +52,7 @@ void remove_op_stack_top();
 #define MEMINT(n) (* (int *)(memory+n)) // TODO : more flexible to data size like DWORD or something
 #define UNI_OP(op) op_stack[stack_ptr] = op op_stack[stack_ptr]
 #define BIN_OP(op) op_stack[stack_ptr-1] = op_stack[stack_ptr-1] op op_stack[stack_ptr], stack_ptr--
-#define INCDEC(num) MEMINT(op_stack[stack_ptr]) += num, op_stack[stack_ptr] = MEMINT(op_stack[stack_ptr])
+#define INCDEC(num) MEMINT(op_stack[stack_ptr-1]) += num, op_stack[stack_ptr-1] = MEMINT(op_stack[stack_ptr-1])
 #define ASSIGN(addr, dat) MEMINT(addr) = dat
 
 int execute();

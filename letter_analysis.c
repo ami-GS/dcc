@@ -59,7 +59,8 @@ int is_ope2(const char *c1, const char *c2) {
     return 0;
   char s[2];
   s[0] = *c1; s[1] = *c2;
-  return strstr(" == <= >= =< => != ", s) != NULL;
+  // TODO : // and /* should be included for comment?
+  return strstr(" ++ -- || && == <= >= =< => != ", s) != NULL;
 }
 
 int is_ope1(Kind k) {

@@ -118,12 +118,18 @@ int factor(Token *t) {
 }
 
 int expr_with_check(Token *t, char l, char r) {
-  if (l != 0 && t->text[0] != l) {
-    return -1;
+  if (l != 0) {
+    if (t->text[0] != l) {
+      return -1;
+    }
+    nextToken(t, 0);
   }
   expression(t);
-  if (r != 0 && t->text[0] != r) {
-    return -1;
+  if (r != 0) {
+    if (t->text[0] != r) {
+      return -1;
+    }
+    nextToken(t, 0);
   }
   return 1;
 }

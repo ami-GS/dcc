@@ -140,6 +140,7 @@ int binary_expr(OpCode op, int d1, int d2) {
   if ((op == DIV || op == MOD) && d2 == 0) {
     return -1; // TODO : zero division
   }
+  // TODO : single '&' '|' '^' should be added. what is appropriate name
   switch (op) {
   case ADD:
     return d1 + d2;
@@ -147,25 +148,25 @@ int binary_expr(OpCode op, int d1, int d2) {
     return d1 - d2;
   case MUL:
     return d1 * d2;
-  case Div:
+  case DIV:
     return d1 / d2;
-  case Mod:
+  case MOD:
     return d1 % d2;
-  case Equal:
+  case EQU:
     return d1 == d2;
-  case NotEq:
+  case NTEQ:
     return d1 != d2;
-  case Less:
+  case LESS:
     return d1 < d2;
-  case LessEq: case EqLess:
+  case LSEQ:
     return d1 <= d2;
-  case Great:
+  case GRT:
     return d1 > d2;
-  case GreatEq: case EqGreat:
+  case GTEQ:
     return d1 >= d2;
-  case And:
+  case AND:
     return d1 && d2;
-  case Or:
+  case OR:
     return d1 || d2;
   }
 }
@@ -234,6 +235,7 @@ int execute() {
     } else {
       addr = dat; // absolute addr
     }
+    pc++;
 
     switch (op) {
     case DEL:
