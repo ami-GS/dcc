@@ -298,6 +298,8 @@ void st_build_in(Token *t) {
 }
 
 void st_inc_dec(Token *t) {
+  expr_with_check(t, 0, ';');
+  remove_op_stack_top();
   return;
 }
 
