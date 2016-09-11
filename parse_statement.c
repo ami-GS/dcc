@@ -96,28 +96,42 @@ void st_continue(Token *t) {
 }
 
 void st_switch(Token *t) {
+  int table_addr, end;
   nextToken(t, 0);
   expr_with_check(t, '(', ')');
   // TODO : jump to condition table check (1)
+  GEN_JMP_BUTTOM(table_addr); // TODO : need to change name
   begin_switch(); // initialize
   statement(t);
   // TODO : jump to end of switch (2)
+  GEN_JMP_BUTTOM(end);
   // TODO : set label (1) for condition table
+  backpatch(table_addr, code_ct);
+  printf("JMP=%d, %d, %d\n", JMP, code_ct, table_addr);
   end_switch(); // apply gathered case list as table
   // TODO : set label (2)
+  backpatch(end, code_ct);
   return;
 }
 
 void st_case(Token *t) {
   nextToken(t, 0);
-  int val;
-  // TODO : pick up const value for condition check
-  expr_with_check(t, 0 , ':');
-  if (switchNest_ct == 0) {
+  // pick up const value for condition check
+  // TODO : suspicious
+  if (!is_const_expr()) {
+    return -1; // TODO : no const value
+  } else if (switchNest_ct == 0) {
     return -1; // TODO : no switch associating
   }
+
+  expr_with_check(t, 0 , ':');
+  int val;
+  if (codes[code_ct-1].opcode == LDI) {
+    val = codes[code_ct-1].opdata; // TODO : suspicious
+  }
+  code_ct--; // remove LDI and its const
   int i;
-  for (i = switchNest[switchNest_ct].case_list_st_addr; i <= caseList_ct; i++) {
+  for (i = switchNest[switchNest_ct].case_list_st_addr; i < caseList_ct; i++) {
     if (caseList[i].value == val) {
       return -1; // TODO : case duplication
     }
@@ -125,8 +139,9 @@ void st_case(Token *t) {
   if (caseList_ct >= MAX_CASE_SIZ) {
     return -1; // TODO : case size overflow
   }
-  caseList[i].value = val;
-  // TODO : caseList[i].address =
+  caseList[caseList_ct].value = val;
+  // caseList[i].address =
+  caseList[caseList_ct++].address = code_ct;
   statement(t);
   return;
 }
@@ -135,12 +150,17 @@ void st_default(Token *t) {
   if (switchNest_ct == 0) {
     return -1; // TODO : no switch association
   }
-  if (switchNest[switchNest_ct].default_addr != -1) {
+  // TODO : 0 is danger. -1 should be applied as initialization
+  if (switchNest[switchNest_ct].default_addr != 0) {
     return -1; // TODO : duplication of default
   }
-  // TODO : set address of switchNest[switchNest_ct].default_addr = ;
+  // set address of switchNest[switchNest_ct].default_addr = ;
+  switchNest[switchNest_ct].default_addr = code_ct;
+  if (!checkNxtTokenKind(Colon)) {
+    return -1; // TODO : no end ':'
+  }
+  nextToken(t, 0); nextToken(t, 0);
   statement(t);
-
 }
 
 void st_while(Token *t) {
@@ -308,19 +328,23 @@ void begin_switch() {
     return -1; // TODO : switch nest over limitation
   }
   switchNest[switchNest_ct].default_addr = -1;
-  switchNest[switchNest_ct++].case_list_st_addr = caseList_ct+1;
+  switchNest[switchNest_ct++].case_list_st_addr = caseList_ct;
 }
 
 void end_switch() {
   int i, st = switchNest[switchNest_ct].case_list_st_addr;
   for (i = st; i <= caseList_ct; i++) {
     // TODO : compare caseList[i].value and stack top?
+    genCode2(EQCMP, caseList[i].value);
     // TODO : jump to caseList[i].addr if true
+    genCode2(JPT, caseList[i].address);
   }
   // TODO : remove top comparison result?
+  genCode1(DEL);
   if (switchNest[switchNest_ct].default_addr != -1) {
     // when this nest has default
     // TODO : jump to switch_nest[switchNest_ct].default_addr
+    genCode2(JMP, switchNest[switchNest_ct].default_addr);
   }
   caseList_ct = st - 1;
   switchNest_ct--;
