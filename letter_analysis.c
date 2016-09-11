@@ -60,7 +60,17 @@ int is_ope2(const char *c1, const char *c2) {
   char s[2];
   s[0] = *c1; s[1] = *c2;
   // TODO : // and /* should be included for comment?
-  return strstr(" ++ -- || && == <= >= =< => != ", s) != NULL;
+  char ope2[10][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
+		      "=<", "=>", "!="};
+  int i;
+  for (i = 0; i < 10; i++) {
+    printf("s=%s, ans=%d\n", s, ope2[i][0] == s[0] && ope2[i][1] == s[1]);
+    if (ope2[i][0] == s[0] && ope2[i][1] == s[1]) {
+      return 1;
+    }
+  }
+  return 0; // workaround
+  //return strstr(" ++ -- || && == <= >= =< => != ", s) != NULL;
 }
 
 int is_ope1(Kind k) {
