@@ -35,20 +35,20 @@ void term(Token *t, int n) {
 }
 
 int factor(Token *t) {
-  Kind op;
+  Kind op = t->kind;
   TableEntry *te_tmp = NULL;
   int find;
 
-  switch (t->kind) {
+  switch (op) {
   case Add: case Sub: case Not: case Incre: case Decre:
     // like, +1, -1, !0
     nextToken(t, 0);
     factor(t);
     // set inc dec preprocessing
-    if (t->kind == Incre || t->kind == Decre) {
+    if (op== Incre || op == Decre) {
       to_left_val();
     }
-    genCode_unary(t->kind);
+    genCode_unary(op);
     break;
   case Ident:
     // TODO : search registered table item
@@ -63,9 +63,8 @@ int factor(Token *t) {
 	nextToken(t, 0);
       } else {
 	nextToken(t, 0);
-	if (t->kind == Lbrace) {
+	if (t->kind == Lbracket) {
 	  // TODO : currently only [] based addressing
-	  nextToken(t, 0);
 	  genCode(LDA, te_tmp->level, te_tmp->code_addr); // TODO : unsure here
 	  expr_with_check(t, '[', ']');
 	  genCode2(LDI, INT_SIZE);
@@ -76,7 +75,7 @@ int factor(Token *t) {
 	  return -1; // TODO : no index
 	}
       }
-      if (t->kind == Incre || t->kind == Decre) {
+      if (t->kind == Incre || t->kind == Decre) { // for A++
 	to_left_val();
 	// TODO : need to study below
 	if (t->kind == Incre) {
@@ -145,7 +144,7 @@ int is_const_expr() {
       t_buf_open = 1;
       return -1; // TODO : invalid const expression
     }
-  } while (t.kind != Rbracket); // TODO : this might cause forever loop?
+  } while (t.kind != Rbracket || t.kind != Colon); // TODO : this might cause forever loop?
   t_buf_open = 1;
   return 1;
 }

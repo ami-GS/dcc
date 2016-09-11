@@ -18,7 +18,7 @@ typedef enum {
   NotEq, Less, LessEq, EqLess, Great, GreatEq, EqGreat,
   And, Or, Xor, Rev,
   Int, Void,
-  Semicolon,
+  Colon, Semicolon,
   String, IntNum, FloatNum,
   Digit, Letter, VarName,
   If, Else, For, Do, While,
@@ -52,7 +52,7 @@ static KeyWordType keyWdType[] = {
   {"++", Incre}, {"--", Decre}, {"&&", And}, {"||", Or},
   {"+", Add}, {"-", Sub}, {"*", Mul}, {"/", Div}, {"%", Mod}, {"=", Assign},
   {"(", Lparen}, {")", Rparen}, {"{", Lbrace}, {"}", Rbrace}, {"[", Lbracket}, {"]", Rbracket},
-  {",", Comma}, {";", Semicolon}, {"", END_list},
+  {",", Comma}, {":", Colon}, {";", Semicolon}, {"", END_list},
 };
 
 #define TOKEN_BUFFER_SIZ 1000
