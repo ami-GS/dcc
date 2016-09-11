@@ -22,3 +22,7 @@ while (a < 5) {
 - do-whlie
 
 - for
+
+- if
+
+- pre & post position incre & decrement
