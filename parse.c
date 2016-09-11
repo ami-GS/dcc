@@ -228,13 +228,15 @@ int begin_declare_func(TableEntry *func) {
 }
 
 int end_declare_func(TableEntry *func, SymbolKind last) {
-  backpatch(func->code_addr, -1 /* TODO : temporally */);
+  // TODO : study here
+  backpatch(func->code_addr, -localAddress);
   if (last != Return) {
     // TODO : here
   }
   backpatch_return(funcPtr->code_addr);
   genCode(LOD, LOCAL, 0); // load return address to op_stack
-  genCode2(ADBR, 0 /* TODO : temporally */); // release local frame
+  // TODO : study here
+  genCode2(ADBR, localAddress); // release local frame
   genCode1(RET); // Return
 }
 
