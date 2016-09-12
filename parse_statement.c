@@ -82,6 +82,7 @@ void st_break(Token *t) {
   genCode2(JMP, NO_FIX_BREAK_ADDR);
   loopNest[loopNest_ct].has_break = 1;
   checkNxtTokenKind(Semicolon);
+  nextToken(t, 0);
   return;
 }
 
@@ -92,6 +93,7 @@ void st_continue(Token *t) {
   // set jump to loop top
   GEN_JMP_TOP(get_loop_top());
   checkNxtTokenKind(Semicolon);
+  nextToken(t, 0);
   return;
 }
 
@@ -213,6 +215,7 @@ void st_do(Token *t) {
     nextToken(t, 0); //-> condition
     expr_with_check(t, '(', ')');
     checkNxtTokenKind(Semicolon);
+    nextToken(t, 0);
     // jump to label (1) when condition is True.
     GEN_JPT_BUTTOM(loop_top);
   } else {
@@ -289,6 +292,7 @@ void st_return(Token *t) {
   // jump to caller
   genCode2(JMP, NO_FIX_RET_ADDR);
   checkNxtTokenKind(Semicolon);
+  nextToken(t, 0);
   return;
 }
 
@@ -298,6 +302,7 @@ void st_ident(Token *t) {
     if ((te->kind == func_ID || te->kind == proto_ID) && te->dType == VOID_T) {
       callFunc(t, te); // TODO : currently 'callFunc' is distributed in 2 files
       checkNxtTokenKind(Semicolon);
+      nextToken(t, 0);
       return;
     }
     if (te->kind == Lbracket) {
