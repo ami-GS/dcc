@@ -95,7 +95,7 @@ void backpatch(int c_ct, int addr) {
 void backpatch_break(int loop_top) {
   int i;
   for (i = code_ct-1; i >= loop_top; i--) {
-    if (codes[i].opcode == JMP) {
+    if (codes[i].opcode == JMP && codes[i].opdata == NO_FIX_BREAK_ADDR) {
       code_ct--;
     } else {
       break;

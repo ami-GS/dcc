@@ -80,7 +80,7 @@ void st_break(Token *t) {
   }
   // set jump to loop end
   genCode2(JMP, NO_FIX_BREAK_ADDR);
-  loopNest[loopNest_ct].has_break = 1;
+  loopNest[loopNest_ct-1].has_break = 1;
   checkNxtTokenKind(Semicolon);
   nextToken(t, 0);
   return;
@@ -365,9 +365,9 @@ void begin_continue_break(Kind k) {
 }
 
 void end_continue_break() {
-  if (loopNest[loopNest_ct].has_break)
+  if (loopNest[loopNest_ct-1].has_break)
     // set loop top label
-    backpatch_break(loopNest[loopNest_ct--].loop_top);
+    backpatch_break(loopNest[loopNest_ct-1].loop_top);
   loopNest_ct--;
 }
 

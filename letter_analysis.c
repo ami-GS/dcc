@@ -15,11 +15,11 @@ void initKind() {
   int i;
   for (i = 0; i < 256; i++)
     cType[i] = Others;
-  for (i = '0'; i < '9'; i++)
+  for (i = '0'; i <= '9'; i++)
     cType[i] = Digit;
-  for (i = 'a'; i < 'z'; i++)
+  for (i = 'a'; i <= 'z'; i++)
     cType[i] = Letter;
-  for (i = 'A'; i < 'A'; i++)
+  for (i = 'A'; i <= 'Z'; i++)
     cType[i] = Letter;
   cType['_'] = Letter;
   cType['('] = Lparen; cType[')'] = Rparen;
@@ -143,7 +143,7 @@ int nextToken(Token *t, int q_lock) {
       if (txt_ptr - t->text < TOKEN_TXT_SIZ)
 	*(txt_ptr++) = c;
       // TODO ; if length exceeds the limit, emit error
-}
+    }
     if (c != '"')
       return -1; // no end "
     *txt_ptr = '\0';
