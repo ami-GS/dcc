@@ -36,14 +36,17 @@ int nextChar(char *c) {
   // TODO : here is my own implementation. suspicious
   if (prevC > 0) {
     *c = (char)prevC;
-    prevC = -1;
+    prevC = -2;
     return 1;
+  } else if (prevC == EOF) {
+    *c = prevC;
+    return *c;
   }
 
   *c = fgetc(fin);
-  if (*c == -1) {
+  if (*c == EOF) {
     fclose(fin);
-    return -1;
+    return *c;
   }
   return 1;
 }
@@ -64,7 +67,6 @@ int is_ope2(const char *c1, const char *c2) {
 		      "=<", "=>", "!="};
   int i;
   for (i = 0; i < 10; i++) {
-    printf("s=%s, ans=%d\n", s, ope2[i][0] == s[0] && ope2[i][1] == s[1]);
     if (ope2[i][0] == s[0] && ope2[i][1] == s[1]) {
       return 1;
     }
@@ -108,15 +110,15 @@ int nextToken(Token *t, int q_lock) {
   t->intVal = 0;
 
   int err = 0;
-  char c;
+  char c = ' ';
 
-  err = nextChar(&c);
-  if (err != 1)
-    return err;
   while (c == ' ' || c == '\t' || c == '\n') {
     err = nextChar(&c);
-    if (err != 1)
-      return err;
+    printf("c=%d, err=%d\n", c, err);
+  }
+  if (err == EOF) {
+    t->kind = EOF_token;
+    return err;
   }
 
   char *txt_ptr = t->text;

@@ -35,7 +35,6 @@ void compile(char *fname) {
       nextToken(&t, 0);
       break;
     }
-    break;
   }
   // TODO
   backpatch_calladdr();
@@ -261,6 +260,9 @@ SymbolKind block(Token *t, TableEntry *func) {
   }
 
   blockNest_ct--;
+  if (blockNest_ct == 0) {
+    return k; // TODO : this is workaround
+  }
   nextToken(t, 0); // point to next to '}'
   return k;
 }

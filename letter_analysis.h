@@ -72,7 +72,7 @@ int set_kind(Token *t);
 int nextToken(Token *t, int q_lock);
 int checkNxtTokenKind(Kind k);
 SymbolKind get_func_type();
-static int prevC = -1;
+static int prevC = -2;
 void notUseChar(char c);
 
 #endif // DCC_LETTER_ANALYSIS_H_
