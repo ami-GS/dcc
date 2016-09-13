@@ -26,3 +26,9 @@ while (a < 5) {
 - if
 
 - pre & post position incre & decrement
+
+- switch, case, default
+
+- continue
+
+- break
