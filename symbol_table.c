@@ -64,6 +64,6 @@ void open_local_table() {
 
 
 void close_local_table(TableEntry *ent) {
-  tblEntryCnt = LTBL_START + ent->args + 1; // to remain arguments
+  tblEntryCnt = LTBL_START + ent->args; // to remain arguments
   LTBL_START = 0;
 }

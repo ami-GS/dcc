@@ -118,7 +118,7 @@ int set_address(TableEntry *te) {
   case func_ID:
     // TODO : need to study for seting func addr
     te->code_addr = code_ct;
-    for (i = 1; i <+ te->args; i++) {
+    for (i = 1; i <= te->args; i++) {
       (te+i)->code_addr = malloc_L(size);
     }
     break;
@@ -144,7 +144,7 @@ int declare_var(TableEntry* ent, Token* t) {
     nextToken(t, 0); // next to ','
     set_name(ent, t);
   }
-  return checkNxtTokenKind(Semicolon);
+  return t->kind == Semicolon;
 }
 
 int set_func_process(TableEntry* ent, Token *t) {

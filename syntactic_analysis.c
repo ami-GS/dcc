@@ -95,6 +95,7 @@ int factor(Token *t) {
 	return -1; // TODO : void return function should not be in expression
       }
       callFunc(t, te_tmp);
+      nextToken(t, 0); // workaround
       break;
     }
     break;
@@ -152,15 +153,16 @@ int is_const_expr() {
 
 void callFunc(Token *t, TableEntry *te) {
   nextToken(t, 0); // point to '('
+  nextToken(t, 0); // point to ')' or arguments
   int arg_cnt = 0;
-  if (!checkNxtTokenKind(Rparen)) {
-    do {
+  if (t->kind != Rparen) {
+    while (t->kind != Comma) {
       nextToken(t, 0);
       expression(t);
       ++arg_cnt;
-    } while (t->kind != Comma);
+    }
   }
-  if (!checkNxtTokenKind(Rparen)) {
+  if (t->kind != Rparen) {
     return -1; // TODO : no end paren
   }
 
