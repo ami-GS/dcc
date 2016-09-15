@@ -114,7 +114,6 @@ int nextToken(Token *t, int q_lock) {
 
   while (c == ' ' || c == '\t' || c == '\n') {
     err = nextChar(&c);
-    printf("c=%d, err=%d\n", c, err);
   }
   if (err == EOF) {
     t->kind = EOF_token;

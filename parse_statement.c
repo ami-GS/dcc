@@ -109,7 +109,6 @@ void st_switch(Token *t) {
   GEN_JMP_BUTTOM(end);
   // TODO : set label (1) for condition table
   backpatch(table_addr, code_ct);
-  printf("JMP=%d, %d, %d\n", JMP, code_ct, table_addr);
   end_switch(); // apply gathered case list as table
   // TODO : set label (2)
   backpatch(end, code_ct);
