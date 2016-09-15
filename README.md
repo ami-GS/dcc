@@ -5,8 +5,9 @@ Daiki C Compiler
 This is for my understandings of interpreter-compiler.
 Currently the usage is limited.
 
-#### Passed statements
-Belows are properly translated assembler with simple processing.
+
+## Passed statements
+statements below were properly translated to assembler with simple processing.
 like
 
 ```c
@@ -32,3 +33,5 @@ while (a < 5) {
 - continue
 
 - break
+
+- call function (without arguments)
