@@ -19,14 +19,14 @@ TableEntry* get_table_entry(char *name) {
   return NULL;
 }
 
-int enter_table_item(TableEntry* ent) {
+TableEntry *enter_table_item(TableEntry* ent) {
   // TODO : data validattion
   TableEntry* e = get_table_entry(ent->name);
   if (e != NULL && e->dType == ent->dType) {
-    return -1; // TODO : name duplication
+    return NULL; // TODO : name duplication
   }
   if (tblEntryCnt >= TABLE_MAX) {
-    return -1; // TODO : table overflow error
+    return NULL; // TODO : table overflow error
   }
 
   if (ent->kind == arg_ID) {
@@ -37,8 +37,8 @@ int enter_table_item(TableEntry* ent) {
     // TODO : apply func setting
   }
 
-  SymbolTable[tblEntryCnt++] = *ent;
-  return 1;
+  SymbolTable[tblEntryCnt] = *ent;
+  return &SymbolTable[tblEntryCnt++];
 }
 
 // TODO : text book uses search and search_name separately. why?

@@ -36,8 +36,8 @@ static int tblEntryCnt = 0;
 static int LTBL_START = 0;
 #define LTBL_EMPTY TABLE_MAX+1
 
-TableEntry* get_table_entry(char *name);
-int enter_table_item(TableEntry* ent);
+TableEntry *get_table_entry(char *name);
+TableEntry *enter_table_item(TableEntry* ent);
 TableEntry *search(char *text);
 void open_local_table();
 void close_local_table();

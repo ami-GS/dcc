@@ -16,10 +16,10 @@ void compile(char *fname) {
   genCode1(STOP);
   fOpen(fname);
   Token t = {NulKind, "", 0};
-  TableEntry entryTmp = {no_ID, "", NON_T, NO_LOCATION, 0, 0, 0};
 
   nextToken(&t, 0);
   while (t.kind != EOF_token) {
+    TableEntry entryTmp = {no_ID, "", NON_T, NO_LOCATION, 0, 0, 0};
     switch(t.kind) {
       // type, #, ;, }, )
     case Int: case Void:
@@ -169,8 +169,7 @@ int declare_func(TableEntry* ent, Token* t) {
   ent->kind = get_func_type();
   t_buf_open = 1;
   nextToken(t, 0); // point at ')' or arguments
-  enter_table_item(ent);
-  funcPtr = ent; // TODO : funcPtr is not needed?
+  funcPtr = enter_table_item(ent); // TODO : funcPtr is not needed?
   // open local table
   open_local_table();
 
@@ -187,7 +186,7 @@ int declare_func(TableEntry* ent, Token* t) {
       set_dtype(&arg, t);
       set_name(&arg, t);
       enter_table_item(&arg); // to avoid multiple declaration in case of using declare_var
-      (ent->args)++;
+      (funcPtr->args)++;
       if (t->kind != Comma) {
 	break;
       }
@@ -199,18 +198,18 @@ int declare_func(TableEntry* ent, Token* t) {
   }
   nextToken(t, 0);
 
-  set_address(ent);
+  set_address(funcPtr);
   // TODO : put func chck
 
-  switch(ent->kind) {
+  switch(funcPtr->kind) {
   case func_ID:
-    set_func_process(ent, t); // enter to statement()
+    set_func_process(funcPtr, t); // enter to statement()
   case proto_ID:
     nextToken(t, 0); // point next to ';'
   }
 
   // close local table
-  close_local_table(ent);
+  close_local_table(funcPtr);
   // TODO : delete duplication
   funcPtr = NULL; // finish function decleration
 
