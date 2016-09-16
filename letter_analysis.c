@@ -44,6 +44,9 @@ int nextChar(char *c) {
   }
 
   *c = fgetc(fin);
+  if (*c == '\n') {
+    currentLine++; // TODO : this need to be made for each files
+  }
   if (*c == EOF) {
     fclose(fin);
     return *c;
