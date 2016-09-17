@@ -210,7 +210,7 @@ int declare_func(TableEntry* ent, Token* t) {
 
   // close local table
   close_local_table(funcPtr);
-  // TODO : delete duplication
+  del_func_entry(entTmp, funcPtr); // delete duplication
   funcPtr = NULL; // finish function decleration
 
   return 1;

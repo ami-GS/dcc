@@ -65,6 +65,23 @@ TableEntry *search(char *text) {
   return NULL;
 }
 
+void del_func_entry(TableEntry *f1, TableEntry *f2) {
+  if (f1 == NULL) {
+    return;
+  }
+  // TODO : NULL check
+  if (f1->dType != f2->dType || f1->args != f2->args)
+    return; // overload
+  if (f1->kind == proto_ID && f2->kind == func_ID) {
+    int i;
+    for (i = 0; i < f2->args; i++) {
+      *(f1+i) = *(f2+i); // copy to proto
+    }
+  }
+  tblEntryCnt -= (f2->args);
+  return;
+}
+
 
 void open_local_table() {
   LTBL_START = tblEntryCnt;
