@@ -24,7 +24,7 @@ while (a < 5) {
 
 - for
 
-- if
+- if, else if, else
 
 - pre & post position incre & decrement
 
@@ -34,4 +34,4 @@ while (a < 5) {
 
 - break
 
-- call function (without arguments)
+- function, prototype, call it (without arguments)
