@@ -4,15 +4,18 @@
 #include "letter_analysis.h"
 #include "parse.h"
 
+TableEntry SymbolTable[TABLE_MAX];
+
 TableEntry* get_table_entry(char *name) {
   // TODO : use quick, binary, hash search
-  for (int i = 0; i < tblEntryCnt; i++) {
-    for (int j = 0; *name != '\0'; j++) {
+  int i, j;
+  for (i = 0; i < tblEntryCnt; i++) {
+    for (j = 0; *(name+j) != '\0'; j++) {
       if (*(name+j) != *(SymbolTable[i].name+j)) {
-	return NULL;
+	break;
       }
     }
-    if (*(SymbolTable[i].name) == '\0') {
+    if (*(SymbolTable[i].name+j) == '\0') {
       return &SymbolTable[i];
     }
   }
@@ -22,8 +25,9 @@ TableEntry* get_table_entry(char *name) {
 TableEntry *enter_table_item(TableEntry* ent) {
   // TODO : data validattion
   TableEntry* e = get_table_entry(ent->name);
-  if (e != NULL && e->dType == ent->dType) {
-    return NULL; // TODO : name duplication
+  if (e != NULL && e->kind == ent->kind) {
+      // TODO : if both are prototype, then warning
+      return NULL; // TODO : name duplication
   }
   if (tblEntryCnt >= TABLE_MAX) {
     return NULL; // TODO : table overflow error
@@ -33,10 +37,14 @@ TableEntry *enter_table_item(TableEntry* ent) {
     ent->level; // TODO : adjust args for function
   } else if (ent->kind == var_ID) {
     set_address(ent);
-  } else if (ent->kind == func_ID) {
-    // TODO : apply func setting
+  } else if (ent->kind == func_ID ) {
+    // apply func setting
+    ent->code_addr = -tblEntryCnt;
+    if (e != NULL && e->kind == proto_ID)
+      e->code_addr = -tblEntryCnt;
+  } else if (ent->kind == proto_ID) {
+    ent->code_addr = -tblEntryCnt; // code.opdata -> SymbolTable[code] ->
   }
-
   SymbolTable[tblEntryCnt] = *ent;
   return &SymbolTable[tblEntryCnt++];
 }

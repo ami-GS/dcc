@@ -127,8 +127,8 @@ void backpatch_calladdr() {
     return -1; // TODO : no main function
   int i;
   for (i = 0; i < code_ct; i++) {
-    if (codes[i].opcode == CALL && codes[i].opdata < 0) {
-      codes[i].opdata = SymbolTable[-(codes[i].opdata-1)].code_addr;
+    if (codes[i].opcode == CALL && codes[i].opdata <= 0) {
+      codes[i].opdata = SymbolTable[-SymbolTable[-(codes[i].opdata)].code_addr].code_addr;
       if (codes[i].opdata < 0) {
 	return -1; // TODO : unknow function //is this true?
       }
