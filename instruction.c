@@ -266,7 +266,9 @@ int execute() {
     case LDI:
       PUSH(dat); break;
     case STO:
-      ASSIGN(addr, op_stack[stack_ptr--]); break;
+      ASSIGN(addr, op_stack[stack_ptr-1]);
+      stack_ptr--;
+      break;
     case ADBR:  // research frame for calling func
       baseReg += dat;
       //TODO : boundary chech for stack overflow
@@ -274,18 +276,18 @@ int execute() {
       break;
 
     case ASS:
-      ASSIGN(op_stack[stack_ptr-1], op_stack[stack_ptr]);
+      ASSIGN(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
       stack_ptr -= 2; break;
     case ASSV:
-      ASSIGN(op_stack[stack_ptr-1], op_stack[stack_ptr]);
-      op_stack[stack_ptr-1] = op_stack[stack_ptr];
+      ASSIGN(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
+      op_stack[stack_ptr-2] = op_stack[stack_ptr-1];
       stack_ptr--; break;
     case VAL: // address to value conversion
-      op_stack[stack_ptr] = MEMINT(op_stack[stack_ptr]); break;
+      op_stack[stack_ptr-1] = MEMINT(op_stack[stack_ptr-1]); break;
     case EQCMP:
       // TODO : suspicious
-      if (dat == op_stack[stack_ptr]) {
-	op_stack[stack_ptr] = 1; break;
+      if (dat == op_stack[stack_ptr-1]) {
+	op_stack[stack_ptr-1] = 1; break;
       }
       PUSH(0); break;
     case CALL:

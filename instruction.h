@@ -48,10 +48,10 @@ void to_left_val();
 int const_fold(OpCode op);
 void remove_op_stack_top();
 
-#define ZERO_CHK() if(op_stack[stack_ptr] == 0) return -1; // TODO : zero division
+#define ZERO_CHK() if(op_stack[stack_ptr-1] == 0) return -1; // TODO : zero division
 #define MEMINT(n) (* (int *)(memory+n)) // TODO : more flexible to data size like DWORD or something
-#define UNI_OP(op) op_stack[stack_ptr] = op op_stack[stack_ptr]
-#define BIN_OP(op) op_stack[stack_ptr-1] = op_stack[stack_ptr-1] op op_stack[stack_ptr], stack_ptr--
+#define UNI_OP(op) op_stack[stack_ptr-1] = op op_stack[stack_ptr-1]
+#define BIN_OP(op) op_stack[stack_ptr-2] = op_stack[stack_ptr-2] op op_stack[stack_ptr-1], stack_ptr--
 #define INCDEC(num) MEMINT(op_stack[stack_ptr-1]) += num, op_stack[stack_ptr-1] = MEMINT(op_stack[stack_ptr-1])
 #define ASSIGN(addr, dat) MEMINT(addr) = dat
 
