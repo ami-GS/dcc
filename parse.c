@@ -224,7 +224,7 @@ int declare_func(TableEntry* ent, Token* t) {
 int begin_declare_func(TableEntry *func) {
   localAddress = START_LOCAL_ADDRESS;
   genCode2(ADBR, 0); // contents will be filled in end_declare_func()
-  genCode(STO, LOCAL, 0);
+  genCode(STO, LOCAL, 0); // store return address
   int i;
   for (i = func->args; i > 0; i--) { // store arguments
     genCode(STO, LOCAL, (func+i)->code_addr);
@@ -232,14 +232,12 @@ int begin_declare_func(TableEntry *func) {
 }
 
 int end_declare_func(TableEntry *func, SymbolKind last) {
-  // TODO : study here
-  backpatch(func->code_addr, -localAddress);
+  backpatch(func->code_addr, -localAddress); // researve local frame for function call
   if (last != Return) {
     // TODO : here
   }
   backpatch_return(funcPtr->code_addr);
   genCode(LOD, LOCAL, 0); // load return address to op_stack
-  // TODO : study here
   genCode2(ADBR, localAddress); // release local frame
   genCode1(RET); // Return
 }

@@ -18,9 +18,7 @@ while (a < 5) {
 }
 ```
 
-- whlie
-
-- do-whlie
+- whlie, do-while
 
 - for
 
@@ -35,3 +33,5 @@ while (a < 5) {
 - break
 
 - function, prototype, call it (without arguments)
+
+- variable declaration (local & global)

@@ -24,5 +24,5 @@ int malloc_L(int size) {
     return -1; // TODO : invalid memory size
   }
   localAddress += size;
-  return localAddress - size; // TODO : need to study
+  return localAddress - size; // start address
 }
