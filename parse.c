@@ -19,7 +19,7 @@ void compile(char *fname) {
 
   nextToken(&t, 0);
   while (t.kind != EOF_token) {
-    TableEntry entryTmp = {no_ID, "", NON_T, NO_LOCATION, 0, 0, 0};
+    TableEntry entryTmp = {no_ID, "", NON_T, GLOBAL, 0, 0, 0};
     switch(t.kind) {
       // type, #, ;, }, )
     case Int: case Void:
@@ -34,10 +34,15 @@ void compile(char *fname) {
     case Semicolon:
       nextToken(&t, 0);
       break;
+    case Ident:
+      statement(&t);
+      break;
+    default:
+      return -1;
     }
   }
-  // TODO
   backpatch_calladdr();
+  // TODO : memory ?
 }
 
 
@@ -239,18 +244,8 @@ int end_declare_func(TableEntry *func, SymbolKind last) {
 }
 
 SymbolKind block(Token *t, TableEntry *func) {
-  nextToken(t, 0);
+  nextToken(t, 0); // point to next to brace '{'
   blockNest_ct++;
-  if (func != NULL) {
-    // TODO : here is dcc specific declaration method in function block
-    //        declaration is allowed only begining of func
-    TableEntry tmp = {no_ID, "", NON_T, NO_LOCATION, 0, 0, 0};
-    while (t->kind == Int) {
-      set_dtype(&tmp, t);
-      set_name(&tmp, t);
-      declare_var(&tmp, t);
-    }
-  }
 
   Kind k = Others; // store last statement (for in case of return)
   while (t->kind != Rbrace) {

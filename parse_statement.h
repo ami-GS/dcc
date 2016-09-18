@@ -55,6 +55,7 @@ void st_ident(Token *t);
 void st_inc_dec(Token *t);
 void st_lbrace(Token *t);
 void st_semicolon(Token *t);
+void st_declare(Token *t);
 void st_EOF(Token *t);
 void begin_switch();
 void end_switch();

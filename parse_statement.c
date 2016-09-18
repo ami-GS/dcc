@@ -63,6 +63,9 @@ void statement(Token *t) {
   case Semicolon:
     nextToken(t, 0);
     break;
+  case Int: // TODO : enhance here
+    st_declare(t);
+    break;
   case EOF_token:
     return; // TODO : unexpected error (occures when ';' is forgotten etc..)
   default:
@@ -324,6 +327,16 @@ void st_build_in(Token *t) {
 void st_inc_dec(Token *t) {
   expr_with_check(t, 0, ';');
   remove_op_stack_top();
+  return;
+}
+
+void st_declare(Token *t) {
+  TableEntry tmp = {no_ID, "", NON_T, LOCAL, 0, 0, 0};
+  while (t->kind == Int) {
+    set_dtype(&tmp, t);
+    set_name(&tmp, t);
+    declare_var(&tmp, t);
+  }
   return;
 }
 
