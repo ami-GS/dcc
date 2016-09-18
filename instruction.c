@@ -213,6 +213,8 @@ int const_fold(OpCode op) {
 
 int execute() {
   pc = 0; // proram counter
+  baseReg = MEM_MAX-1;
+  stack_ptr = 0;
 
   int op, dat, addr;
   while (1) {
@@ -309,7 +311,7 @@ int execute() {
       ZERO_CHK();
       BIN_OP(%); break;
     case ADD:
-      BIN_OP(%); break;
+      BIN_OP(+); break;
     case SUB:
       BIN_OP(-); break;
     case MUL:

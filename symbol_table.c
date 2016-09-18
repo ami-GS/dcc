@@ -5,6 +5,7 @@
 #include "parse.h"
 
 TableEntry SymbolTable[TABLE_MAX];
+int tblEntryCnt = 0;
 
 TableEntry* get_table_entry(char *name) {
   // TODO : use quick, binary, hash search

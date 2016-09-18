@@ -222,6 +222,7 @@ int declare_func(TableEntry* ent, Token* t) {
 }
 
 int begin_declare_func(TableEntry *func) {
+  localAddress = START_LOCAL_ADDRESS;
   genCode2(ADBR, 0); // contents will be filled in end_declare_func()
   genCode(STO, LOCAL, 0);
   int i;

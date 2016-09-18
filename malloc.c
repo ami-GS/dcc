@@ -2,6 +2,8 @@
 #include "malloc.h"
 #include "instruction.h"
 
+int localAddress;
+
 int malloc_G(int size) {
   if (size <= 0)
     return globalAddress; // ?
