@@ -332,10 +332,11 @@ void st_inc_dec(Token *t) {
 
 void st_declare(Token *t) {
   TableEntry tmp = {no_ID, "", NON_T, LOCAL, 0, 0, 0};
-  while (t->kind == Int) {
+  while (t->kind == Int) { // TODO : not only Int
     set_dtype(&tmp, t);
     set_name(&tmp, t);
     declare_var(&tmp, t);
+    nextToken(t, 0);
   }
   return;
 }

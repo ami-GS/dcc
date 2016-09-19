@@ -39,7 +39,7 @@ TableEntry *enter_table_item(TableEntry* ent) {
   dupCheck(ent);
 
   if (ent->kind == arg_ID) {
-    ent->level; // TODO : adjust args for function
+    //ent->level++; // TODO : this is depends on declare_func of parse.c 'arg'
   } else if (ent->kind == var_ID) {
     set_address(ent);
   } else if (ent->kind == func_ID ) {
