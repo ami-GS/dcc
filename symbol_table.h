@@ -41,5 +41,6 @@ TableEntry *enter_table_item(TableEntry* ent);
 TableEntry *search(char *text);
 void open_local_table();
 void close_local_table();
+void dupCheck(TableEntry *ent);
 
 #endif // _DCC_SYMBOL_TABLE_H_

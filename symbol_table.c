@@ -25,14 +25,18 @@ TableEntry* get_table_entry(char *name) {
 
 TableEntry *enter_table_item(TableEntry* ent) {
   // TODO : data validattion
+  /*
   TableEntry* e = get_table_entry(ent->name);
   if (e != NULL && e->kind == ent->kind) {
       // TODO : if both are prototype, then warning
       return NULL; // TODO : name duplication
   }
+  */
+
   if (tblEntryCnt >= TABLE_MAX) {
     return NULL; // TODO : table overflow error
   }
+  dupCheck(ent);
 
   if (ent->kind == arg_ID) {
     ent->level; // TODO : adjust args for function
@@ -41,7 +45,8 @@ TableEntry *enter_table_item(TableEntry* ent) {
   } else if (ent->kind == func_ID ) {
     // apply func setting
     ent->code_addr = -tblEntryCnt;
-    if (e != NULL && e->kind == proto_ID)
+    TableEntry* e = get_table_entry(ent->name);
+  if (e != NULL && e->kind == proto_ID)
       e->code_addr = -tblEntryCnt;
   } else if (ent->kind == proto_ID) {
     ent->code_addr = -tblEntryCnt; // code.opdata -> SymbolTable[code] ->
@@ -92,4 +97,19 @@ void open_local_table() {
 void close_local_table(TableEntry *ent) {
   tblEntryCnt = LTBL_START + ent->args; // to remain arguments
   LTBL_START = 0;
+}
+
+void dupCheck(TableEntry *ent) {
+  if (ent->kind != arg_ID && ent->kind != var_ID)
+    return;
+
+  int level = blockNest_ct;
+  TableEntry *p = search(ent->name);
+  if (p == NULL) return;
+  if (ent->kind == arg_ID) level++;
+  if (p->level == level) {
+    // TODO : duplicating
+    return -1;
+  }
+
 }
