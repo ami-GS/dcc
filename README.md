@@ -32,6 +32,6 @@ while (a < 5) {
 
 - break
 
-- function, prototype, call it (without arguments)
+- function, prototype, call it (with arguments)
 
-- variable declaration (local & global)
+- local & global variable declaration (without initialization)
