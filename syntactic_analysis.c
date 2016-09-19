@@ -156,10 +156,12 @@ void callFunc(Token *t, TableEntry *te) {
   nextToken(t, 0); // point to ')' or arguments
   int arg_cnt = 0;
   if (t->kind != Rparen) {
-    while (t->kind != Comma) {
-      nextToken(t, 0);
+    while (1) {
       expression(t);
       ++arg_cnt;
+      if (t->kind != Comma)
+	break;
+      nextToken(t, 0);
     }
   }
   if (t->kind != Rparen) {

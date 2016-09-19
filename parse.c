@@ -164,8 +164,10 @@ int set_func_process(TableEntry* ent, Token *t) {
 
 
 int declare_func(TableEntry* ent, Token* t) {
+  localAddress = START_LOCAL_ADDRESS;
   TableEntry* entTmp = get_table_entry(ent->name);
-  if (entTmp != NULL && entTmp->kind == func_ID) {
+  // TODO : prototype can be declared several times with warning
+  if (entTmp != NULL && entTmp->kind == func_ID && entTmp->kind == proto_ID) {
     // TODO : check all arguments for overload
     return -1;
   }
@@ -179,7 +181,7 @@ int declare_func(TableEntry* ent, Token* t) {
   open_local_table();
 
   // declare arguments
-  TableEntry arg;
+  TableEntry arg = {arg_ID, "", NON_T, LOCAL, 0, 0, 0};
   switch (t->kind) {
   case Void:
     nextToken(t, 0); // point to ')'
@@ -222,7 +224,6 @@ int declare_func(TableEntry* ent, Token* t) {
 }
 
 int begin_declare_func(TableEntry *func) {
-  localAddress = START_LOCAL_ADDRESS;
   genCode2(ADBR, 0); // contents will be filled in end_declare_func()
   genCode(STO, LOCAL, 0); // store return address
   int i;

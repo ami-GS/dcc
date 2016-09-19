@@ -128,7 +128,12 @@ void backpatch_calladdr() {
   int i;
   for (i = 0; i < code_ct; i++) {
     if (codes[i].opcode == CALL && codes[i].opdata <= 0) {
-      codes[i].opdata = SymbolTable[-SymbolTable[-(codes[i].opdata)].code_addr].code_addr;
+      int addr = SymbolTable[-(codes[i].opdata)].code_addr;
+      if (addr <= 0) {
+	codes[i].opdata = SymbolTable[-addr].code_addr;
+      } else {
+	codes[i].opdata = addr; // workaround
+      }
       if (codes[i].opdata < 0) {
 	return -1; // TODO : unknow function //is this true?
       }
