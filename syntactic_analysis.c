@@ -65,11 +65,11 @@ int factor(Token *t) {
 	nextToken(t, 0);
 	if (t->kind == Lbracket) {
 	  // TODO : currently only [] based addressing
-	  genCode(LDA, te_tmp->level, te_tmp->code_addr); // TODO : unsure here
+	  genCode(LDA, te_tmp->level, te_tmp->code_addr); // load top start address of array
 	  expr_with_check(t, '[', ']');
 	  genCode2(LDI, INT_SIZE);
 	  genCode1(MUL); // index * data size
-	  genCode1(Add); // add it to tp->adr
+	  genCode1(ADD); // add it to tp->adr
 	  genCode1(VAL); // pick up the value
 	} else {
 	  return -1; // TODO : no index
@@ -138,14 +138,14 @@ int is_const_expr() {
   Token t = {NulKind, "", 0};
   t_buf_open = 0;
   do {
-    nextToken(&t, 0);
+    nextToken(&t, 1);
     t_buf_enqueue(t);
     // TODO : Can ! and - be allowed?
-    if (!(t.kind == Int || is_ope1(t.kind) || t.kind == Rbracket)) {
+    if (!(t.kind == IntNum || is_ope1(t.kind) || t.kind == Rbracket)) {
       t_buf_open = 1;
       return -1; // TODO : invalid const expression
     }
-  } while (t.kind != Rbracket || t.kind != Colon); // TODO : this might cause forever loop?
+  } while (t.kind != Rbracket && t.kind != Colon); // TODO : this might cause forever loop?
   t_buf_open = 1;
   return 1;
 }

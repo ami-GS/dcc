@@ -184,7 +184,7 @@ int nextToken(Token *t, int q_lock) {
 
 int checkNxtTokenKind(Kind k) {
   Token t = {NulKind, "", 0};
-  nextToken(&t, 1);
+  nextToken(&t, 0);
   t_buf_enqueue(t);
   return t.kind == k;
 }
