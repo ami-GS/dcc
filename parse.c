@@ -77,15 +77,27 @@ int set_name(TableEntry* ent, Token* t) {
   return 1;
 }
 
+int countInitialization() {
+  int count = 0;
+  Token t = {NulKind, "", 0};
+  do {
+    nextToken(&t, 1);
+    t_buf_enqueue(t);
+    count += (t.kind == Comma);
+  } while(t.kind != Rbrace);
+  return count + 1;
+}
+
 int set_array(TableEntry* ent, Token *t) {
   while (t->kind == Lbracket) {
-    nextToken(t, 0);
-    if (t->kind == Rbracket) {
-      return -1; // TODO : ']' this case can be ok
-    }
-
     if (!is_const_expr()) {
       return -1; // TODO : array length must be const
+    }
+    nextToken(t, 0);
+    if (t->kind == Rbracket) {
+      nextToken(t, 0); // point to '=' or another
+      ent->arrLen = countInitialization();
+      return 1; // no array length declaration
     }
     expr_with_check(t, 0, ']'); // TODO : validate error?
     // expr_with_check folds const expression.
@@ -95,13 +107,13 @@ int set_array(TableEntry* ent, Token *t) {
       return -1; // TODO : invalid array length;
     }
 
-    if (t->kind != Rbracket) {
-      return -1; // TODO : no end bracket?
+    if (t->kind == Semicolon || t->kind == Comma) {
+      return 1; // TODO : no end bracket?
     }
-    //nextToken(t, 0); // point at ']' <-
-    if (t->kind == Rbracket) {
+    // TODO : currently it doesn't support multi dimention
+    if (t->kind == Lbracket) {
       nextToken(t, 0); // point at ',', ';' or '['
-      return 1; // TODO : currently it doesn't support multi dimention
+      return 1;
     }
   }
   return 1;
@@ -143,6 +155,33 @@ int declare_var(TableEntry* ent, Token* t) {
   while (1) {
     set_array(ent, t);
     enter_table_item(ent);
+    if (t->kind == Assign) {
+      if (ent->arrLen == 0) {
+	genCode(LDA, ent->level, ent->code_addr);
+	expression(t);
+	remove_op_stack_top();
+      } else {
+	int i = 0;
+	nextToken(t, 0); // point to '{'
+	do {
+	  nextToken(t, 0); // point to value
+	  if (t->kind != IntNum) { // TODO : more flexible
+	    return -1; // type or syntax error
+	  }
+	  genCode(LDA, ent->level, ent->code_addr);
+	  genCode2(LDI, INT_SIZE*i);
+	  genCode1(ADD);
+	  expression(t); // point to ',' or '}'
+	  genCode1(ASS);
+	  ++i;
+	  if (ent->arrLen != -1 && i > ent->arrLen) {
+	    return -1; // TODO : exceed defined limits
+	  }
+	} while(t->kind == Comma);
+	nextToken(t, 0);
+      }
+    }
+
     if (t->kind != Comma) {
       break; // TODO : suspicious
     }

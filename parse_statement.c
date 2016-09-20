@@ -307,9 +307,6 @@ void st_ident(Token *t) {
       nextToken(t, 0);
       return;
     }
-    if (te->kind == Lbracket) {
-      expr_with_check(t, '[', ']'); // TODO : add address to base register
-    }
   }
   expr_with_check(t, 0, ';');
   remove_op_stack_top();

@@ -34,4 +34,4 @@ while (a < 5) {
 
 - function, prototype, call it (with arguments)
 
-- local & global variable declaration (without initialization)
+- local & global (array) variable declaration (with initialization)
