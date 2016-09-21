@@ -3,8 +3,18 @@ Daiki C Compiler
 
 ### Notice
 This is for my understandings of interpreter-compiler.
+
 Currently the usage is limited.
 
+
+## Supported types
+Types below are supported.
+
+pointer * is not supported stil.
+
+- Int
+
+- Char (string)
 
 ## Passed statements
 statements below were properly translated to assembler with simple processing.
