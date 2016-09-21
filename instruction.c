@@ -285,8 +285,15 @@ int execute() {
     case ASS:
       ASSIGN(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
       stack_ptr -= 2; break;
+    case ASSC:
+      ASSIGN_CHAR(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
+      stack_ptr -= 2; break;
     case ASSV:
       ASSIGN(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
+      op_stack[stack_ptr-2] = op_stack[stack_ptr-1];
+      stack_ptr--; break;
+    case ASVC:
+      ASSIGN_CHAR(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
       op_stack[stack_ptr-2] = op_stack[stack_ptr-1];
       stack_ptr--; break;
     case VAL: // address to value conversion

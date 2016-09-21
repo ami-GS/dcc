@@ -54,6 +54,7 @@ void remove_op_stack_top();
 #define BIN_OP(op) op_stack[stack_ptr-2] = op_stack[stack_ptr-2] op op_stack[stack_ptr-1], stack_ptr--
 #define INCDEC(num) MEMINT(op_stack[stack_ptr-1]) += num, op_stack[stack_ptr-1] = MEMINT(op_stack[stack_ptr-1])
 #define ASSIGN(addr, dat) MEMINT(addr) = dat
+#define ASSIGN_CHAR(addr, dat) *(memory+addr) = dat
 
 int execute();
 

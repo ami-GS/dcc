@@ -17,7 +17,7 @@ typedef enum {
   Incre, Decre,
   NotEq, Less, LessEq, EqLess, Great, GreatEq, EqGreat,
   And, Or, Xor, Rev,
-  Int, Void,
+  Int, Float, Char, Void,
   Colon, Semicolon,
   String, IntNum, FloatNum,
   Digit, Letter, VarName,
@@ -42,7 +42,7 @@ typedef struct {
 } KeyWordType;
 
 static KeyWordType keyWdType[] = {
-  {"void", Void}, {"int", Int},
+  {"void", Void}, {"int", Int}, {"char", Char},
   {"if", If}, {"else", Else},
   {"for", For}, {"while", While}, {"do", Do},
   {"switch", Switch}, {"case", Case}, {"continue", Continue},

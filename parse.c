@@ -54,6 +54,9 @@ void set_dtype(TableEntry* ent, Token* t) {
   case Void:
     ent->dType = VOID_T;
     break;
+  case Char:
+    ent->dType = CHAR_T;
+    break; // STRING_T is needed?
   default:
     break;
     // TODO : other types can be placed
@@ -77,15 +80,19 @@ int set_name(TableEntry* ent, Token* t) {
   return 1;
 }
 
-int countInitialization() {
+void countInitialization(TableEntry *ent) {
   int count = 0;
   Token t = {NulKind, "", 0};
   do {
     nextToken(&t, 1);
     t_buf_enqueue(t);
+    if (ent->dType == CHAR_T && t.kind == String) { // for char A = "1234abcs...";
+      ent->arrLen = t.intVal;
+      return;
+    }
     count += (t.kind == Comma);
   } while(t.kind != Rbrace);
-  return count + 1;
+  ent->arrLen = count + 1;
 }
 
 int set_array(TableEntry* ent, Token *t) {
@@ -94,9 +101,9 @@ int set_array(TableEntry* ent, Token *t) {
       return -1; // TODO : array length must be const
     }
     nextToken(t, 0);
-    if (t->kind == Rbracket) {
+    if (t->kind == Rbracket) { // A[] = ...;
       nextToken(t, 0); // point to '=' or another
-      ent->arrLen = countInitialization();
+      countInitialization(ent);
       return 1; // no array length declaration
     }
     expr_with_check(t, 0, ']'); // TODO : validate error?
@@ -120,12 +127,19 @@ int set_array(TableEntry* ent, Token *t) {
 }
 
 int set_address(TableEntry *te) {
-  int i, size = INT_SIZE; // TODO : currently fixed size
+  int i, size;
+  switch (te->dType) {
+  case INT_T: case FLOAT_T:
+    size = INT_SIZE; break;
+  case CHAR_T:
+    size = CHAR_SIZE; break;
+  default:
+    break; // error
+  }
   switch (te->kind) {
   case var_ID:
-    if (te->arrLen != 0) {
-      size *= te->arrLen; // TODO other type should be capable
-    }
+    if (te->arrLen != 0)
+      size *= te->arrLen; // other type should be capable
     if (te->level == GLOBAL) {
       te->code_addr = malloc_G(size);
       break;
@@ -150,36 +164,59 @@ void set_main(TableEntry *ent) {
     return 1;
 }
 
+void init_var(TableEntry *ent, Token *t) {
+  int i = 0;
+  nextToken(t, 0); // point to '{'
+  if (ent->dType == CHAR_T) {
+    //nextToken(t, 0); // point to "...."
+    if (ent->arrLen == 0) {
+      ent->arrLen = t->intVal;
+    } else if (t->intVal > ent->arrLen) {
+      return -1; // TODO : string exceeds limits
+    }
+    do {
+      genCode(LDA, ent->level, ent->code_addr);
+      genCode2(LDI, CHAR_SIZE*i);
+      genCode1(ADD);
+      genCode2(LDI, *(t->text+i)); // TODO : LDI?
+      genCode1(ASSC);
+      i++;
+    } while (ent->arrLen > i);
+    nextToken(t, 0); // point to ';'
+  } else { // TODO : currently only for INT_T
+    if (ent->arrLen == 0) {
+      genCode(LDA, ent->level, ent->code_addr);
+      expression(t);
+      remove_op_stack_top();
+    } else {
+      nextToken(t, 0); // point to '{'
+      do {
+	nextToken(t, 0); // point to value
+	if (t->kind != IntNum) { // TODO : more flexible
+	  return -1; // type or syntax error
+	}
+	genCode(LDA, ent->level, ent->code_addr);
+	genCode2(LDI, INT_SIZE*i);
+	genCode1(ADD);
+	expression(t); // point to ',' or '}'
+	genCode1(ASS);
+	++i;
+	if (ent->arrLen != -1 && i > ent->arrLen) {
+	  return -1; // TODO : exceed defined limits
+	}
+      } while(t->kind == Comma);
+      nextToken(t, 0);
+    }
+  }
+}
+
 int declare_var(TableEntry* ent, Token* t) {
   ent->kind = var_ID;
   while (1) {
     set_array(ent, t);
-    enter_table_item(ent);
+    TableEntry *tmp =  enter_table_item(ent);
     if (t->kind == Assign) {
-      if (ent->arrLen == 0) {
-	genCode(LDA, ent->level, ent->code_addr);
-	expression(t);
-	remove_op_stack_top();
-      } else {
-	int i = 0;
-	nextToken(t, 0); // point to '{'
-	do {
-	  nextToken(t, 0); // point to value
-	  if (t->kind != IntNum) { // TODO : more flexible
-	    return -1; // type or syntax error
-	  }
-	  genCode(LDA, ent->level, ent->code_addr);
-	  genCode2(LDI, INT_SIZE*i);
-	  genCode1(ADD);
-	  expression(t); // point to ',' or '}'
-	  genCode1(ASS);
-	  ++i;
-	  if (ent->arrLen != -1 && i > ent->arrLen) {
-	    return -1; // TODO : exceed defined limits
-	  }
-	} while(t->kind == Comma);
-	nextToken(t, 0);
-      }
+      init_var(tmp, t);
     }
 
     if (t->kind != Comma) {

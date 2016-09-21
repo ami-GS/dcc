@@ -7,7 +7,7 @@ typedef enum {
 static int scopeCnt = 0;
 
 typedef enum {
-    NON_T, VOID_T, INT_T, // TODO : increase
+    NON_T, VOID_T, INT_T, CHAR_T, FLOAT_T // TODO : increase
 } DataType;
 
 typedef enum {

@@ -63,7 +63,7 @@ void statement(Token *t) {
   case Semicolon:
     nextToken(t, 0);
     break;
-  case Int: // TODO : enhance here
+  case Int: case Float: case Char: // TODO : enhance here
     st_declare(t);
     break;
   case EOF_token:
@@ -329,7 +329,7 @@ void st_inc_dec(Token *t) {
 
 void st_declare(Token *t) {
   TableEntry tmp = {no_ID, "", NON_T, LOCAL, 0, 0, 0};
-  while (t->kind == Int) { // TODO : not only Int
+  while (t->kind == Int || t->kind == Char || t->kind == Float) { // TODO : not only Int
     set_dtype(&tmp, t);
     set_name(&tmp, t);
     declare_var(&tmp, t);
