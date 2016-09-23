@@ -179,7 +179,7 @@ int binary_expr(OpCode op, int d1, int d2) {
 void to_left_val() {
   // TODO : I need study more here
   switch (codes[code_ct-1].opcode) {
-  case VAL:
+  case VAL: case VALC: case VALD:
     --code_ct;
     break;
   case LOD:
@@ -192,9 +192,14 @@ void to_left_val() {
 }
 
 void remove_op_stack_top() {
-  if (codes[code_ct-1].opcode == ASSV) {
-    codes[code_ct-1].opcode = ASS;
-  } else {
+  switch (codes[code_ct-1].opcode) {
+  case ASSV:
+    codes[code_ct-1].opcode = ASS; break;
+  case ASVC:
+    codes[code_ct-1].opcode = ASSC; break;
+  case ASVD:
+    codes[code_ct-1].opcode = ASSD; break;
+  default:
     genCode1(DEL);
   }
 }
@@ -298,6 +303,8 @@ int execute() {
       stack_ptr--; break;
     case VAL: // address to value conversion
       op_stack[stack_ptr-1] = MEMINT(op_stack[stack_ptr-1]); break;
+    case VALC:
+      op_stack[stack_ptr] = memory[op_stack[stack_ptr-1]]; break;
     case EQCMP:
       // TODO : suspicious
       if (dat == op_stack[stack_ptr-1]) {

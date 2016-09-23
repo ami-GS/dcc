@@ -67,10 +67,29 @@ int factor(Token *t) {
 	  // TODO : currently only [] based addressing
 	  genCode(LDA, te_tmp->level, te_tmp->code_addr); // load top start address of array
 	  expr_with_check(t, '[', ']');
-	  genCode2(LDI, INT_SIZE);
+	  switch (te_tmp->dType) {
+	  case INT_T:
+	    genCode2(LDI, INT_SIZE); break;
+	  case CHAR_T:
+	    genCode2(LDI, CHAR_SIZE); break;
+	  case DOUBLE_T:
+	    genCode2(LDI, DOUBLE_SIZE); break;
+	  default:
+	    break;
+	  }
 	  genCode1(MUL); // index * data size
 	  genCode1(ADD); // add it to tp->adr
-	  genCode1(VAL); // pick up the value
+	  // TODO : optimize here
+	  switch (te_tmp->dType) {
+	  case INT_T:
+	    genCode1(VAL); break; // pick up the value from address
+	  case CHAR_T:
+	    genCode1(VALC); break; // pick up the value from address
+	  case DOUBLE_T:
+	    genCode1(VALD); break;
+	  default:
+	    break;
+	  }
 	} else {
 	  return -1; // TODO : no index
 	}
