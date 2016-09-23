@@ -3,8 +3,10 @@
 #include "letter_analysis.h"
 
 int t_buf_open = 0;
+int currentLine = 1;
 
 int fOpen(char *fname) {
+  currentLine = 1;
   if ((fin = fopen(fname, "r")) == NULL) {
     return -1; // TODO : file cannot be opened
   }
@@ -162,6 +164,7 @@ int nextToken(Token *t, int q_lock) {
       return -1; // no end '
     if (txt_ptr - t->text > 1)
       return -1; // Squote has single char
+    t->kind = Char;
     *txt_ptr = '\0';
     break;
   default:

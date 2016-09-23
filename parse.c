@@ -189,7 +189,6 @@ void init_var(TableEntry *ent, Token *t) {
       expression(t);
       remove_op_stack_top();
     } else {
-      nextToken(t, 0); // point to '{'
       do {
 	nextToken(t, 0); // point to value
 	if (t->kind != IntNum) { // TODO : more flexible
