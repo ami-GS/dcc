@@ -61,7 +61,7 @@ static int t_buf_head = 0, t_buf_tail = 0;
 extern int t_buf_open; // TODO : workaround
 int t_buf_enqueue(Token t);
 int t_buf_dequeue(Token *t);
-static int currentLine = 1;
+extern int currentLine;
 
 // TODO : research about function name decisionning
 int fOpen(char *fname);

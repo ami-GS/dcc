@@ -304,7 +304,7 @@ int execute() {
     case VAL: // address to value conversion
       op_stack[stack_ptr-1] = MEMINT(op_stack[stack_ptr-1]); break;
     case VALC:
-      op_stack[stack_ptr] = memory[op_stack[stack_ptr-1]]; break;
+      op_stack[stack_ptr-1] = memory[op_stack[stack_ptr-1]]; break;
     case EQCMP:
       // TODO : suspicious
       if (dat == op_stack[stack_ptr-1]) {

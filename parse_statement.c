@@ -285,7 +285,7 @@ void st_return(Token *t) {
       return -1; // this can be warning
     }
   } else {
-    expression(t);
+    expr_with_check(t, 0, ';');
     // return type comparison t->kind, func type
     if (funcPtr->dType == VOID_T) {
       return -1; // TODO : data type should be validated properly
@@ -293,8 +293,6 @@ void st_return(Token *t) {
   }
   // jump to caller
   genCode2(JMP, NO_FIX_RET_ADDR);
-  checkNxtTokenKind(Semicolon);
-  nextToken(t, 0);
   return;
 }
 
@@ -308,7 +306,8 @@ void st_ident(Token *t) {
       return;
     }
   }
-  expr_with_check(t, 0, ';');
+  expression(t, te->dType);
+  nextToken(t, 0);
   remove_op_stack_top();
   return;
 }
