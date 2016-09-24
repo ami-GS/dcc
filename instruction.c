@@ -44,19 +44,19 @@ int genCode_unary(Kind k) {
 int genCode_binary(Kind k) {
   OpCode op = NOP;
   switch (k) {
-  case Add:
+  case Add: case AddAss:
     op = ADD;
     break;
-  case Sub:
+  case Sub: case SubAss:
     op = SUB;
     break;
-  case Mul:
+  case Mul: case MulAss:
     op = MUL;
     break;
-  case Div:
+  case Div: case DivAss:
     op = DIV;
     break;
-  case Mod:
+  case Mod: case ModAss:
     op = MOD;
     break;
   case Equal:
@@ -301,6 +301,9 @@ int execute() {
       ASSIGN_CHAR(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
       op_stack[stack_ptr-2] = op_stack[stack_ptr-1];
       stack_ptr--; break;
+    case CPY:
+      op_stack[stack_ptr] = op_stack[stack_ptr-1];
+      stack_ptr++; break;
     case VAL: // address to value conversion
       op_stack[stack_ptr-1] = MEMINT(op_stack[stack_ptr-1]); break;
     case VALC:

@@ -7,11 +7,25 @@
 #include "symbol_table.h"
 
 void expression(Token *t, DataType type) {
+  // researve expression type
+  Kind k;
   term(t, 2);
+  switch (t->kind) {
     // TODO : need to study
+  case Assign:
     to_left_val();
     nextToken(t, 0);
     expression(t, NON_T);
+    break;
+  case AddAss: case SubAss: case MulAss: case DivAss: case ModAss: // case NotEq:
+    k = t->kind;
+    to_left_val();
+    genCode1(CPY);
+    genCode1(VAL);
+    nextToken(t, 0);
+    expression(t, NON_T);
+    genCode_binary(k);
+    break;
   }
   switch (type) {
   case INT_T:
