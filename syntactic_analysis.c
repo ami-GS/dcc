@@ -6,14 +6,24 @@
 #include "data_declare.h"
 #include "symbol_table.h"
 
-void expression(Token *t) {
+void expression(Token *t, DataType type) {
   term(t, 2);
-  if (t->kind == Assign) {
     // TODO : need to study
     to_left_val();
     nextToken(t, 0);
-    expression(t);
-    genCode1(ASSV);
+    expression(t, NON_T);
+  }
+  switch (type) {
+  case INT_T:
+    genCode1(ASSV); break;
+  case DOUBLE_T:
+    genCode1(ASVD); break;
+  case FLOAT_T:
+    genCode1(ASVF); break;
+  case CHAR_T:
+    genCode1(ASVC); break;
+  default:
+    break;
   }
 }
 
@@ -143,7 +153,7 @@ int expr_with_check(Token *t, char l, char r) {
     }
     nextToken(t, 0);
   }
-  expression(t);
+  expression(t, NON_T);
   if (r != 0) {
     if (t->text[0] != r) {
       return -1;
@@ -176,7 +186,7 @@ void callFunc(Token *t, TableEntry *te) {
   int arg_cnt = 0;
   if (t->kind != Rparen) {
     while (1) {
-      expression(t);
+      expression(t, NON_T);
       ++arg_cnt;
       if (t->kind != Comma)
 	break;

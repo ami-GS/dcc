@@ -2,8 +2,9 @@
 #define DCC_SYNTACTIC_ANALYSIS_H_
 
 #include "letter_analysis.h"
+#include "symbol_table.h"
 
-void expression(Token *t);
+void expression(Token *t, DataType type);
 void term(Token *t, int n);
 int factor(Token *t);
 int expr_with_check(Token *t, char l, char r);

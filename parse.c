@@ -186,7 +186,7 @@ void init_var(TableEntry *ent, Token *t) {
   } else { // TODO : currently only for INT_T
     if (ent->arrLen == 0) {
       genCode(LDA, ent->level, ent->code_addr);
-      expression(t);
+      expression(t, ent->dType);
       remove_op_stack_top();
     } else {
       do {
@@ -197,7 +197,7 @@ void init_var(TableEntry *ent, Token *t) {
 	genCode(LDA, ent->level, ent->code_addr);
 	genCode2(LDI, INT_SIZE*i);
 	genCode1(ADD);
-	expression(t); // point to ',' or '}'
+	expression(t, ent->dType); // point to ',' or '}'
 	genCode1(ASS);
 	++i;
 	if (ent->arrLen != -1 && i > ent->arrLen) {
