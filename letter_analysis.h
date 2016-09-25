@@ -12,7 +12,8 @@ static FILE *fin;
 typedef enum {
   NulKind, Others, Ident,
   Lparen, Rparen, Lbrace, Rbrace, Lbracket, Rbracket,
-  Squote, Dquote, Comma,
+  Squote, Dquote, Comma, Sharp,
+  Define, Include,
   Add, Sub, Mul, Div, Equal, Mod, Assign, Not,
   Incre, Decre,
   AddAss, SubAss, MulAss, DivAss, ModAss,

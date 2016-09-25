@@ -31,6 +31,7 @@ void initKind() {
   cType['='] = Assign; cType['<'] = Less; cType['>'] = Great;
   cType[';'] = Semicolon; cType[','] = Comma;
   cType['\''] = Squote; cType['"'] = Dquote;
+  cType['#'] = Sharp;
   cType['&'] = And; cType['|'] = Or; cType['~'] = Rev;
 }
 
@@ -138,8 +139,11 @@ int nextToken(Token *t, int q_lock) {
     t->intVal = txt_ptr - t->text; // lenth
     break;
   case Digit:
-    for (; cType[c] == Digit; nextChar(&c))
+    for (; cType[c] == Digit; nextChar(&c)) {
       t->intVal = t->intVal*10 + (c - '0');
+      *(txt_ptr++) = c;
+    }
+    *txt_ptr = '\0';
     notUseChar(c);
     t->kind = IntNum;
     // TODO : float case
@@ -166,6 +170,17 @@ int nextToken(Token *t, int q_lock) {
       return -1; // Squote has single char
     t->kind = Char;
     *txt_ptr = '\0';
+    break;
+  case Sharp:
+    for (nextChar(&c); c != ' ' && c != EOF; nextChar(&c)) {
+      if (txt_ptr - t->text < TOKEN_TXT_SIZ)
+	*(txt_ptr++) = c;
+      // TODO ; if length exceeds the limit, emit error
+    }
+    if (c != ' ')
+      return -1; // no end "
+    *txt_ptr = '\0';
+    t->intVal = txt_ptr - t->text;
     break;
   default:
     // TODO : add more cases?
