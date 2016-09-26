@@ -38,7 +38,7 @@ void compile(char *fname) {
       statement(&t);
       break;
     default:
-      return -1;
+      error("unknown token kind");
     }
   }
   backpatch_calladdr();
@@ -67,8 +67,7 @@ void set_dtype(TableEntry* ent, Token* t) {
 
 int set_name(TableEntry* ent, Token* t) {
   if (t->kind != Ident) {
-    // TODO57 : error
-    return -1;
+    error("Token parse error");
   }
   int len;
   ent->name = malloc(sizeof(char) * (t->intVal + 1)); // TODO : error check, and must free
@@ -98,7 +97,7 @@ void countInitialization(TableEntry *ent) {
 int set_array(TableEntry* ent, Token *t) {
   while (t->kind == Lbracket) {
     if (!is_const_expr()) {
-      return -1; // TODO : array length must be const
+      error("array length must be const value");
     }
     nextToken(t, 0);
     if (t->kind == Rbracket) { // A[] = ...;
@@ -111,7 +110,7 @@ int set_array(TableEntry* ent, Token *t) {
     // the result assigned arrLen and it is not needed on codes
     ent->arrLen = codes[--code_ct].opdata; // TODO : suspicious, my implementation
     if (ent->arrLen <= 0) {
-      return -1; // TODO : invalid array length;
+      error("invalid array length");
     }
 
     if (t->kind == Semicolon || t->kind == Comma) {
@@ -172,7 +171,7 @@ void init_var(TableEntry *ent, Token *t) {
     if (ent->arrLen == 0) {
       ent->arrLen = t->intVal;
     } else if (t->intVal > ent->arrLen) {
-      return -1; // TODO : string exceeds limits
+      error("string length exceeds limits");
     }
     do {
       genCode(LDA, ent->level, ent->code_addr);
@@ -192,7 +191,7 @@ void init_var(TableEntry *ent, Token *t) {
       do {
 	nextToken(t, 0); // point to value
 	if (t->kind != IntNum) { // TODO : more flexible
-	  return -1; // type or syntax error
+	  error("initialize type mismatch");
 	}
 	genCode(LDA, ent->level, ent->code_addr);
 	genCode2(LDI, INT_SIZE*i);
@@ -201,7 +200,7 @@ void init_var(TableEntry *ent, Token *t) {
 	genCode1(ASS);
 	++i;
 	if (ent->arrLen != -1 && i > ent->arrLen) {
-	  return -1; // TODO : exceed defined limits
+	  error("the number of init value exceeds that of predefined");
 	}
       } while(t->kind == Comma);
       nextToken(t, 0);
@@ -276,7 +275,7 @@ int declare_func(TableEntry* ent, Token* t) {
     }
   }
   if (t->kind != Rparen) {
-    return -1; // TODO : no ')' error (Is this conducted in get_func_type?)
+    error("end ')' is missing ");
   }
   nextToken(t, 0);
 

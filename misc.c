@@ -29,3 +29,9 @@ void code_dump() {
 	}
     }
 }
+
+void error(char *s) {
+  fprintf(stderr, "file %s :  line %d\n", currentFile, currentLine);
+  fprintf(stderr, "%s\n", s);
+  return;
+}

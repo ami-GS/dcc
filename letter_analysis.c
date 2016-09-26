@@ -4,11 +4,13 @@
 
 int t_buf_open = 0;
 int currentLine = 1;
+char *currentFile = NULL;
 
 int fOpen(char *fname) {
   currentLine = 1;
+  currentFile = fname;
   if ((fin = fopen(fname, "r")) == NULL) {
-    return -1; // TODO : file cannot be opened
+    error("file cannot be opened");
   }
   return 1;
 }
@@ -99,7 +101,7 @@ int set_kind(Token *t) {
   } else if (cType[*t->text] == Digit) {
     t->kind = IntNum;
   } else {
-    return -1;
+    error("unknown kind");
   }
   return 1;
 }
@@ -155,7 +157,7 @@ int nextToken(Token *t, int q_lock) {
       // TODO ; if length exceeds the limit, emit error
     }
     if (c != '"')
-      return -1; // no end "
+      error("end \" is missing");
     *txt_ptr = '\0';
     t->kind = String;
     t->intVal = txt_ptr - t->text;
@@ -165,9 +167,9 @@ int nextToken(Token *t, int q_lock) {
     for (nextChar(&c); c != '\'' && c != EOF; nextChar(&c))
       *(txt_ptr++) = t->intVal = c;
     if (c != '\'')
-      return -1; // no end '
+      error("end \' is missing");
     if (txt_ptr - t->text > 1)
-      return -1; // Squote has single char
+      error("Single quote must have single char");
     t->kind = Char;
     *txt_ptr = '\0';
     break;
@@ -178,7 +180,7 @@ int nextToken(Token *t, int q_lock) {
       // TODO ; if length exceeds the limit, emit error
     }
     if (c != ' ')
-      return -1; // no end "
+      return -1; // preprocessing needs ' '
     *txt_ptr = '\0';
     t->intVal = txt_ptr - t->text;
     break;
@@ -196,7 +198,7 @@ int nextToken(Token *t, int q_lock) {
   if (t->kind == NulKind)
     set_kind(t);
   if (t->kind == Others)
-    return -1; // maricious token
+    error("unknown token kind");
   return 1;
 }
 
@@ -210,7 +212,7 @@ int checkNxtTokenKind(Kind k) {
 int t_buf_enqueue(Token t) {
   // TODO : not good, workaround here
   if ((t_buf_tail + 1)%TOKEN_BUFFER_SIZ == t_buf_head) {
-    return -1; // TODO : queue is full
+    error("token buffer overflow");
   }
   t_buf[t_buf_tail++] = t;
   t_buf_tail %= TOKEN_BUFFER_SIZ;
@@ -219,7 +221,7 @@ int t_buf_enqueue(Token t) {
 
 int t_buf_dequeue(Token *t) {
   if (t_buf_head == t_buf_tail) {
-    return -1; // TODO : no contents
+    error("token buffer is empty");
   }
   *t = t_buf[t_buf_head++];
   t_buf_head %= TOKEN_BUFFER_SIZ;

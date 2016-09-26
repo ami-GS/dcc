@@ -66,6 +66,7 @@ extern int t_buf_open; // TODO : workaround
 int t_buf_enqueue(Token t);
 int t_buf_dequeue(Token *t);
 extern int currentLine;
+extern char *currentFile;
 
 // TODO : research about function name decisionning
 int fOpen(char *fname);

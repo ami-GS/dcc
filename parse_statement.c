@@ -79,7 +79,7 @@ void statement(Token *t) {
 
 void st_break(Token *t) {
   if (loopNest_ct == 0) {
-    return -1; // TODO : invalid break, or ignore
+    error("no corresponding statement for 'break'");
   }
   // set jump to loop end
   genCode2(JMP, NO_FIX_BREAK_ADDR);
@@ -91,7 +91,7 @@ void st_break(Token *t) {
 
 void st_continue(Token *t) {
   if (loopNest_ct == 0) {
-    return -1; // TODO : invalid continue, or ignore
+    error("no corresponding statement for 'continue'");
   }
   // set jump to loop top
   GEN_JMP_TOP(get_loop_top());
@@ -123,9 +123,9 @@ void st_case(Token *t) {
   // pick up const value for condition check
   // TODO : suspicious
   if (!is_const_expr()) {
-    return -1; // TODO : no const value
+    error("switch condition must be const value");
   } else if (switchNest_ct == 0) {
-    return -1; // TODO : no switch associating
+    error("no corresponding switch for 'case'");
   }
 
   expr_with_check(t, 0 , ':');
@@ -137,11 +137,11 @@ void st_case(Token *t) {
   int i;
   for (i = switchNest[switchNest_ct].case_list_st_addr; i < caseList_ct; i++) {
     if (caseList[i].value == val) {
-      return -1; // TODO : case duplication
+      error("case condition is duplicating");
     }
   }
   if (caseList_ct >= MAX_CASE_SIZ) {
-    return -1; // TODO : case size overflow
+    error("too many cases");
   }
   caseList[caseList_ct].value = val;
   // caseList[i].address =
@@ -152,16 +152,16 @@ void st_case(Token *t) {
 
 void st_default(Token *t) {
   if (switchNest_ct == 0) {
-    return -1; // TODO : no switch association
+    error("no corresponding switch for 'default'");
   }
   // TODO : 0 is danger. -1 should be applied as initialization
   if (switchNest[switchNest_ct].default_addr != 0) {
-    return -1; // TODO : duplication of default
+    error("multiple 'default'");
   }
   // set address of switchNest[switchNest_ct].default_addr = ;
   switchNest[switchNest_ct].default_addr = code_ct;
   if (!checkNxtTokenKind(Colon)) {
-    return -1; // TODO : no end ':'
+    error("end ':' is missing");
   }
   nextToken(t, 0); nextToken(t, 0);
   statement(t);
@@ -221,8 +221,7 @@ void st_do(Token *t) {
     // jump to label (1) when condition is True.
     GEN_JPT_BUTTOM(loop_top);
   } else {
-    // error when While is not existing
-    return -1;
+    error("'do' statement needs 'while'");
   }
   return 1;
 }
@@ -339,7 +338,7 @@ void st_declare(Token *t) {
 
 void begin_switch() {
   if (switchNest_ct >= MAX_SWITCH_NEST_SIZ) {
-    return -1; // TODO : switch nest over limitation
+    error("switch is nesting over limitation");
   }
   switchNest[switchNest_ct].default_addr = -1;
   switchNest[switchNest_ct++].case_list_st_addr = caseList_ct;
@@ -387,5 +386,5 @@ int get_loop_top() {
     if (loopNest[i].st_kind != Switch)
       return loopNest[i].loop_top;
   }
-  return -1; // TODO : no loop associating
+  error("no associating loop");
 }
