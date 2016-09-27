@@ -12,7 +12,7 @@ int genCode(OpCode op, int flag, int dat) {
   Instruction inst = {op, flag, dat};
 
   if (code_ct >= CODE_SIZ) {
-    return -1; // TODO : code size overflow
+    error("generated code size overflow");
   }
   codes[code_ct++] = inst;
   return code_ct-1;
@@ -124,7 +124,7 @@ void backpatch_return(int return_address) {
 
 void backpatch_calladdr() {
   if (codes[0].opdata < 0)
-    return -1; // TODO : no main function
+    error("'main' function is missing");
   int i;
   for (i = 0; i < code_ct; i++) {
     if (codes[i].opcode == CALL && codes[i].opdata <= 0) {
@@ -232,10 +232,10 @@ int execute() {
       return -1; // invalid operation
     }
     if (stack_ptr < OP_STACK_BUTTOM) {
-      return -1; // TODO : operand stack underflow
+      error("operand stack underflow");
     }
     if (stack_ptr > OP_STACK_TOP) {
-      return -1; // TODO : operand stack overflow
+      error("operand stack overflow");
     }
     /*
       preprocessing

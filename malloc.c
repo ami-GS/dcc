@@ -11,7 +11,7 @@ int malloc_G(int size) {
   int align = INT_SIZE; // TODO : here should be more flexible
   globalAddress = (globalAddress + align-1) / align * align;
   if (MEM_MAX < (globalAddress + size)) {
-    return -1; // TODO : memory cannot be alloced
+    error("few memory to allocate");
   }
   memset(memory + globalAddress, 0, size); // zero init
   globalAddress += size;
@@ -20,8 +20,8 @@ int malloc_G(int size) {
 
 int malloc_L(int size) {
   if (size <= 0) {
+    error("invalid memory size");
     size = 0;
-    return -1; // TODO : invalid memory size
   }
   localAddress += size;
   return localAddress - size; // start address

@@ -34,7 +34,7 @@ TableEntry *enter_table_item(TableEntry* ent) {
   */
 
   if (tblEntryCnt >= TABLE_MAX) {
-    return NULL; // TODO : table overflow error
+    error("symbol table overflow");
   }
   dupCheck(ent);
 
@@ -107,9 +107,7 @@ void dupCheck(TableEntry *ent) {
   TableEntry *p = search(ent->name);
   if (p == NULL) return;
   if (ent->kind == arg_ID) level++;
-  if (p->level == level) {
-    // TODO : duplicating
-    return -1;
-  }
+  if (p->level == level)
+    error("duplicated declaration");
 
 }

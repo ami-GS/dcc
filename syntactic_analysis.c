@@ -78,7 +78,7 @@ int factor(Token *t) {
     // TODO : search registered table item
     te_tmp = search(t->text);
     if (te_tmp == NULL) {
-      return -1; // TODO : do something
+      error("undefined symbol");
     }
     switch (te_tmp->kind) {
     case var_ID: case arg_ID:
@@ -115,7 +115,7 @@ int factor(Token *t) {
 	    break;
 	  }
 	} else {
-	  return -1; // TODO : no index
+	  error("array requires index"); // TODO : this case is correct
 	}
       }
       if (t->kind == Incre || t->kind == Decre) { // for A++
@@ -163,14 +163,14 @@ int factor(Token *t) {
 int expr_with_check(Token *t, char l, char r) {
   if (l != 0) {
     if (t->text[0] != l) {
-      return -1;
+      fprintf(stderr, "expression is not starting with %s", l);
     }
     nextToken(t, 0);
   }
   expression(t, NON_T);
   if (r != 0) {
     if (t->text[0] != r) {
-      return -1;
+      fprintf(stderr, "expression is not ending with %s", l);
     }
     nextToken(t, 0);
   }
@@ -208,11 +208,11 @@ void callFunc(Token *t, TableEntry *te) {
     }
   }
   if (t->kind != Rparen) {
-    return -1; // TODO : no end paren
+    error("end ')' is missing");
   }
 
   if (arg_cnt != te->args) {
-    return -1; // TODO : few or more arguments
+    error("few or many arguments for function");
   }
   genCode2(CALL, te->code_addr);
   return;
