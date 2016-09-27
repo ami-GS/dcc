@@ -46,4 +46,17 @@ while (a < 5) {
 
 - local & global (array) variable declaration (with initialization)
 
+
+## Passed expressions
+
+- binary operations (+ - * / %)
+
+- unary operations (+ - ! ++ --)
+
+- binary bit operations (& | ^ << >>)
+
+- unary bit operation (~)
+
+- binary boolean operations (== != <= => >= =< && ||)
+
 - compound operators (+= -= *= /= %=)
