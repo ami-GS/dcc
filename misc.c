@@ -11,8 +11,9 @@ void code_dump() {
         switch (op) {
 	case RET: case ASS: case ASSV: case ASSC: case ASVC: case NOT: case INC: case DEC:
 	case NEG: case ADD: case SUB: case MUL: case DIV: case MOD: case LESS: case LSEQ:
-	case GRT: case GTEQ: case EQU: case NTEQ: case AND: case OR: case VAL: case VALC:
-	case VALD: case DEL: case NOP: case STOP: case CPY:
+	case GRT: case GTEQ: case EQU: case NTEQ: case AND: case OR: case BAND: case BOR:
+	case BXOR: case BNOT: case LSHIFT: case RSHIFT: case VAL: case VALC: case VALD:
+	case DEL: case NOP: case STOP: case CPY:
 	  printf("%s\n", OpCodeStr[op]);
 	  if (op == RET || op == STOP)
 	    printf("\n");

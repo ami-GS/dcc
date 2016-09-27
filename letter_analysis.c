@@ -34,7 +34,7 @@ void initKind() {
   cType[';'] = Semicolon; cType[','] = Comma;
   cType['\''] = Squote; cType['"'] = Dquote;
   cType['#'] = Sharp;
-  cType['&'] = And; cType['|'] = Or; cType['~'] = Rev;
+  cType['&'] = Band; cType['|'] = Bor; cType['~'] = Bnot; cType['^'] = Bxor;
 }
 
 int nextChar(char *c) {
@@ -71,10 +71,11 @@ int is_ope2(const char *c1, const char *c2) {
   char s[2];
   s[0] = *c1; s[1] = *c2;
   // TODO : // and /* should be included for comment?
-  char ope2[15][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
-		      "=<", "=>", "!=", "+=", "-=", "*=", "/=", "%="};
+  char ope2[17][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
+		      "=<", "=>", "!=", "+=", "-=", "*=", "/=",
+		      "%=", "<<", ">>"};
   int i;
-  for (i = 0; i < 15; i++) {
+  for (i = 0; i < 17; i++) {
     if (ope2[i][0] == s[0] && ope2[i][1] == s[1]) {
       return 1;
     }

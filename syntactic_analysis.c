@@ -43,7 +43,7 @@ void expression(Token *t, DataType type) {
 
 void term(Token *t, int n) {
   // TODO : need to study
-  if (n == 8) {
+  if (n == 12) {
     factor(t);
     return;
   }
@@ -64,8 +64,8 @@ int factor(Token *t) {
   int find;
 
   switch (op) {
-  case Add: case Sub: case Not: case Incre: case Decre:
-    // like, +1, -1, !0
+  case Add: case Sub: case Not: case Incre: case Decre: case Bnot:
+    // like, +1, -1, !0, ~1
     nextToken(t, 0);
     factor(t);
     // set inc dec preprocessing
@@ -221,10 +221,14 @@ void callFunc(Token *t, TableEntry *te) {
 int opOder(Kind k) {
   // TODO : can operation kind itself have order integer?
   switch(k) {
-  case Mul: case Div: case Mod:                                                return 7;
-  case Add: case Sub:                                                          return 6;
-  case Less: case LessEq: case EqLess: case Great: case GreatEq: case EqGreat: return 5;
-  case Equal: case NotEq:                                                      return 4;
+  case Mul: case Div: case Mod:                                                return 11;
+  case Add: case Sub:                                                          return 10;
+  case Lshift: case Rshift:                                                    return 9;
+  case Less: case LessEq: case EqLess: case Great: case GreatEq: case EqGreat: return 8;
+  case Equal: case NotEq:                                                      return 7;
+  case Band:                                                                   return 6;
+  case Bxor:                                                                   return 5;
+  case Bor:                                                                    return 4;
   case And:                                                                    return 3;
   case Or:                                                                     return 2;
   case Assign:                                                                 return 1;

@@ -35,6 +35,9 @@ int genCode_unary(Kind k) {
   case Decre:
     op = DEC;
     break;
+  case Bnot:
+    op = BNOT;
+    break;
   }
 
   genCode1(op);
@@ -83,9 +86,23 @@ int genCode_binary(Kind k) {
   case Or:
     op = OR;
     break;
+  case Band:
+    op = BAND;
+    break;
+  case Bor:
+    op = BOR;
+    break;
+  case Bxor:
+    op = BXOR;
+    break;
+  case Lshift:
+    op = LSHIFT;
+    break;
+  case Rshift:
+    op = RSHIFT;
+    break;
   }
   genCode1(op);
-
 }
 
 void backpatch(int c_ct, int addr) {
@@ -173,6 +190,12 @@ int binary_expr(OpCode op, int d1, int d2) {
     return d1 && d2;
   case OR:
     return d1 || d2;
+  case BAND:
+    return d1 & d2;
+  case BOR:
+    return d1 | d2;
+  case BXOR:
+    return d1 ^ d2;
   }
 }
 
@@ -211,6 +234,9 @@ int const_fold(OpCode op) {
       return 1;
     } else if (op == NEG) {
       codes[code_ct-1].opdata = -codes[code_ct-1].opdata;
+      return 1;
+    } else if (op == BNOT) {
+      codes[code_ct-1].opdata = ~codes[code_ct-1].opdata;
       return 1;
     } else if (is_binaryOP(op) && codes[code_ct-2].opcode == LDI) {
       codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
@@ -324,6 +350,8 @@ int execute() {
       INCDEC(-1); break;
     case NOT:
       UNI_OP(!); break;
+    case BNOT:
+      UNI_OP(~); break;
     case NEG:
       UNI_OP(-); break;
     case DIV:
@@ -354,6 +382,16 @@ int execute() {
       BIN_OP(&&); break;
     case OR:
       BIN_OP(||); break;
+    case BAND:
+      BIN_OP(&); break;
+    case BOR:
+      BIN_OP(|); break;
+    case BXOR:
+      BIN_OP(^); break;
+    case LSHIFT:
+      BIN_OP(<<); break;
+    case RSHIFT:
+      BIN_OP(>>); break;
     }
   }
 }
