@@ -10,5 +10,5 @@ int main(int argc, char *argv[]) {
 
   compile(argv[1]);
   code_dump();
-  execute();
+  execute(1);
 }

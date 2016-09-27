@@ -56,6 +56,6 @@ void remove_op_stack_top();
 #define ASSIGN(addr, dat) MEMINT(addr) = dat
 #define ASSIGN_CHAR(addr, dat) *(memory+addr) = dat
 
-int execute();
+int execute(int debug);
 
 #endif // _DCC_INSTRUCTION_H_

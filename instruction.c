@@ -247,7 +247,11 @@ int const_fold(OpCode op) {
   return 0;
 }
 
-int execute() {
+int execute(int debug) {
+  if (debug) {
+    printf("****instructions****\n");
+    printf("program counter\t\topcode\t\topdata\t\tstackvalue\n");
+  }
   pc = 0; // proram counter
   baseReg = MEM_MAX-1;
   stack_ptr = 0;
@@ -272,6 +276,14 @@ int execute() {
       addr = baseReg + dat; // reative addr
     } else {
       addr = dat; // absolute addr
+    }
+    if (debug) {
+      printf("%d:\t\t\t %s\t\t %d\t\t", pc, OpCodeStr[op], dat);
+      int k;
+      for (k = stack_ptr-1; k >= 0; k--) {
+	printf("%d ", op_stack[k]);
+      }
+      printf("\n");
     }
     pc++;
 
