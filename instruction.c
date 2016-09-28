@@ -196,6 +196,10 @@ int binary_expr(OpCode op, int d1, int d2) {
     return d1 | d2;
   case BXOR:
     return d1 ^ d2;
+  case LSHIFT:
+    return d1 << d2;
+  case RSHIFT:
+    return d1 >> d2;
   }
 }
 
