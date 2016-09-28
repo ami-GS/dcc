@@ -197,7 +197,7 @@ void init_var(TableEntry *ent, Token *t) {
 	genCode2(LDI, INT_SIZE*i);
 	genCode1(ADD);
 	expression(t, ent->dType); // point to ',' or '}'
-	genCode1(ASS);
+	remove_op_stack_top();
 	++i;
 	if (ent->arrLen != -1 && i > ent->arrLen) {
 	  error("the number of init value exceeds that of predefined");
