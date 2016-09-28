@@ -86,19 +86,19 @@ int genCode_binary(Kind k) {
   case Or:
     op = OR;
     break;
-  case Band:
+  case Band: case BandAss:
     op = BAND;
     break;
-  case Bor:
+  case Bor: case BorAss:
     op = BOR;
     break;
-  case Bxor:
+  case Bxor: case BxorAss:
     op = BXOR;
     break;
-  case Lshift:
+  case Lshift: case LsftAss:
     op = LSHIFT;
     break;
-  case Rshift:
+  case Rshift: case RsftAss:
     op = RSHIFT;
     break;
   }

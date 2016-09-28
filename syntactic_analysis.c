@@ -18,6 +18,7 @@ void expression(Token *t, DataType type) {
     expression(t, NON_T);
     break;
   case AddAss: case SubAss: case MulAss: case DivAss: case ModAss: // case NotEq:
+  case BandAss: case BorAss: case BxorAss: case LsftAss: case RsftAss:
     k = t->kind;
     to_left_val();
     genCode1(CPY);

@@ -71,11 +71,11 @@ int is_ope2(const char *c1, const char *c2) {
   char s[2];
   s[0] = *c1; s[1] = *c2;
   // TODO : // and /* should be included for comment?
-  char ope2[17][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
+  char ope2[20][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
 		      "=<", "=>", "!=", "+=", "-=", "*=", "/=",
-		      "%=", "<<", ">>"};
+		      "%=", "<<", ">>", "&=", "|=", "^="};
   int i;
-  for (i = 0; i < 17; i++) {
+  for (i = 0; i < 20; i++) {
     if (ope2[i][0] == s[0] && ope2[i][1] == s[1]) {
       return 1;
     }
@@ -191,6 +191,12 @@ int nextToken(Token *t, int q_lock) {
     nextChar(&c); //to check 2 length operaiton
     if (is_ope2(txt_ptr-1, &c)) {
       *(txt_ptr++) = c;
+      nextChar(&c); //to check only <"<=" >">="
+      if (is_ope2(txt_ptr-1, &c)) {
+	*(txt_ptr++) = c;
+      } else {
+	notUseChar(c);
+      }
     } else {
       notUseChar(c);
     }

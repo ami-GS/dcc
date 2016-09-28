@@ -59,4 +59,4 @@ while (a < 5) {
 
 - binary boolean operations (== != <= => >= =< && ||)
 
-- compound operators (+= -= *= /= %=)
+- compound operators (+= -= *= /= %= &= |= ^= <<= >>=)
