@@ -326,8 +326,8 @@ void st_inc_dec(Token *t) {
 }
 
 void st_declare(Token *t) {
-  TableEntry tmp = {no_ID, "", NON_T, LOCAL, 0, 0, 0};
   while (t->kind == Int || t->kind == Char || t->kind == Float) { // TODO : not only Int
+    TableEntry tmp = {no_ID, "", NON_T, LOCAL, 0, 0, 0};
     set_dtype(&tmp, t);
     set_name(&tmp, t);
     declare_var(&tmp, t);
