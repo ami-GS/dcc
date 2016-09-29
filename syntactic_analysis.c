@@ -102,8 +102,8 @@ int factor(Token *t) {
 	  default:
 	    break;
 	  }
-	  genCode1(MUL); // index * data size
-	  genCode1(ADD); // add it to tp->adr
+	  genCode1(MULL); // index * data size
+	  genCode1(ADDL); // add it to tp->adr
 	  // TODO : optimize here
 	  switch (te_tmp->dType) {
 	  case INT_T:
@@ -123,13 +123,13 @@ int factor(Token *t) {
 	to_left_val();
 	// TODO : need to study below
 	if (t->kind == Incre) {
-	  genCode1(INC);
+	  genCode1(INCL);
 	  genCode2(LDI, 1);
-	  genCode1(SUB);
+	  genCode1(SUBL);
 	} else {
-	  genCode1(DEC);
+	  genCode1(DECL);
 	  genCode2(LDI, 1);
-	  genCode1(ADD);
+	  genCode1(ADDL);
 	}
 	nextToken(t, 0);
       }

@@ -38,6 +38,7 @@ typedef struct {
   Kind kind;
   char text[TOKEN_TXT_SIZ];
   int intVal;
+  double dVal;
 } Token;
 
 typedef struct {
@@ -46,7 +47,7 @@ typedef struct {
 } KeyWordType;
 
 static KeyWordType keyWdType[] = {
-  {"void", Void}, {"int", Int}, {"char", Char},
+  {"void", Void}, {"int", Int}, {"char", Char}, {"float", Float}, {"double", Double},
   {"if", If}, {"else", Else},
   {"for", For}, {"while", While}, {"do", Do},
   {"switch", Switch}, {"case", Case}, {"continue", Continue},

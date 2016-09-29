@@ -57,6 +57,12 @@ void set_dtype(TableEntry* ent, Token* t) {
   case Char:
     ent->dType = CHAR_T;
     break; // STRING_T is needed?
+  case Float:
+    ent->dType = FLOAT_T;
+    break;
+  case Double:
+    ent->dType = DOUBLE_T;
+    break;
   default:
     break;
     // TODO : other types can be placed
@@ -176,7 +182,7 @@ void init_var(TableEntry *ent, Token *t) {
     do {
       genCode(LDA, ent->level, ent->code_addr);
       genCode2(LDI, CHAR_SIZE*i);
-      genCode1(ADD);
+      genCode1(ADDL);
       genCode2(LDI, *(t->text+i)); // TODO : LDI?
       genCode1(ASSC);
       i++;
@@ -195,7 +201,7 @@ void init_var(TableEntry *ent, Token *t) {
 	}
 	genCode(LDA, ent->level, ent->code_addr);
 	genCode2(LDI, INT_SIZE*i);
-	genCode1(ADD);
+	genCode1(ADDL);
 	expression(t, ent->dType); // point to ',' or '}'
 	remove_op_stack_top();
 	++i;

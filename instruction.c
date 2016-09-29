@@ -30,10 +30,10 @@ int genCode_unary(Kind k) {
     op = NOT;
     break;
   case Incre:
-    op = INC;
+    op = INCL;
     break;
   case Decre:
-    op = DEC;
+    op = DECL;
     break;
   case Bnot:
     op = BNOT;
@@ -48,58 +48,58 @@ int genCode_binary(Kind k) {
   OpCode op = NOP;
   switch (k) {
   case Add: case AddAss:
-    op = ADD;
+    op = ADDL;
     break;
   case Sub: case SubAss:
-    op = SUB;
+    op = SUBL;
     break;
   case Mul: case MulAss:
-    op = MUL;
+    op = MULL;
     break;
   case Div: case DivAss:
-    op = DIV;
+    op = DIVL;
     break;
   case Mod: case ModAss:
-    op = MOD;
+    op = MODL;
     break;
   case Equal:
-    op = EQU;
+    op = EQUL;
     break;
   case NotEq:
-    op = NTEQ;
+    op = NTEQL;
     break;
   case Less:
-    op = LESS;
+    op = LESSL;
     break;
   case LessEq: case EqLess:
-    op = LSEQ;
+    op = LSEQL;
     break;
   case Great:
-    op = GRT;
+    op = GRTL;
     break;
   case GreatEq: case EqGreat:
-    op = GTEQ;
+    op = GTEQL;
     break;
   case And:
-    op = AND;
+    op = ANDL;
     break;
   case Or:
-    op = OR;
+    op = ORL;
     break;
   case Band: case BandAss:
-    op = BAND;
+    op = BANDL;
     break;
   case Bor: case BorAss:
-    op = BOR;
+    op = BORL;
     break;
   case Bxor: case BxorAss:
-    op = BXOR;
+    op = BXORL;
     break;
   case Lshift: case LsftAss:
-    op = LSHIFT;
+    op = LSHIFTL;
     break;
   case Rshift: case RsftAss:
-    op = RSHIFT;
+    op = RSHIFTL;
     break;
   }
   genCode1(op);
@@ -159,46 +159,46 @@ void backpatch_calladdr() {
 }
 
 int binary_expr(OpCode op, int d1, int d2) {
-  if ((op == DIV || op == MOD) && d2 == 0) {
+  if ((op == DIVL || op == MODL || DIVSD == 0 || MODSD == 0) && d2 == 0) {
     return -1; // TODO : zero division
   }
   // TODO : single '&' '|' '^' should be added. what is appropriate name
   switch (op) {
-  case ADD:
+  case ADDL: case ADDSD:
     return d1 + d2;
-  case SUB:
+  case SUBL: case SUBSD:
     return d1 - d2;
-  case MUL:
+  case MULL: case MULSD:
     return d1 * d2;
-  case DIV:
+  case DIVL: case DIVSD:
     return d1 / d2;
-  case MOD:
+  case MODL: case MODSD:
     return d1 % d2;
-  case EQU:
+  case EQUL: case EQUSD:
     return d1 == d2;
-  case NTEQ:
+  case NTEQL: case NTEQSD:
     return d1 != d2;
-  case LESS:
+  case LESSL: case LESSSD:
     return d1 < d2;
-  case LSEQ:
+  case LSEQL: case LSEQSD:
     return d1 <= d2;
-  case GRT:
+  case GRTL: case GRTSD:
     return d1 > d2;
-  case GTEQ:
+  case GTEQL: case GTEQSD:
     return d1 >= d2;
-  case AND:
+  case ANDL: case ANDSD:
     return d1 && d2;
-  case OR:
+  case ORL: case ORSD:
     return d1 || d2;
-  case BAND:
+  case BANDL: case BANDSD:
     return d1 & d2;
-  case BOR:
+  case BORL: case BORSD:
     return d1 | d2;
-  case BXOR:
+  case BXORL: case BXORSD:
     return d1 ^ d2;
-  case LSHIFT:
+  case LSHIFTL: case LSHIFTSD:
     return d1 << d2;
-  case RSHIFT:
+  case RSHIFTL: case RSHIFTSD:
     return d1 >> d2;
   }
 }
@@ -315,12 +315,18 @@ int execute(int debug) {
       */
     case LOD:
       PUSH(MEMINT(addr)); break;
+    case LODC:
+      PUSH(*(memory+addr)); break;
     case LDA:
       PUSH(addr); break;
     case LDI:
       PUSH(dat); break;
     case STO:
-      ASSIGN(addr, op_stack[stack_ptr-1]);
+      ASSIGN(addr, op_stack[stack_ptr-1].sINT);
+      stack_ptr--;
+      break;
+    case STOC:
+      ASSIGN_CHAR(addr, op_stack[stack_ptr-1].sINT);
       stack_ptr--;
       break;
     case ADBR:  // research frame for calling func
@@ -330,84 +336,84 @@ int execute(int debug) {
       break;
 
     case ASS:
-      ASSIGN(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
+      ASSIGN(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
       stack_ptr -= 2; break;
     case ASSC:
-      ASSIGN_CHAR(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
+      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
       stack_ptr -= 2; break;
     case ASSV:
-      ASSIGN(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
-      op_stack[stack_ptr-2] = op_stack[stack_ptr-1];
+      ASSIGN(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
+      op_stack[stack_ptr-2].sINT = op_stack[stack_ptr-1].sINT;
       stack_ptr--; break;
     case ASVC:
-      ASSIGN_CHAR(op_stack[stack_ptr-2], op_stack[stack_ptr-1]);
-      op_stack[stack_ptr-2] = op_stack[stack_ptr-1];
+      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
+      op_stack[stack_ptr-2].sINT = op_stack[stack_ptr-1].sINT;
       stack_ptr--; break;
     case CPY:
-      op_stack[stack_ptr] = op_stack[stack_ptr-1];
+      op_stack[stack_ptr].sINT = op_stack[stack_ptr-1].sINT;
       stack_ptr++; break;
     case VAL: // address to value conversion
-      op_stack[stack_ptr-1] = MEMINT(op_stack[stack_ptr-1]); break;
+      op_stack[stack_ptr-1].sINT = MEMINT(op_stack[stack_ptr-1].sINT); break;
     case VALC:
-      op_stack[stack_ptr-1] = memory[op_stack[stack_ptr-1]]; break;
+      op_stack[stack_ptr-1].sINT = memory[op_stack[stack_ptr-1].sINT]; break;
     case EQCMP:
       // TODO : suspicious
-      if (dat == op_stack[stack_ptr-1]) {
-	op_stack[stack_ptr-1] = 1; break;
+      if (dat == op_stack[stack_ptr-1].sINT) {
+	op_stack[stack_ptr-1].sINT = 1; break;
       }
       PUSH(0); break;
     case CALL:
       PUSH(pc); pc = dat; break;
     case RET:
       pc = POP(); break;
-    case INC:
-      INCDEC(1); break;
-    case DEC:
-      INCDEC(-1); break;
+    case INCL:
+      INCDEC_DWORD(1); break;
+    case DECL:
+      INCDEC_DWORD(-1); break;
     case NOT:
-      UNI_OP(!); break;
+      UNI_OP_DWORD(!); break;
     case BNOT:
-      UNI_OP(~); break;
+      UNI_OP_DWORD(~); break;
     case NEG:
-      UNI_OP(-); break;
-    case DIV:
-      ZERO_CHK();
-      BIN_OP(/); break;
-    case MOD:
-      ZERO_CHK();
-      BIN_OP(%); break;
-    case ADD:
-      BIN_OP(+); break;
-    case SUB:
-      BIN_OP(-); break;
-    case MUL:
-      BIN_OP(*); break;
-    case LESS:
-      BIN_OP(<); break;
-    case LSEQ:
-      BIN_OP(<=); break;
-    case GRT:
-      BIN_OP(>); break;
-    case GTEQ:
-      BIN_OP(>=); break;
-    case EQU:
-      BIN_OP(==); break;
-    case NTEQ:
-      BIN_OP(!=); break;
-    case AND:
-      BIN_OP(&&); break;
-    case OR:
-      BIN_OP(||); break;
-    case BAND:
-      BIN_OP(&); break;
-    case BOR:
-      BIN_OP(|); break;
-    case BXOR:
-      BIN_OP(^); break;
-    case LSHIFT:
-      BIN_OP(<<); break;
-    case RSHIFT:
-      BIN_OP(>>); break;
+      UNI_OP_DWORD(-); break;
+    case DIVL:
+      ZERO_CHK_DWORD();
+      BIN_OP_DWORD(/); break;
+    case MODL:
+      ZERO_CHK_DWORD();
+      BIN_OP_DWORD(%); break;
+    case ADDL:
+      BIN_OP_DWORD(+); break;
+    case SUBL:
+      BIN_OP_DWORD(-); break;
+    case MULL:
+      BIN_OP_DWORD(*); break;
+    case LESSL:
+      BIN_OP_DWORD(<); break;
+    case LSEQL:
+      BIN_OP_DWORD(<=); break;
+    case GRTL:
+      BIN_OP_DWORD(>); break;
+    case GTEQL:
+      BIN_OP_DWORD(>=); break;
+    case EQUL:
+      BIN_OP_DWORD(==); break;
+    case NTEQL:
+      BIN_OP_DWORD(!=); break;
+    case ANDL:
+      BIN_OP_DWORD(&&); break;
+    case ORL:
+      BIN_OP_DWORD(||); break;
+    case BANDL:
+      BIN_OP_DWORD(&); break;
+    case BORL:
+      BIN_OP_DWORD(|); break;
+    case BXORL:
+      BIN_OP_DWORD(^); break;
+    case LSHIFTL:
+      BIN_OP_DWORD(<<); break;
+    case RSHIFTL:
+      BIN_OP_DWORD(>>); break;
     }
   }
 }

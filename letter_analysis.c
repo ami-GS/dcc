@@ -99,8 +99,6 @@ int set_kind(Token *t) {
   }
   if (cType[*t->text] == Letter) {
     t->kind = Ident;
-  } else if (cType[*t->text] == Digit) {
-    t->kind = IntNum;
   } else {
     error("unknown kind");
   }
@@ -129,6 +127,7 @@ int nextToken(Token *t, int q_lock) {
     return err;
   }
 
+  float power;
   char *txt_ptr = t->text;
   switch (cType[c]) {
   case Letter:
@@ -146,10 +145,22 @@ int nextToken(Token *t, int q_lock) {
       t->intVal = t->intVal*10 + (c - '0');
       *(txt_ptr++) = c;
     }
+    if (c == '.') {
+      *(txt_ptr++) = c;
+      nextChar(&c);
+      for (power = 1.0; cType[c] == Digit; nextChar(&c)) {
+	t->intVal = t->intVal*10 + (c - '0');
+	power *= 10.0;
+	*(txt_ptr++) = c;
+      }
+      t->dVal = (double)t->intVal / power;
+      t->kind = FloatNum;
+    } else {
+      t->kind = IntNum;
+    }
+
     *txt_ptr = '\0';
     notUseChar(c);
-    t->kind = IntNum;
-    // TODO : float case
     break;
   case Dquote:
     for (nextChar(&c); c != '"' && c != EOF; nextChar(&c)) {
@@ -210,7 +221,7 @@ int nextToken(Token *t, int q_lock) {
 }
 
 int checkNxtTokenKind(Kind k) {
-  Token t = {NulKind, "", 0};
+  Token t = {NulKind, "", 0, 0.0};
   nextToken(&t, 0);
   t_buf_enqueue(t);
   return t.kind == k;
@@ -239,7 +250,7 @@ SymbolKind get_func_type() {
   // TODO : this might use many memory of t_buf
   //        in case of there are many arguments
   do {
-    Token tmp = {NulKind, "", 0};
+    Token tmp = {NulKind, "", 0, 0.0};
     nextToken(&tmp, 1);
     t_buf_enqueue(tmp);
     if (tmp.kind == Rparen) {

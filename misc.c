@@ -9,11 +9,11 @@ void code_dump() {
         op = codes[i].opcode;
 	printf("%d:\t", i);
         switch (op) {
-	case RET: case ASS: case ASSV: case ASSC: case ASVC: case NOT: case INC: case DEC:
-	case NEG: case ADD: case SUB: case MUL: case DIV: case MOD: case LESS: case LSEQ:
-	case GRT: case GTEQ: case EQU: case NTEQ: case AND: case OR: case BAND: case BOR:
-	case BXOR: case BNOT: case LSHIFT: case RSHIFT: case VAL: case VALC: case VALD:
-	case DEL: case NOP: case STOP: case CPY:
+	case RET: case ASS: case ASSV: case ASSC: case ASVC: case ASSF: case ASVF: case NOT:
+	case INCL: case DECL: case NEG: case ADDL: case SUBL: case MULL: case DIVL: case MODL:
+	case LESSL: case LSEQL: case GRTL: case GTEQL: case EQUL: case NTEQL: case ANDL:
+	case ORL: case BANDL: case BORL: case BXORL: case BNOT: case LSHIFTL: case RSHIFTL:
+	case VAL: case VALC: case VALD:	case DEL: case NOP: case STOP: case CPY:
 	  printf("%s\n", OpCodeStr[op]);
 	  if (op == RET || op == STOP)
 	    printf("\n");

@@ -1,7 +1,10 @@
 #include "opcode.h"
 
 int is_binaryOP(OpCode op) {
-  return op == ADD || op == SUB || op == MUL || op == DIV || op == MOD || op == LESS || op == LSEQ ||
-    op == GRT || op == GTEQ || op == EQU || op == NTEQ || op == AND || op == OR || op == BAND || op == BOR ||
-    op == BXOR || op == LSHIFT || op == RSHIFT;
+  return op == ADDL || op == SUBL || op == MULL || op == DIVL || op == MODL || op == LESSL || op == LSEQL ||
+    op == GRTL || op == GTEQL || op == EQUL || op == NTEQL || op == ANDL || op == ORL || op == BANDL || op == BORL ||
+    op == BXORL || op == LSHIFTL || op == RSHIFTL ||
+    op == ADDSD || op == SUBSD || op == MULSD || op == DIVSD || op == MODSD || op == LESSSD || op == LSEQSD ||
+    op == GRTSD || op == GTEQSD || op == EQUSD || op == NTEQSD || op == ANDSD || op == ORSD || op == BANDSD || op == BORSD ||
+    op == BXORSD || op == LSHIFTSD || op == RSHIFTSD;
 }
