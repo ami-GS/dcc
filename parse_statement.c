@@ -346,7 +346,7 @@ void begin_switch() {
 
 void end_switch() {
   int i, st = switchNest[switchNest_ct].case_list_st_addr;
-  for (i = st; i <= caseList_ct; i++) {
+  for (i = st; i <= caseList_ct-1; i++) {
     // TODO : compare caseList[i].value and stack top?
     genCode2(EQCMP, caseList[i].value);
     // TODO : jump to caseList[i].addr if true
