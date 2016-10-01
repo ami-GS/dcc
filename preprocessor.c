@@ -179,6 +179,15 @@ void pre_define(Token *t) {
 }
 
 int replace_com(Token *t) {
+  if (t->kind == LComment) {
+    while (!wrapNext(t, 0)) {}
+    writeWords(t->text);
+  } else if (t->kind == MLCommS) {
+    while (t->kind != MLCommE) {
+      wrapNext(t, 0);
+    }
+    writeWords(" ");
+  }
   return 0;
 }
 
