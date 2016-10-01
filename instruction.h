@@ -11,7 +11,7 @@ typedef union {
     short  sSINT; //not used yet
     int    sINT;
     float  sFLT;  //not used yet
-    double sDBL;
+    double sDBL;  //not used yet
 } stkData;
 stkData op_stack[OP_STACK_TOP];
 

@@ -47,6 +47,11 @@ while (a < 5) {
 - local & global (array) variable declaration (with initialization)
 
 
+## Passed preprocessor directives
+
+- #define (const and function)
+
+
 ## Passed expressions
 
 - binary operations (+ - * / %)
