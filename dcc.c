@@ -1,6 +1,8 @@
 #include "parse.h"
 #include "instruction.h"
 #include "misc.h"
+#include "preprocessor.h"
+#include  <stdlib.h>
 
 int main(int argc, char *argv[]) {
   if (argc == 1) {
@@ -8,7 +10,10 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  compile(argv[1]);
+  initKind();
+  char *fname_i = preprocess(argv[1]);
+  compile(fname_i);
+  free(fname_i);
   code_dump();
   execute(1);
 }

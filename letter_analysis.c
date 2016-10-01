@@ -5,6 +5,7 @@
 int t_buf_open = 0;
 int currentLine = 1;
 char *currentFile = NULL;
+FILE *fin;
 
 int fOpen(char *fname) {
   currentLine = 1;
@@ -60,7 +61,7 @@ int nextChar(char *c) {
 }
 
 void notUseChar(char c) {
-  if (c == ' ' || c == '\t' || c == '\n')
+  if (c == ' ' || c == '\t')
     return;
   prevC = c;
 }
@@ -70,12 +71,13 @@ int is_ope2(const char *c1, const char *c2) {
     return 0;
   char s[2];
   s[0] = *c1; s[1] = *c2;
-  // TODO : // and /* should be included for comment?
-  char ope2[20][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
+  // TODO : //, /* and */ are put here as workaround
+  char ope2[23][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
 		      "=<", "=>", "!=", "+=", "-=", "*=", "/=",
-		      "%=", "<<", ">>", "&=", "|=", "^="};
+		      "%=", "<<", ">>", "&=", "|=", "^=", "//",
+		      "/*", "*/"};
   int i;
-  for (i = 0; i < 20; i++) {
+  for (i = 0; i < 23; i++) {
     if (ope2[i][0] == s[0] && ope2[i][1] == s[1]) {
       return 1;
     }
@@ -184,17 +186,6 @@ int nextToken(Token *t, int q_lock) {
       error("Single quote must have single char");
     t->kind = Char;
     *txt_ptr = '\0';
-    break;
-  case Sharp:
-    for (nextChar(&c); c != ' ' && c != EOF; nextChar(&c)) {
-      if (txt_ptr - t->text < TOKEN_TXT_SIZ)
-	*(txt_ptr++) = c;
-      // TODO ; if length exceeds the limit, emit error
-    }
-    if (c != ' ')
-      return -1; // preprocessing needs ' '
-    *txt_ptr = '\0';
-    t->intVal = txt_ptr - t->text;
     break;
   default:
     // TODO : add more cases?

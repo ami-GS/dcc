@@ -6,7 +6,7 @@
 
 #define ID_SIZ 31 // 31 + \0
 #define TOKEN_TXT_SIZ 63 // 63 + \0
-static FILE *fin;
+extern  FILE *fin;
 
 // TODO : separate NOT and NOTEq
 typedef enum {
@@ -29,6 +29,7 @@ typedef enum {
   Switch, Case, Default,
   Break, Continue, Return,
   Printf, Exit, Input,
+  LComment, MLCommS, MLCommE,
   EOF_token,
   END_list,
 } Kind;
@@ -54,12 +55,13 @@ static KeyWordType keyWdType[] = {
   {"default", Default}, {"break", Break},
   {"define", Define}, {"include", Include},
   {"return", Return},
+  {"//", LComment}, {"/*", MLCommS}, {"*/", MLCommE},
   {"<<", Lshift}, {">>", Rshift}, {"<<=", LsftAss}, {">>=", RsftAss},
   {"==", Equal}, {"!=", NotEq}, {"<", Less}, {"<=", LessEq}, {"=<", EqLess}, {">", Great}, {">=", GreatEq}, {"=>", EqGreat},
   {"+=", AddAss}, {"-=", SubAss}, {"*=", MulAss}, {"/=", DivAss}, {"%=", ModAss},
   {"++", Incre}, {"--", Decre}, {"&&", And}, {"||", Or},
   {"+", Add}, {"-", Sub}, {"*", Mul}, {"/", Div}, {"%", Mod}, {"=", Assign},
-  {"&", Band}, {"|", Bor}, {"^", Bxor}, {"~", Bnot},
+  {"&", Band}, {"|", Bor}, {"^", Bxor}, {"~", Bnot}, {"#", Sharp},
   {"&=", BandAss}, {"|=", BorAss}, {"^=", BxorAss},
   {"(", Lparen}, {")", Rparen}, {"{", Lbrace}, {"}", Rbrace}, {"[", Lbracket}, {"]", Rbracket},
   {",", Comma}, {":", Colon}, {";", Semicolon}, {"", END_list},

@@ -19,6 +19,7 @@ int end_declare_func(TableEntry *func, SymbolKind last);
 SymbolKind block(Token *t, TableEntry* funcPtr);
 int set_func_process(TableEntry *ent, Token *t);
 void countInitialization(TableEntry *ent);
+void ignoreLine(Token *t);
 
 
 #endif // _DCC_PARSE_H_

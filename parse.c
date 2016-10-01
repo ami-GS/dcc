@@ -11,7 +11,6 @@ TableEntry* funcPtr = NULL;
 #define is_main(p) (strcmp(p, "main")==0)
 
 void compile(char *fname) {
-  initKind();
   genCode2(CALL, -1); // for main
   genCode1(STOP);
   fOpen(fname);
@@ -37,6 +36,9 @@ void compile(char *fname) {
     case Ident:
       statement(&t);
       break;
+    case Sharp:
+      ignoreLine(&t);
+      break;
     default:
       error("unknown token kind");
     }
@@ -45,6 +47,13 @@ void compile(char *fname) {
   // TODO : memory ?
 }
 
+
+void ignoreLine(Token *t) {
+  int l = currentLine;
+  while (l == currentLine) {
+    nextToken(t, 0);
+  }
+}
 
 void set_dtype(TableEntry* ent, Token* t) {
   switch(t->kind) {
