@@ -230,6 +230,14 @@ char *preprocess(char *fname) {
       replace_com(&t);
     } else if (t.kind == Ident) {
       replace_def(&t);
+    } else if (t.kind == String){
+      writeWords("\""); // workaround
+      writeWords(t.text);
+      writeWords("\"");
+    } else if (t.kind == Char){
+      writeWords("\'"); // workaround
+      writeWords(t.text);
+      writeWords("\'");
     } else {
       writeWords(t.text);
     }
