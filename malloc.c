@@ -1,6 +1,7 @@
 #include <string.h>
 #include "malloc.h"
 #include "instruction.h"
+#include "emulate_cpu.h"
 
 int localAddress;
 
