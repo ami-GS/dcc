@@ -49,7 +49,7 @@ while (a < 5) {
 
 ## Passed preprocessor directives
 
-- #define (const and function)
+- #define (const and function) no recursive
 
 
 ## Passed expressions
