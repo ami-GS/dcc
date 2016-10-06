@@ -23,13 +23,14 @@ typedef enum {
   Band, Bor, Bxor, Bnot, Lshift, Rshift,
   Int, Float, Double, Char, Void,
   Colon, Semicolon,
-  String, IntNum, FloatNum,
+  String, IntNum, FloatNum, CharSymbol,
   Digit, Letter, VarName,
   If, Else, For, Do, While,
   Switch, Case, Default,
   Break, Continue, Return,
   Printf, Exit, Input,
   LComment, MLCommS, MLCommE,
+  Space, Tab, NewLine,
   EOF_token,
   END_list,
 } Kind;
@@ -64,7 +65,8 @@ static KeyWordType keyWdType[] = {
   {"&", Band}, {"|", Bor}, {"^", Bxor}, {"~", Bnot}, {"#", Sharp},
   {"&=", BandAss}, {"|=", BorAss}, {"^=", BxorAss},
   {"(", Lparen}, {")", Rparen}, {"{", Lbrace}, {"}", Rbrace}, {"[", Lbracket}, {"]", Rbracket},
-  {",", Comma}, {":", Colon}, {";", Semicolon}, {"", END_list},
+  {",", Comma}, {":", Colon}, {";", Semicolon},
+  {" ", Space}, {"\t", Tab}, {"\n", NewLine},  {"", END_list},
 };
 
 #define TOKEN_BUFFER_SIZ 1000
@@ -75,6 +77,7 @@ int t_buf_enqueue(Token t);
 int t_buf_dequeue(Token *t);
 extern int currentLine;
 extern char *currentFile;
+extern int use_all_as_token;
 
 // TODO : research about function name decisionning
 int fOpen(char *fname);

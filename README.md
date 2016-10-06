@@ -51,6 +51,8 @@ while (a < 5) {
 
 - #define (const and function) no recursive
 
+- Currently this does not work (degration)
+
 
 ## Passed expressions
 

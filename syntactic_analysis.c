@@ -143,7 +143,7 @@ int factor(Token *t) {
       break;
     }
     break;
-  case IntNum: case Char:
+  case IntNum: case CharSymbol:
     // TODO : also every type. Using TokenStack is the besy way?
     genCode2(LDI, t->intVal);
     nextToken(t, 0);

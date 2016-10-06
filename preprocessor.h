@@ -35,6 +35,7 @@ int search_define();
 void enter_define();
 char *fOpen_i(char *fname);
 char *preprocess(char *fname);
+int wrapNext(Token *t, int save);
 
 
 #endif //_DCC_PREPROCESSOR_H_

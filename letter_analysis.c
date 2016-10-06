@@ -5,6 +5,8 @@
 int t_buf_open = 0;
 int currentLine = 1;
 char *currentFile = NULL;
+ // for creating '.i' file
+int use_all_as_token = 1;
 FILE *fin;
 
 int fOpen(char *fname) {
@@ -61,7 +63,7 @@ int nextChar(char *c) {
 }
 
 void notUseChar(char c) {
-  if (c == ' ' || c == '\t')
+  if (!use_all_as_token && (c == ' ' || c == '\t' || c == '\n'))
     return;
   prevC = c;
 }
@@ -119,13 +121,17 @@ int nextToken(Token *t, int q_lock) {
   t->intVal = 0;
 
   int err = 0;
-  char c = ' ';
-
-  while (c == ' ' || c == '\t' || c == '\n') {
-    err = nextChar(&c);
+  char c;
+  err = nextChar(&c);
+  if (!use_all_as_token) {
+    while (c == ' ' || c == '\t' || c == '\n') {
+      err = nextChar(&c);
+    }
   }
+
   if (err == EOF) {
     t->kind = EOF_token;
+    prevC = -2;
     return err;
   }
 
@@ -160,7 +166,6 @@ int nextToken(Token *t, int q_lock) {
     } else {
       t->kind = IntNum;
     }
-
     *txt_ptr = '\0';
     notUseChar(c);
     break;
@@ -184,8 +189,16 @@ int nextToken(Token *t, int q_lock) {
       error("end \' is missing");
     if (txt_ptr - t->text > 1)
       error("Single quote must have single char");
-    t->kind = Char;
+    t->kind = CharSymbol;
     *txt_ptr = '\0';
+    break;
+  case Space: case Tab: case NewLine:
+    do {
+      nextChar(&c);
+      *(txt_ptr++) = c;
+    } while (c == ' ' || c == '\t' || c == '\n');
+    *txt_ptr = '\0';
+    notUseChar(c);
     break;
   default:
     // TODO : add more cases?

@@ -12,6 +12,7 @@ int main(int argc, char *argv[]) {
 
   initKind();
   char *fname_i = preprocess(argv[1]);
+  use_all_as_token = 0;
   compile(fname_i);
   free(fname_i);
   code_dump();

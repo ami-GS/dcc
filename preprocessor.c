@@ -8,7 +8,6 @@ void writeWords(char *words) {
   for (i = 0; *(words+i) != '\0'; i++) {
     putc(*(words+i), i_file);
   }
-  putc(' ', i_file); // TODO : differenciate when ' ' is put or not
 }
 
 int replace_def(Token *t) {
@@ -89,11 +88,9 @@ int wrapNext(Token *t, int save) {
   int nl = 0;
   if (currentLine > bef_line) {
     nl = 1;
-    putc('\n', i_file);
   }
   bef_line = currentLine;
   nextToken(t, 0);
-
   if (save) {
     // write to file
     writeWords(t->text);
@@ -104,7 +101,7 @@ int wrapNext(Token *t, int save) {
 
 void pre_define(Token *t) {
   define_item item = define_table[def_table_ct]; // just copy, not reference. this is intentional
-  wrapNext(t, 1);
+  wrapNext(t, 1); wrapNext(t, 1); // skip space
   int i;
   for (i = 0; t->text[i] != '\0'; i++)
     item.n_bef[i] = t->text[i];
@@ -161,6 +158,7 @@ void pre_define(Token *t) {
   } else {
     // const type
     // until new line
+    wrapNext(t, 1); // skip space
     do {
       if (t->kind == Ident) {
 	replace_def(t); // self replace
@@ -234,7 +232,7 @@ char *preprocess(char *fname) {
       writeWords("\""); // workaround
       writeWords(t.text);
       writeWords("\"");
-    } else if (t.kind == Char){
+    } else if (t.kind == CharSymbol){
       writeWords("\'"); // workaround
       writeWords(t.text);
       writeWords("\'");
