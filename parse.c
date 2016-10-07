@@ -53,6 +53,7 @@ void ignoreLine(Token *t) {
   while (l == currentLine) {
     nextToken(t, 0);
   }
+  nextToken(t, 0);
 }
 
 void set_dtype(TableEntry* ent, Token* t) {

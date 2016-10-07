@@ -37,6 +37,7 @@ void initKind() {
   cType[';'] = Semicolon; cType[','] = Comma;
   cType['\''] = Squote; cType['"'] = Dquote;
   cType['#'] = Sharp;
+  cType[' '] = Space; cType['\t'] = Tab; cType['\n'] = NewLine;
   cType['&'] = Band; cType['|'] = Bor; cType['~'] = Bnot; cType['^'] = Bxor;
 }
 
@@ -193,10 +194,10 @@ int nextToken(Token *t, int q_lock) {
     *txt_ptr = '\0';
     break;
   case Space: case Tab: case NewLine:
-    do {
-      nextChar(&c);
+    while (c == ' ' || c == '\t' || c == '\n') {
       *(txt_ptr++) = c;
-    } while (c == ' ' || c == '\t' || c == '\n');
+      nextChar(&c);
+    }
     *txt_ptr = '\0';
     notUseChar(c);
     break;

@@ -40,7 +40,7 @@ int replace_def(Token *t) {
 	// save argumnets
 	while (t->kind != Rparen) {
 	  wrapNext(t, 0); // arg
-	  if (t->kind != Comma && t->kind != Rparen) {
+	  if (t->kind != Comma && t->kind != Rparen && t->kind != Space && t->kind != Tab && t->kind != NewLine) {
 	    for (k = 0; t->text[k] != '\0'; k++) 
 	      arg_table_buf[aNum][k] = t->text[k];
 	    arg_table_buf[aNum++][k] = '\0';
@@ -118,18 +118,17 @@ void pre_define(Token *t) {
 	for (i = 0; t->text[i] != '\0'; i++) 
 	  item.arg_table[item.argNum][i] = t->text[i];
 	item.arg_table[item.argNum++][i] = '\0';
-	wrapNext(t, 1);
-	if (t->kind != Comma)
-	  break;
-	wrapNext(t, 1);
-      } else {
-	  error("arguments of defined function should be identifier");
-	  return -1;
-	}
+      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Comma)) {
+	error("arguments of defined function should be identifier");
+	return -1;
+      }
+      wrapNext(t, 1);
     }
-    
+
     // until new line
-    while (!wrapNext(t, 0)) {
+    wrapNext(t, 1); // point at space
+    while (t->kind != NewLine) {
+      wrapNext(t, 0);
       if (t->kind == Ident) {
 	for (i = 0; i < item.argNum; i++) {
 	  if (strcmp(item.arg_table[i], t->text) == 0) {
@@ -149,26 +148,28 @@ void pre_define(Token *t) {
 	if (i == item.argNum) {
 	  replace_def(t); // self replace
 	}
-      } else {
+      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine)) {
 	for (i = 0; t->text[i] != '\0'; i++)
 	  item.n_af[af_idx++] = t->text[i];
       }
       writeWords(t->text);
     }
-  } else {
+  } else if (t->kind == Space || t->kind == Tab) {
+    writeWords(t->text); // save space
     // const type
     // until new line
-    wrapNext(t, 1); // skip space
-    do {
+    while (t->kind != NewLine) {
+      wrapNext(t, 0);
       if (t->kind == Ident) {
 	replace_def(t); // self replace
-	continue;
+      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine)) {
+	for (i = 0; t->text[i] != '\0'; i++)
+	  item.n_af[af_idx++] = t->text[i];
+	writeWords(t->text);
       }
-      for (i = 0; t->text[i] != '\0'; i++)
-	item.n_af[af_idx++] = t->text[i];
-      writeWords(t->text);
-      // write to i file
-    } while (!wrapNext(t, 0));
+    }
+  } else {
+    error("invalid pre define syntax");
   }
   writeWords(t->text);
   item.n_af[af_idx] = '\0'; // end
