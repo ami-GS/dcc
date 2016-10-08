@@ -193,12 +193,16 @@ int nextToken(Token *t, int q_lock) {
     t->kind = CharSymbol;
     *txt_ptr = '\0';
     break;
-  case Space: case Tab: case NewLine:
-    while (c == ' ' || c == '\t' || c == '\n') {
+  case Space: case Tab:
+    while (c == ' ' || c == '\t') {
       *(txt_ptr++) = c;
       nextChar(&c);
     }
     *txt_ptr = '\0';
+    t->intVal = txt_ptr - t->text;
+    if (t->intVal > 1) {
+      t->kind = Blanks;
+    }
     notUseChar(c);
     break;
   default:

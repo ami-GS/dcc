@@ -25,7 +25,6 @@ int replace_def(Token *t) {
       if (define_table[i].argNum == 0) {
 	// write define_table[i].n_af to i file
 	writeWords(define_table[i].n_af);
-	return 1; // 1 indicates replaced
       } else {
 	// func type
 	wrapNext(t, 0); // -> '('
@@ -40,7 +39,8 @@ int replace_def(Token *t) {
 	// save argumnets
 	while (t->kind != Rparen) {
 	  wrapNext(t, 0); // arg
-	  if (t->kind != Comma && t->kind != Rparen && t->kind != Space && t->kind != Tab && t->kind != NewLine) {
+	  if (t->kind != Comma && t->kind != Rparen &&
+	      t->kind != Space && t->kind != Tab && t->kind != NewLine && t->kind != Blanks) {
 	    for (k = 0; t->text[k] != '\0'; k++) 
 	      arg_table_buf[aNum][k] = t->text[k];
 	    arg_table_buf[aNum++][k] = '\0';
@@ -72,15 +72,15 @@ int replace_def(Token *t) {
 	// write af_buf to i file
 	writeWords(af_buf);
       }
-      return 1; // 1 indicate replaced
+      return i; // 1 indicate replaced
     }
   }
   
   if (i == def_table_ct) {
     writeWords(t->text);
-    return 0; // 0 indicate not replaced
+    return -1; // 0 indicate not replaced
   }
-  return 0;
+  return -1;
 }
 
 int bef_line = 1;
@@ -108,6 +108,7 @@ void pre_define(Token *t) {
   item.n_bef[i] = '\0';
 
   int af_idx = 0;
+  int replaced_idx = -1;
   wrapNext(t, 0);
   if (t->kind == Lparen) {
     writeWords(t->text);
@@ -118,7 +119,7 @@ void pre_define(Token *t) {
 	for (i = 0; t->text[i] != '\0'; i++) 
 	  item.arg_table[item.argNum][i] = t->text[i];
 	item.arg_table[item.argNum++][i] = '\0';
-      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Comma)) {
+      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Blanks || t->kind == Comma)) {
 	error("arguments of defined function should be identifier");
 	return -1;
       }
@@ -139,30 +140,40 @@ void pre_define(Token *t) {
 	      item.n_af[af_idx++] = (char)i + '0'; // 0 origin
 	      item.n_af[af_idx++] = '}';
 	    }
+	    writeWords(t->text);
 	    break;
-	  } /*else if () {
-	      TODO : self replace
-          }*/
+	  }
 	}
 	// if any argument doesn't' match, try to replace by pre defined variable
 	if (i == item.argNum) {
 	  replace_def(t); // self replace
+	  // self replace
+	  replaced_idx = replace_def(t);
+	  if (replaced_idx != -1) {
+	    for (i = 0; define_table[replaced_idx].n_af[i] != '\0'; i++)
+	      item.n_af[af_idx++] = define_table[replaced_idx].n_af[i];
+	  }
 	}
-      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine)) {
+      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Blanks)) {
 	for (i = 0; t->text[i] != '\0'; i++)
 	  item.n_af[af_idx++] = t->text[i];
+	writeWords(t->text);
       }
-      writeWords(t->text);
     }
   } else if (t->kind == Space || t->kind == Tab) {
     writeWords(t->text); // save space
     // const type
     // until new line
     while (t->kind != NewLine) {
-      wrapNext(t, 0);
+     wrapNext(t, 0);
       if (t->kind == Ident) {
-	replace_def(t); // self replace
-      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine)) {
+	// self replace
+	replaced_idx = replace_def(t);
+	if (replaced_idx != -1) {
+	  for (i = 0; define_table[replaced_idx].n_af[i] != '\0'; i++)
+	    item.n_af[af_idx++] = define_table[replaced_idx].n_af[i];
+	}
+      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Blanks)) {
 	for (i = 0; t->text[i] != '\0'; i++)
 	  item.n_af[af_idx++] = t->text[i];
 	writeWords(t->text);

@@ -30,7 +30,7 @@ typedef enum {
   Break, Continue, Return,
   Printf, Exit, Input,
   LComment, MLCommS, MLCommE,
-  Space, Tab, NewLine,
+  Space, Tab, NewLine, Blanks,
   EOF_token,
   END_list,
 } Kind;
