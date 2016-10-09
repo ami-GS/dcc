@@ -175,6 +175,8 @@ void pre_define(Token *t) {
 	  item.n_af[af_idx++] = t->text[i];
       }
     }
+  } else if (t->kind == NewLine) {
+    item.n_af[af_idx++] = ' '; // for like #define DCC_HEADER_H_
   } else {
     error("invalid pre define syntax");
   }
