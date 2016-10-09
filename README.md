@@ -49,7 +49,9 @@ while (a < 5) {
 
 ## Passed preprocessor directives
 
-- #define (const and function) recursive only for const type
+- \#define (const and function) recursive only for const type
+
+- \#include (no include guard)
 
 
 ## Passed expressions

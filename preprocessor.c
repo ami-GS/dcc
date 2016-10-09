@@ -185,6 +185,23 @@ void pre_define(Token *t) {
   return;
 }
 
+void pre_include(Token *t) {
+  wrapNext(t, 0); wrapNext(t, 0);
+  if (t->kind != String) {
+    error("include needs \"FILENAME\"."); // TODO : <FILENAME> should be added
+    return;
+  }
+  FILE *ftmp;
+  char ctmp[MAX_LINE_SIZE];
+  if ((ftmp = fopen(t->text, "r")) == NULL) {
+    error("include file could not be loaded");
+    return;
+  }
+  while (fgets(ctmp, MAX_LINE_SIZE, ftmp) != NULL)
+    fputs(ctmp, i_file);
+  fclose(ftmp);
+}
+
 int replace_com(Token *t) {
   if (t->kind == LComment) {
     while (!wrapNext(t, 0)) {}
@@ -226,6 +243,7 @@ char *preprocess(char *fname) {
 	pre_define(&t);
 	break;
       case Include:
+	pre_include(&t);
 	break;
 	//case Pragma:
       default:
