@@ -29,7 +29,7 @@ static int def_table_ct = 0;
 
 
 void  pre_define(Token *t);
-int replace_def(Token *t);
+int replace_def(Token *t, int save);
 int replace_com(Token *t);
 int search_define();
 void enter_define();

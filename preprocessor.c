@@ -10,7 +10,7 @@ void writeWords(char *words) {
   }
 }
 
-int replace_def(Token *t) {
+int replace_def(Token *t, int save) {
   int i;
   char tmp[128];
   for (i = 0; t->text[i] != '\0'; i++) {
@@ -24,7 +24,8 @@ int replace_def(Token *t) {
       int j;
       if (define_table[i].argNum == 0) {
 	// write define_table[i].n_af to i file
-	writeWords(define_table[i].n_af);
+	if (save)
+	  writeWords(define_table[i].n_af);
       } else {
 	// func type
 	wrapNext(t, 0); // -> '('
@@ -70,7 +71,8 @@ int replace_def(Token *t) {
 	}
 	af_buf[af_idx] = '\0';
 	// write af_buf to i file
-	writeWords(af_buf);
+	if (save)
+	  writeWords(af_buf);
       }
       return i; // 1 indicate replaced
     }
@@ -101,7 +103,7 @@ int wrapNext(Token *t, int save) {
 
 void pre_define(Token *t) {
   define_item item = define_table[def_table_ct]; // just copy, not reference. this is intentional
-  wrapNext(t, 1); wrapNext(t, 1); // skip space
+  wrapNext(t, 0); wrapNext(t, 0); // skip space
   int i;
   for (i = 0; t->text[i] != '\0'; i++)
     item.n_bef[i] = t->text[i];
@@ -111,8 +113,7 @@ void pre_define(Token *t) {
   int replaced_idx = -1;
   wrapNext(t, 0);
   if (t->kind == Lparen) {
-    writeWords(t->text);
-    wrapNext(t, 1);
+    wrapNext(t, 0);
     // func type
     while (t->kind != Rparen) {
       if (t->kind == Ident) {
@@ -123,11 +124,11 @@ void pre_define(Token *t) {
 	error("arguments of defined function should be identifier");
 	return -1;
       }
-      wrapNext(t, 1);
+      wrapNext(t, 0);
     }
 
     // until new line
-    wrapNext(t, 1); // point at space
+    wrapNext(t, 0); // point at space
     while (t->kind != NewLine) {
       wrapNext(t, 0);
       if (t->kind == Ident) {
@@ -140,15 +141,13 @@ void pre_define(Token *t) {
 	      item.n_af[af_idx++] = (char)i + '0'; // 0 origin
 	      item.n_af[af_idx++] = '}';
 	    }
-	    writeWords(t->text);
 	    break;
 	  }
 	}
 	// if any argument doesn't' match, try to replace by pre defined variable
 	if (i == item.argNum) {
-	  replace_def(t); // self replace
 	  // self replace
-	  replaced_idx = replace_def(t);
+	  replaced_idx = replace_def(t, 0);
 	  if (replaced_idx != -1) {
 	    for (i = 0; define_table[replaced_idx].n_af[i] != '\0'; i++)
 	      item.n_af[af_idx++] = define_table[replaced_idx].n_af[i];
@@ -157,18 +156,16 @@ void pre_define(Token *t) {
       } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Blanks)) {
 	for (i = 0; t->text[i] != '\0'; i++)
 	  item.n_af[af_idx++] = t->text[i];
-	writeWords(t->text);
       }
     }
   } else if (t->kind == Space || t->kind == Tab) {
-    writeWords(t->text); // save space
     // const type
     // until new line
     while (t->kind != NewLine) {
      wrapNext(t, 0);
       if (t->kind == Ident) {
 	// self replace
-	replaced_idx = replace_def(t);
+	replaced_idx = replace_def(t, 0);
 	if (replaced_idx != -1) {
 	  for (i = 0; define_table[replaced_idx].n_af[i] != '\0'; i++)
 	    item.n_af[af_idx++] = define_table[replaced_idx].n_af[i];
@@ -176,13 +173,11 @@ void pre_define(Token *t) {
       } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Blanks)) {
 	for (i = 0; t->text[i] != '\0'; i++)
 	  item.n_af[af_idx++] = t->text[i];
-	writeWords(t->text);
       }
     }
   } else {
     error("invalid pre define syntax");
   }
-  writeWords(t->text);
   item.n_af[af_idx] = '\0'; // end
   define_table[def_table_ct++] = item;
   return;
@@ -191,7 +186,6 @@ void pre_define(Token *t) {
 int replace_com(Token *t) {
   if (t->kind == LComment) {
     while (!wrapNext(t, 0)) {}
-    writeWords(t->text);
   } else if (t->kind == MLCommS) {
     while (t->kind != MLCommE) {
       wrapNext(t, 0);
@@ -224,8 +218,7 @@ char *preprocess(char *fname) {
   while (t.kind != EOF_token) {
     wrapNext(&t, 0);
     if (t.kind == Sharp) {
-      writeWords(t.text);
-      wrapNext(&t, 1);
+      wrapNext(&t, 0);
       switch(t.kind) {
       case Define:
 	pre_define(&t);
@@ -236,20 +229,23 @@ char *preprocess(char *fname) {
       default:
 	error("undefined predefine");
       }
-    } else if (t.kind == LComment || t.kind == MLCommS) {
-      replace_com(&t);
-    } else if (t.kind == Ident) {
-      replace_def(&t);
-    } else if (t.kind == String){
-      writeWords("\""); // workaround
-      writeWords(t.text);
-      writeWords("\"");
-    } else if (t.kind == CharSymbol){
-      writeWords("\'"); // workaround
-      writeWords(t.text);
-      writeWords("\'");
     } else {
-      writeWords(t.text);
+	switch(t.kind) {
+	case LComment: case MLCommS:
+	  replace_com(&t); break;
+	case Ident:
+	  replace_def(&t, 1); break;
+	case String:
+	  writeWords("\""); // workaround
+	  writeWords(t.text);
+	  writeWords("\""); break;
+	case CharSymbol:
+	  writeWords("\'"); // workaround
+	  writeWords(t.text);
+	  writeWords("\'"); break;
+	default:
+	  writeWords(t.text); break;
+      }
     }
   }
   fclose(i_file);
