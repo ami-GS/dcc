@@ -230,6 +230,78 @@ char *fOpen_i(char *fname) {
   return fname_i;
 }
 
+void pre_if(Token *t) {
+  wrapNext(t, 0); wrapNext(t, 0);
+  if (!(t->kind == Ident || t->kind == IntNum)) {
+    error("#if needs value");
+    return;
+  }
+  // TODO : below lines are not cool
+  if (t->kind == Ident) {
+    int idx = replace_def(t, 0);
+    if (idx == -1 || strcmp(define_table[idx].n_af, "0") == 0) {
+      if_nest_table[if_nest_ct].ignore = 1;
+    } else {
+      if_nest_table[if_nest_ct].has_true = 1;
+    }
+  } else {
+    if (t->intVal == 0) { // TODO : is other value available?
+      if_nest_table[if_nest_ct].ignore = 1;
+    } else {
+      if_nest_table[if_nest_ct].has_true = 1;
+    }
+  }
+  if_nest_table[if_nest_ct].if_type = 1;
+  ++if_nest_ct;
+}
+
+void pre_else(Token *t, int is_elif) {
+  if (if_nest_ct < 1) {
+    error("missing previous #if, #ifdef or #ifndef");
+    return;
+  }
+
+  if (if_nest_table[if_nest_ct-1].has_true) {
+    if_nest_table[if_nest_ct-1].ignore = 1;
+  } else if (is_elif) {
+    wrapNext(t, 0); wrapNext(t, 0);
+    if (!(t->kind == Ident || t->kind == IntNum)) { // TODO : other type should be available
+      error("#elif of #if needs value");
+      return;
+    }
+
+    // TODO : below lines are not cool
+    if (t->kind == Ident) {
+      int idx = replace_def(t, 0);
+      if (idx == -1 || strcmp(define_table[idx].n_af, "0") == 0) {
+	if_nest_table[if_nest_ct-1].ignore = 1;
+      } else {
+	if_nest_table[if_nest_ct-1].ignore = 0;
+	if_nest_table[if_nest_ct-1].has_true = 1;
+      }
+    } else if (t->kind == IntNum){
+      if (t->intVal == 0) { // TODO : is other value available?
+	if_nest_table[if_nest_ct-1].ignore = 1;
+      } else {
+	if_nest_table[if_nest_ct-1].ignore = 0;
+	if_nest_table[if_nest_ct-1].has_true = 1;
+      }
+    }
+  } else { // when #else and false on #if, #ifdef or #ifndef
+    if_nest_table[if_nest_ct-1].ignore = 0;
+  }
+}
+
+void pre_endif(Token *t) {
+  if (if_nest_ct > 0 && if_nest_table[if_nest_ct-1].if_type > 0) {
+    if_nest_table[--if_nest_ct].has_true = 0;
+    if_nest_table[if_nest_ct].if_type = 0;
+    if_nest_table[if_nest_ct].ignore = 0;
+  } else {
+    error("missing previous #if, #ifdef or #ifndef");
+  }
+}
+
 char *preprocess(char *fname) {
   fOpen(fname);
   char *fname_i = fOpen_i(fname);
@@ -242,6 +314,20 @@ char *preprocess(char *fname) {
       case Define:
 	pre_define(&t);
 	break;
+      case If:
+	// in preprocessor.c, this only validate the elif, else, endif pair
+	// actual process after like #if is conducted in compiler()
+	pre_if(&t);
+	break;
+      case Elif:
+	pre_else(&t, 1);
+	break;
+      case Else:
+	pre_else(&t, 0);
+	break;
+      case Endif:
+	pre_endif(&t);
+	break;
       case Include:
 	pre_include(&t);
 	break;
@@ -250,6 +336,7 @@ char *preprocess(char *fname) {
 	error("undefined predefine");
       }
     } else {
+      if (if_nest_table[if_nest_ct-1].ignore == 0) {
 	switch(t.kind) {
 	case LComment: case MLCommS:
 	  replace_com(&t); break;
@@ -265,9 +352,11 @@ char *preprocess(char *fname) {
 	  writeWords("\'"); break;
 	default:
 	  writeWords(t.text); break;
+	}
       }
     }
   }
+
   fclose(i_file);
   return fname_i; // success
 }

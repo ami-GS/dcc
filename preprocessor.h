@@ -27,6 +27,16 @@ typedef struct {
 static define_item define_table[256];
 static int def_table_ct = 0;
 
+#define MAX_IF_NEST 16
+typedef struct {
+    int has_true;
+    int if_type; // 0:none, 1:#if, 2:#if(n)def
+    int ignore;
+} if_nest_item;
+static if_nest_item if_nest_table[MAX_IF_NEST];
+static int if_nest_ct = 0;
+
+#define MAX_LINE_SIZE 512
 
 void  pre_define(Token *t);
 int replace_def(Token *t, int save);

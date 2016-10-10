@@ -14,7 +14,7 @@ pointer * is not supported stil.
 
 - Int
 
- Char (string)
+- Char (string)
 
 ## Passed statements
 statements below were properly translated to assembler with simple processing.
@@ -52,6 +52,8 @@ while (a < 5) {
 - \#define (const and function) recursive only for const type
 
 - \#include (no include guard)
+
+- \#if, #elif, #else and #endif
 
 
 ## Passed expressions
