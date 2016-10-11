@@ -7,16 +7,19 @@ This is for my understandings of interpreter-compiler.
 Currently the usage is limited.
 
 
-## Supported types
+
+## Specification
+
+### Supported types
 Types below are supported.
 
-pointer * is not supported stil.
+pointer * is not supported stil. ('*' and '&' will be supported as unary operation below)
 
 - Int
 
 - Char (string)
 
-## Passed statements
+### Passed statements
 statements below were properly translated to assembler with simple processing.
 like
 
@@ -47,16 +50,16 @@ while (a < 5) {
 - local & global (array) variable declaration (with initialization)
 
 
-## Passed preprocessor directives
+### Passed preprocessor directives
 
 - \#define (const and function) recursive only for const type
 
-- \#include (no include guard)
+- \#include (no include guard, currently just copying)
 
 - \#if, #elif, #else and #endif
 
 
-## Passed expressions
+### Passed expressions
 
 - binary operations (+ - * / %)
 
