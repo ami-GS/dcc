@@ -32,7 +32,7 @@ void code_dump() {
 }
 
 void error(char *s) {
-  fprintf(stderr, "file %s :  line %d\n", currentFile, currentLine);
+  fprintf(stderr, "file %s :  line %d\n", fileNames[streamNest-1], currentLines[streamNest-1]);
   fprintf(stderr, "%s\n", s);
   return;
 }

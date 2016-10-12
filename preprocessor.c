@@ -5,9 +5,8 @@
 
 void writeWords(char *words) {
   int i;
-  for (i = 0; *(words+i) != '\0'; i++) {
-    putc(*(words+i), i_file);
-  }
+  for (i = 0; *(words+i) != '\0'; i++)
+    putc(*(words+i), streams[1]); // NOTICE : streams[1] must be .i file
 }
 
 int replace_def(Token *t, int save) {
@@ -88,10 +87,10 @@ int replace_def(Token *t, int save) {
 int bef_line = 1;
 int wrapNext(Token *t, int save) {
   int nl = 0;
-  if (currentLine > bef_line) {
+  if (currentLines[streamNest-1] > bef_line) {
     nl = 1;
   }
-  bef_line = currentLine;
+  bef_line = currentLines[streamNest-1];
   nextToken(t, 0);
   if (save) {
     // write to file
@@ -191,15 +190,9 @@ void pre_include(Token *t) {
     error("include needs \"FILENAME\"."); // TODO : <FILENAME> should be added
     return;
   }
-  FILE *ftmp;
-  char ctmp[MAX_LINE_SIZE];
-  if ((ftmp = fopen(t->text, "r")) == NULL) {
-    error("include file could not be loaded");
-    return;
-  }
-  while (fgets(ctmp, MAX_LINE_SIZE, ftmp) != NULL)
-    fputs(ctmp, i_file);
-  fclose(ftmp);
+  fOpen(t->text, "r");
+  preprocess_sub();
+  fClose();
 }
 
 int replace_com(Token *t) {
@@ -225,8 +218,7 @@ char *fOpen_i(char *fname) {
   } else {
     fprintf(stderr, "bad file format");
   }
-  if ((i_file = fopen(fname_i, "w")) == NULL)
-    fprintf(stderr, "file cannnot be opened");
+  fOpen(fname_i, "w");
   return fname_i;
 }
 
@@ -302,9 +294,7 @@ void pre_endif(Token *t) {
   }
 }
 
-char *preprocess(char *fname) {
-  fOpen(fname);
-  char *fname_i = fOpen_i(fname);
+void preprocess_sub() {
   Token t = {NulKind, "", 0, 0.0};
   while (t.kind != EOF_token) {
     wrapNext(&t, 0);
@@ -356,7 +346,12 @@ char *preprocess(char *fname) {
       }
     }
   }
+}
 
-  fclose(i_file);
+char *preprocess(char *fname) {
+  fOpen(fname, "r");
+  char *fname_i = fOpen_i(fname);
+  preprocess_sub();
+  fClose();
   return fname_i; // success
 }

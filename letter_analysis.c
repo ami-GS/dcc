@@ -3,19 +3,34 @@
 #include "letter_analysis.h"
 
 int t_buf_open = 0;
-int currentLine = 1;
-char *currentFile = NULL;
  // for creating '.i' file
 int use_all_as_token = 1;
-FILE *fin;
+FILE *streams[STREAM_SIZE];
+char fileNames[STREAM_SIZE][80];
+char  streamRW[STREAM_SIZE];
+int streamNest = 0;
+int currentLines[STREAM_SIZE];
 
-int fOpen(char *fname) {
-  currentLine = 1;
-  currentFile = fname;
-  if ((fin = fopen(fname, "r")) == NULL) {
+int fOpen(char *fname, char *RW) {
+  int i;
+  for (i = 0; fname[i] != '\0'; i++)
+    fileNames[streamNest][i] = fname[i];
+  fileNames[streamNest][i] = '\0';
+  streamRW[streamNest] = RW[0];
+  currentLines[streamNest] = 1;
+  if ((streams[streamNest++] = fopen(fname, RW)) == NULL) {
     error("file cannot be opened");
+    return -1;
   }
   return 1;
+}
+
+int fClose() {
+  if (streamNest < 1) {
+    error("file was not opened");
+    return -1;
+  }
+  fclose(streams[--streamNest]);
 }
 
 void initKind() {
@@ -51,13 +66,12 @@ int nextChar(char *c) {
     *c = prevC;
     return *c;
   }
-
-  *c = fgetc(fin);
+  *c = fgetc(streams[streamNest-1]);
   if (*c == '\n') {
-    currentLine++; // TODO : this need to be made for each files
+    currentLines[streamNest-1]++; // TODO : this need to be made for each files
   }
   if (*c == EOF) {
-    fclose(fin);
+    fclose(streams[streamNest-1]);
     return *c;
   }
   return 1;

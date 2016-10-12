@@ -6,7 +6,6 @@
 
 #define ID_SIZ 31 // 31 + \0
 #define TOKEN_TXT_SIZ 63 // 63 + \0
-extern  FILE *fin;
 
 // TODO : separate NOT and NOTEq
 typedef enum {
@@ -75,12 +74,17 @@ static int t_buf_head = 0, t_buf_tail = 0;
 extern int t_buf_open; // TODO : workaround
 int t_buf_enqueue(Token t);
 int t_buf_dequeue(Token *t);
-extern int currentLine;
-extern char *currentFile;
 extern int use_all_as_token;
+#define STREAM_SIZE 8
+extern FILE *streams[STREAM_SIZE];
+extern char fileNames[STREAM_SIZE][80];
+extern char  streamRW[STREAM_SIZE];
+extern int streamNest;
+extern int currentLines[STREAM_SIZE];
 
 // TODO : research about function name decisionning
-int fOpen(char *fname);
+int fOpen(char *fname, char *RW);
+int fClose();
 void initKind();
 int nextChar(char *c);
 int is_ope2(const char *c1, const char *c2);

@@ -13,7 +13,7 @@ TableEntry* funcPtr = NULL;
 void compile(char *fname) {
   genCode2(CALL, -1); // for main
   genCode1(STOP);
-  fOpen(fname);
+  fOpen(fname, "r");
   Token t = {NulKind, "", 0};
 
   nextToken(&t, 0);
@@ -45,12 +45,13 @@ void compile(char *fname) {
   }
   backpatch_calladdr();
   // TODO : memory ?
+  fClose();
 }
 
 
 void ignoreLine(Token *t) {
-  int l = currentLine;
-  while (l == currentLine) {
+  int l = currentLines[streamNest-1];
+  while (l == currentLines[streamNest-1]) {
     nextToken(t, 0);
   }
   nextToken(t, 0);

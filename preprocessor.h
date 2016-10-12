@@ -9,9 +9,6 @@
 #define MAX_DEFINE_ARG_NUM 16
 #define MAX_DEFINE_ARG_LEN 14
 
-static FILE *i_file; // for .i file
-char *i_fname[126];
-
 typedef enum {
     INCLUDE,
     DEFINE,
@@ -45,6 +42,7 @@ int search_define();
 void enter_define();
 char *fOpen_i(char *fname);
 char *preprocess(char *fname);
+void preprocess_sub();
 int wrapNext(Token *t, int save);
 
 
