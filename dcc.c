@@ -29,10 +29,12 @@ int  main(int argc, char *argv[]) {
     }
   }
 
-  char *fname_i = preprocess(argv[1]);
+  char *fname_i = preprocess(fname);
   use_all_as_token = 0;
   compile(fname_i);
+  if (!leave_ifile)
+    remove(fname_i);
   free(fname_i);
   code_dump();
-  execute(codes, 1);
+  execute(codes, show_movement);
 }
