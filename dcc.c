@@ -34,7 +34,7 @@ int  main(int argc, char *argv[]) {
   compile(fname_i);
   if (!leave_ifile)
     remove(fname_i);
-  free(fname_i);
-  code_dump();
+  if (show_assembly)
+    code_dump();
   execute(codes, show_movement);
 }
