@@ -71,7 +71,6 @@ int nextChar(char *c) {
     currentLines[streamNest-1]++; // TODO : this need to be made for each files
   }
   if (*c == EOF) {
-    fclose(streams[streamNest-1]);
     return *c;
   }
   return 1;

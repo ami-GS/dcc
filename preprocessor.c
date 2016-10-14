@@ -6,7 +6,7 @@
 void writeWords(char *words) {
   int i;
   for (i = 0; *(words+i) != '\0'; i++)
-    putc(*(words+i), streams[1]); // NOTICE : streams[1] must be .i file
+    putc(*(words+i), streams[STREAM_SIZE-1]); // NOTICE : streams[1] must be .i file
 }
 
 int replace_def(Token *t, int save) {
@@ -209,17 +209,22 @@ int replace_com(Token *t) {
 
 char *fOpen_i(char *fname) {
   int i;
-  for (i = 0; fname[i] != '\0'; i++) {}
-  char *fname_i;
-  fname_i = (char *)malloc(sizeof(char) * i);
-  memcpy(fname_i, fname, i);
-  if (fname_i[i-2] == '.' && fname_i[i-1] == 'c') {
-    fname_i[i-1] = 'i';
+  for (i = 0; fname[i] != '\0'; i++)
+    fileNames[STREAM_SIZE-1][i] = fname[i];
+  fileNames[STREAM_SIZE-1][i] = '\0';
+  if (fname[i-2] == '.' && fname[i-1] == 'c') {
+    fileNames[STREAM_SIZE-1][i-1] = 'i';
   } else {
     fprintf(stderr, "bad file format");
   }
-  fOpen(fname_i, "w");
-  return fname_i;
+
+  streamRW[STREAM_SIZE-1] = 'w';
+  currentLines[STREAM_SIZE-1] = 1;
+  if ((streams[STREAM_SIZE-1] = fopen(fileNames[STREAM_SIZE-1], "w")) == NULL) {
+    error("file cannot be opened");
+    return -1;
+  }
+  return fileNames[STREAM_SIZE-1];
 }
 
 void pre_if(Token *t) {
@@ -352,6 +357,7 @@ char *preprocess(char *fname) {
   fOpen(fname, "r");
   char *fname_i = fOpen_i(fname);
   preprocess_sub();
+  fclose(streams[STREAM_SIZE-1]);
   fClose();
   return fname_i; // success
 }
