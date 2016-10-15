@@ -54,9 +54,9 @@ while (a < 5) {
 
 - \#define (const and function) recursive only for const type
 
-- \#include (no include guard, currently just copying)
+- \#include (possible to file nesting compile)
 
-- \#if, #elif, #else and #endif
+- \#if, #elif, #else, #ifdef, #ifndef and #endif
 
 
 ### Passed expressions
