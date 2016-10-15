@@ -11,6 +11,16 @@ void writeWords(char *words) {
     putc(*(words+i), streams[STREAM_SIZE-1]); // NOTICE : streams[1] must be .i file
 }
 
+int search_def(char *text) {
+  int i;
+  for (i = 0; i < def_table_ct; i++) {
+    if (strcmp(text, define_table[i].n_bef) == 0) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 int replace_def(Token *t, int save) {
   int i;
   char tmp[128];
@@ -20,8 +30,8 @@ int replace_def(Token *t, int save) {
   tmp[i] = '\0';
   
   // search
-  for (i = 0; i < def_table_ct; i++) {
-    if (strcmp(t->text, define_table[i].n_bef) == 0) {
+  i = search_def(t->text);
+  if (i != -1) {
       int j;
       if (define_table[i].argNum == 0) {
 	// write define_table[i].n_af to i file
@@ -77,9 +87,8 @@ int replace_def(Token *t, int save) {
       }
       return i; // 1 indicate replaced
     }
-  }
-  
-  if (i == def_table_ct) {
+
+  if (save && i == -1) {
     writeWords(t->text);
     return -1; // 0 indicate not replaced
   }
@@ -103,8 +112,12 @@ int wrapNext(Token *t, int save) {
 }
 
 void pre_define(Token *t) {
-  define_item item = define_table[def_table_ct]; // just copy, not reference. this is intentional
   wrapNext(t, 0); wrapNext(t, 0); // skip space
+  if (search_def(t->text) != -1) {
+    error("duplicating define");
+    return -1;
+  }
+  define_item item = define_table[def_table_ct]; // just copy, not reference. this is intentional
   int i;
   for (i = 0; t->text[i] != '\0'; i++)
     item.n_bef[i] = t->text[i];

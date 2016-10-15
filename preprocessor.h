@@ -38,7 +38,7 @@ static int if_nest_ct = 0;
 void  pre_define(Token *t);
 int replace_def(Token *t, int save);
 int replace_com(Token *t);
-int search_define();
+int search_def(char *text);
 void enter_define();
 char *fOpen_i(char *fname);
 char *preprocess(char *fname);
