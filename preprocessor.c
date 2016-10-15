@@ -248,6 +248,13 @@ void pre_if(Token *t) {
     error("#if needs value");
     return;
   }
+  if (if_nest_ct > 0 && if_nest_table[if_nest_ct-1].ignore == 1) {
+    if_nest_table[if_nest_ct].ignore = 1;
+    if_nest_table[if_nest_ct].has_true = 1;
+    if_nest_table[if_nest_ct++].if_type = 1;
+    return;
+  }
+
   // TODO : below lines are not cool
   if (t->kind == Ident) {
     int idx = replace_def(t, 0);
@@ -267,6 +274,24 @@ void pre_if(Token *t) {
   ++if_nest_ct;
 }
 
+void pre_ifdef(Token *t, int not) {
+  wrapNext(t, 0); wrapNext(t, 0);
+  if (t->kind != Ident) { // TODO : other type should be available
+    error("#elif needs value");
+    return;
+  }
+  int idx = replace_def(t, 0);
+  if (idx == -1) {
+    if_nest_table[if_nest_ct].ignore = !not;
+    if_nest_table[if_nest_ct].has_true = not;
+  } else {
+    if_nest_table[if_nest_ct].ignore = not;
+    if_nest_table[if_nest_ct].has_true = !not;
+  }
+  if_nest_table[if_nest_ct].if_type = 2 + not;
+  ++if_nest_ct;
+}
+
 void pre_else(Token *t, int is_elif) {
   if (if_nest_ct < 1) {
     error("missing previous #if, #ifdef or #ifndef");
@@ -283,6 +308,7 @@ void pre_else(Token *t, int is_elif) {
     }
 
     // TODO : below lines are not cool
+    // TODO : consider ifdef and ifndef separation
     if (t->kind == Ident) {
       int idx = replace_def(t, 0);
       if (idx == -1 || strcmp(define_table[idx].n_af, "0") == 0) {
@@ -335,6 +361,12 @@ void preprocess_sub() {
 	break;
       case Else:
 	pre_else(&t, 0);
+	break;
+      case Ifdef:
+	pre_ifdef(&t, 0);
+	break;
+      case Ifndef:
+	pre_ifdef(&t, 1);
 	break;
       case Endif:
 	pre_endif(&t);
