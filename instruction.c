@@ -139,8 +139,6 @@ void backpatch_return(int return_address) {
 }
 
 void backpatch_calladdr() {
-  if (codes[0].opdata < 0)
-    error("'main' function is missing");
   int i;
   for (i = 0; i < code_ct; i++) {
     if (codes[i].opcode == CALL && codes[i].opdata <= 0) {

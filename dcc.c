@@ -36,5 +36,9 @@ int  main(int argc, char *argv[]) {
     remove(fname_i);
   if (show_assembly)
     code_dump();
+
+  if (codes[0].opdata < 0)
+    error("'main' function is missing");
+
   execute(codes, show_movement);
 }

@@ -171,7 +171,7 @@ int expr_with_check(Token *t, char l, char r) {
   expression(t, NON_T);
   if (r != 0) {
     if (t->text[0] != r) {
-      fprintf(stderr, "expression is not ending with %s", l);
+      fprintf(stderr, "expression is not ending with %s", r);
     }
     nextToken(t, 0);
   }
