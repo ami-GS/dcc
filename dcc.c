@@ -15,8 +15,10 @@ int  main(int argc, char *argv[]) {
   }
 
   initKind();
-  int i;
-  char *fname;
+  // TODO : temporally putting here
+  genCode2(CALL, -1); // for main
+  genCode1(STOP);
+  int i, j;
   for (i = 0; argv[i] != '\0'; i++) {
     if (argv[i][0] == '-') {
       switch (argv[i][1]) {
@@ -24,16 +26,18 @@ int  main(int argc, char *argv[]) {
       case 's': show_assembly = 1; break;
       case 'm': show_movement = 1; break;
       }
-    } else {
-      fname = argv[i]; // TODO : more validation needed
     }
   }
 
-  char *fname_i = preprocess(fname);
-  use_all_as_token = 0;
-  compile(fname_i);
-  if (!leave_ifile)
-    remove(fname_i);
+  for (i = 0; argv[i] != '\0'; i++) {
+    for (j = 0; argv[i][j] != '\0'; j++) {}
+    if (argv[i][j-2] == '.' && argv[i][j-1] == 'c') {
+      char *fname_i = preprocess(argv[i]);
+      compile(fname_i);
+      if (!leave_ifile)
+	remove(fname_i);
+    }
+  }
   if (show_assembly)
     code_dump();
 

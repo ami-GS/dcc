@@ -11,11 +11,8 @@ TableEntry* funcPtr = NULL;
 #define is_main(p) (strcmp(p, "main")==0)
 
 void compile(char *fname) {
-  genCode2(CALL, -1); // for main
-  genCode1(STOP);
   fOpen(fname, "r");
   Token t = {NulKind, "", 0};
-
   nextToken(&t, 0);
   while (t.kind != EOF_token) {
     TableEntry entryTmp = {no_ID, "", NON_T, GLOBAL, 0, 0, 0};

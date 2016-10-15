@@ -5,6 +5,8 @@
 
 void writeWords(char *words) {
   int i;
+  if (if_nest_ct > 0 && if_nest_table[if_nest_ct-1].ignore == 1)
+    return;
   for (i = 0; *(words+i) != '\0'; i++)
     putc(*(words+i), streams[STREAM_SIZE-1]); // NOTICE : streams[1] must be .i file
 }
@@ -307,7 +309,8 @@ void preprocess_sub() {
       wrapNext(&t, 0);
       switch(t.kind) {
       case Define:
-	pre_define(&t);
+	if (!if_nest_table[if_nest_ct-1].ignore)
+	  pre_define(&t);
 	break;
       case If:
 	// in preprocessor.c, this only validate the elif, else, endif pair
@@ -324,40 +327,41 @@ void preprocess_sub() {
 	pre_endif(&t);
 	break;
       case Include:
-	pre_include(&t);
+	if (!if_nest_table[if_nest_ct-1].ignore)
+	  pre_include(&t);
 	break;
 	//case Pragma:
       default:
 	error("undefined predefine");
       }
     } else {
-      if (if_nest_table[if_nest_ct-1].ignore == 0) {
-	switch(t.kind) {
-	case LComment: case MLCommS:
-	  replace_com(&t); break;
-	case Ident:
-	  replace_def(&t, 1); break;
-	case String:
-	  writeWords("\""); // workaround
-	  writeWords(t.text);
-	  writeWords("\""); break;
-	case CharSymbol:
-	  writeWords("\'"); // workaround
-	  writeWords(t.text);
-	  writeWords("\'"); break;
-	default:
-	  writeWords(t.text); break;
-	}
+      switch(t.kind) {
+      case LComment: case MLCommS:
+	replace_com(&t); break;
+      case Ident:
+	replace_def(&t, 1); break;
+      case String:
+	writeWords("\""); // workaround
+	writeWords(t.text);
+	writeWords("\""); break;
+      case CharSymbol:
+	writeWords("\'"); // workaround
+	writeWords(t.text);
+	writeWords("\'"); break;
+      default:
+	writeWords(t.text); break;
       }
     }
   }
 }
 
 char *preprocess(char *fname) {
+  use_all_as_token = 1;
   fOpen(fname, "r");
   char *fname_i = fOpen_i(fname);
   preprocess_sub();
   fclose(streams[STREAM_SIZE-1]);
   fClose();
+  use_all_as_token = 0;
   return fname_i; // success
 }
