@@ -31,7 +31,7 @@ typedef struct {
 
 #define TABLE_MAX 65536
 extern TableEntry SymbolTable[TABLE_MAX];
-extern int tblEntryCnt;
+static int table_ent_ct = 0;
 #define GTBL_START 0
 static int LTBL_START = 0;
 #define LTBL_EMPTY TABLE_MAX+1

@@ -98,10 +98,10 @@ int replace_def(Token *t, int save) {
 int bef_line = 1;
 int wrapNext(Token *t, int save) {
   int nl = 0;
-  if (currentLines[streamNest-1] > bef_line) {
+  if (currentLines[streamNest_ct-1] > bef_line) {
     nl = 1;
   }
-  bef_line = currentLines[streamNest-1];
+  bef_line = currentLines[streamNest_ct-1];
   nextToken(t, 0);
   if (save) {
     // write to file

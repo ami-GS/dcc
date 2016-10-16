@@ -8,17 +8,17 @@ int use_all_as_token = 1;
 FILE *streams[STREAM_SIZE];
 char fileNames[STREAM_SIZE][80];
 char  streamRW[STREAM_SIZE];
-int streamNest = 0;
+int streamNest_ct = 0;
 int currentLines[STREAM_SIZE];
 
 int fOpen(char *fname, char *RW) {
   int i;
   for (i = 0; fname[i] != '\0'; i++)
-    fileNames[streamNest][i] = fname[i];
-  fileNames[streamNest][i] = '\0';
-  streamRW[streamNest] = RW[0];
-  currentLines[streamNest] = 1;
-  if ((streams[streamNest++] = fopen(fname, RW)) == NULL) {
+    fileNames[streamNest_ct][i] = fname[i];
+  fileNames[streamNest_ct][i] = '\0';
+  streamRW[streamNest_ct] = RW[0];
+  currentLines[streamNest_ct] = 1;
+  if ((streams[streamNest_ct++] = fopen(fname, RW)) == NULL) {
     error("file cannot be opened");
     return -1;
   }
@@ -26,11 +26,11 @@ int fOpen(char *fname, char *RW) {
 }
 
 int fClose() {
-  if (streamNest < 1) {
+  if (streamNest_ct < 1) {
     error("file was not opened");
     return -1;
   }
-  fclose(streams[--streamNest]);
+  fclose(streams[--streamNest_ct]);
 }
 
 void initKind() {
@@ -66,9 +66,9 @@ int nextChar(char *c) {
     *c = prevC;
     return *c;
   }
-  *c = fgetc(streams[streamNest-1]);
+  *c = fgetc(streams[streamNest_ct-1]);
   if (*c == '\n') {
-    currentLines[streamNest-1]++; // TODO : this need to be made for each files
+    currentLines[streamNest_ct-1]++; // TODO : this need to be made for each files
   }
   if (*c == EOF) {
     return *c;

@@ -5,12 +5,12 @@
 #include "parse.h"
 
 TableEntry SymbolTable[TABLE_MAX];
-int tblEntryCnt = 0;
+//int tblEntryCnt = 0;
 
 TableEntry* get_table_entry(char *name) {
   // TODO : use quick, binary, hash search
   int i, j;
-  for (i = 0; i < tblEntryCnt; i++) {
+  for (i = 0; i < table_ent_ct; i++) {
     for (j = 0; *(name+j) != '\0'; j++) {
       if (*(name+j) != *(SymbolTable[i].name+j)) {
 	break;
@@ -33,7 +33,7 @@ TableEntry *enter_table_item(TableEntry* ent) {
   }
   */
 
-  if (tblEntryCnt >= TABLE_MAX) {
+  if (table_ent_ct >= TABLE_MAX) {
     error("symbol table overflow");
   }
   dupCheck(ent);
@@ -44,21 +44,21 @@ TableEntry *enter_table_item(TableEntry* ent) {
     set_address(ent);
   } else if (ent->kind == func_ID ) {
     // apply func setting
-    ent->code_addr = -tblEntryCnt;
+    ent->code_addr = -table_ent_ct;
     TableEntry* e = get_table_entry(ent->name);
   if (e != NULL && e->kind == proto_ID)
-      e->code_addr = -tblEntryCnt;
+      e->code_addr = -table_ent_ct;
   } else if (ent->kind == proto_ID) {
-    ent->code_addr = -tblEntryCnt; // code.opdata -> SymbolTable[code] ->
+    ent->code_addr = -table_ent_ct; // code.opdata -> SymbolTable[code] ->
   }
-  SymbolTable[tblEntryCnt] = *ent;
-  return &SymbolTable[tblEntryCnt++];
+  SymbolTable[table_ent_ct] = *ent;
+  return &SymbolTable[table_ent_ct++];
 }
 
 // TODO : text book uses search and search_name separately. why?
 TableEntry *search(char *text) {
   int i;
-  for (i = tblEntryCnt-1; i >= LTBL_START; i--) {
+  for (i = table_ent_ct-1; i >= LTBL_START; i--) {
     if (strcmp(SymbolTable[i].name, text) == 0) {
       return SymbolTable + i;
     }
@@ -84,18 +84,18 @@ void del_func_entry(TableEntry *f1, TableEntry *f2) {
       *(f1+i) = *(f2+i); // copy to proto
     }
   }
-  tblEntryCnt -= (f2->args);
+  table_ent_ct -= (f2->args);
   return;
 }
 
 
 void open_local_table() {
-  LTBL_START = tblEntryCnt;
+  LTBL_START = table_ent_ct;
 }
 
 
 void close_local_table(TableEntry *ent) {
-  tblEntryCnt = LTBL_START + ent->args; // to remain arguments
+  table_ent_ct = LTBL_START + ent->args; // to remain arguments
   LTBL_START = 0;
 }
 

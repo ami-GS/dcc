@@ -47,8 +47,8 @@ void compile(char *fname) {
 
 
 void ignoreLine(Token *t) {
-  int l = currentLines[streamNest-1];
-  while (l == currentLines[streamNest-1]) {
+  int l = currentLines[streamNest_ct-1];
+  while (l == currentLines[streamNest_ct-1]) {
     nextToken(t, 0);
   }
   nextToken(t, 0);

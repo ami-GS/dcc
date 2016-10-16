@@ -11,10 +11,6 @@
 #define GEN_JPF_BUTTOM(addr) addr=genCode2(JPF, 0)
 #define GEN_JPT_BUTTOM(addr) genCode2(JPT, addr)
 
-//#define BREAK_LIST_SIZ 64
-//int break_list[BREAK_LIST_SIZ];
-//int break_list_ct = 0;
-
 #define MAX_LOOP_NEST_SIZ 100
 struct {
     Kind st_kind;

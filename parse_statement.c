@@ -104,16 +104,16 @@ void st_switch(Token *t) {
   int table_addr, end;
   nextToken(t, 0);
   expr_with_check(t, '(', ')');
-  // TODO : jump to condition table check (1)
+  // jump to condition table check (1)
   GEN_JMP_BUTTOM(table_addr); // TODO : need to change name
   begin_switch(); // initialize
   statement(t);
-  // TODO : jump to end of switch (2)
+  // jump to end of switch (2)
   GEN_JMP_BUTTOM(end);
-  // TODO : set label (1) for condition table
+  // set label (1) for condition table
   backpatch(table_addr, code_ct);
   end_switch(); // apply gathered case list as table
-  // TODO : set label (2)
+  // set label (2)
   backpatch(end, code_ct);
   return;
 }
@@ -212,7 +212,6 @@ void st_do(Token *t) {
   // set label to loop. (1)
   LABEL_TOP(loop_top);
   statement(t);
-  //nextToken(t, 0); //-> while
   if (t->kind == While) {
     nextToken(t, 0); //-> condition
     expr_with_check(t, '(', ')');
@@ -347,16 +346,16 @@ void begin_switch() {
 void end_switch() {
   int i, st = switchNest[switchNest_ct].case_list_st_addr;
   for (i = st; i <= caseList_ct-1; i++) {
-    // TODO : compare caseList[i].value and stack top?
+    // compare caseList[i].value and stack top?
     genCode2(EQCMP, caseList[i].value);
-    // TODO : jump to caseList[i].addr if true
+    // jump to caseList[i].addr if true
     genCode2(JPT, caseList[i].address);
   }
   // TODO : remove top comparison result?
   genCode1(DEL);
   if (switchNest[switchNest_ct].default_addr != -1) {
     // when this nest has default
-    // TODO : jump to switch_nest[switchNest_ct].default_addr
+    // jump to switch_nest[switchNest_ct].default_addr
     genCode2(JMP, switchNest[switchNest_ct].default_addr);
   }
   caseList_ct = st - 1;

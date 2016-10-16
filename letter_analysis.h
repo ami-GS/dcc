@@ -79,7 +79,7 @@ extern int use_all_as_token;
 extern FILE *streams[STREAM_SIZE];
 extern char fileNames[STREAM_SIZE][80];
 extern char  streamRW[STREAM_SIZE];
-extern int streamNest;
+extern int streamNest_ct;
 extern int currentLines[STREAM_SIZE];
 
 // TODO : research about function name decisionning
