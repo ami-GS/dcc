@@ -21,10 +21,12 @@ int  main(int argc, char *argv[]) {
   int i, j;
   for (i = 0; argv[i] != '\0'; i++) {
     if (argv[i][0] == '-') {
-      switch (argv[i][1]) {
-      case 'i': leave_ifile = 1; break;
-      case 's': show_assembly = 1; break;
-      case 'm': show_movement = 1; break;
+      for (j = 1; argv[i][j] != '\0'; j++) {
+	switch (argv[i][j]) {
+	case 'i': leave_ifile = 1; break;
+	case 's': show_assembly = 1; break;
+	case 'm': show_movement = 1; break;
+	}
       }
     }
   }
