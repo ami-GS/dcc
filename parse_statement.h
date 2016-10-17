@@ -25,7 +25,7 @@ struct {
     int value;
     int address;
 } caseList[MAX_CASE_SIZ];
-static int caseList_ct; // TODO : this is not for each switch
+static int caseList_ct = 0; // TODO : this is not for each switch
 
 #define MAX_SWITCH_NEST_SIZ 10
 struct {

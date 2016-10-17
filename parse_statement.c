@@ -135,7 +135,7 @@ void st_case(Token *t) {
   }
   code_ct--; // remove LDI and its const
   int i;
-  for (i = switchNest[switchNest_ct].case_list_st_addr; i < caseList_ct; i++) {
+  for (i = switchNest[switchNest_ct-1].case_list_st_addr; i < caseList_ct; i++) {
     if (caseList[i].value == val) {
       error("case condition is duplicating");
     }
@@ -155,11 +155,11 @@ void st_default(Token *t) {
     error("no corresponding switch for 'default'");
   }
   // TODO : 0 is danger. -1 should be applied as initialization
-  if (switchNest[switchNest_ct].default_addr != 0) {
+  if (switchNest[switchNest_ct-1].default_addr != -1) {
     error("multiple 'default'");
   }
   // set address of switchNest[switchNest_ct].default_addr = ;
-  switchNest[switchNest_ct].default_addr = code_ct;
+  switchNest[switchNest_ct-1].default_addr = code_ct;
   if (!checkNxtTokenKind(Colon)) {
     error("end ':' is missing");
   }
@@ -344,8 +344,8 @@ void begin_switch() {
 }
 
 void end_switch() {
-  int i, st = switchNest[switchNest_ct].case_list_st_addr;
-  for (i = st; i <= caseList_ct-1; i++) {
+  int i, st = switchNest[switchNest_ct-1].case_list_st_addr;
+  for (i = st; i < caseList_ct; i++) {
     // compare caseList[i].value and stack top?
     genCode2(EQCMP, caseList[i].value);
     // jump to caseList[i].addr if true
@@ -353,12 +353,12 @@ void end_switch() {
   }
   // TODO : remove top comparison result?
   genCode1(DEL);
-  if (switchNest[switchNest_ct].default_addr != -1) {
+  if (switchNest[switchNest_ct-1].default_addr != -1) {
     // when this nest has default
     // jump to switch_nest[switchNest_ct].default_addr
-    genCode2(JMP, switchNest[switchNest_ct].default_addr);
+    genCode2(JMP, switchNest[switchNest_ct-1].default_addr);
   }
-  caseList_ct = st - 1;
+  caseList_ct = st;
   switchNest_ct--;
 }
 
