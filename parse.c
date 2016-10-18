@@ -21,7 +21,7 @@ void compile(char *fname) {
     case Int: case Void:
       set_dtype(&entryTmp, &t);
       set_name(&entryTmp, &t);
-      if (t.kind == Lparen) {
+      if (t.kind == '(') {
 	declare_func(&entryTmp, &t);
       } else { // in case of ',' or '['
 	declare_var(&entryTmp, &t);
@@ -103,18 +103,18 @@ void countInitialization(TableEntry *ent) {
       ent->arrLen = t.intVal;
       return;
     }
-    count += (t.kind == Comma);
-  } while(t.kind != Rbrace);
+    count += (t.kind == ',');
+  } while(t.kind != '}');
   ent->arrLen = count + 1;
 }
 
 int set_array(TableEntry* ent, Token *t) {
-  while (t->kind == Lbracket) {
+  while (t->kind == '[') {
     if (!is_const_expr()) {
       error("array length must be const value");
     }
     nextToken(t, 0);
-    if (t->kind == Rbracket) { // A[] = ...;
+    if (t->kind == ']') { // A[] = ...;
       nextToken(t, 0); // point to '=' or another
       countInitialization(ent);
       return 1; // no array length declaration
@@ -127,11 +127,11 @@ int set_array(TableEntry* ent, Token *t) {
       error("invalid array length");
     }
 
-    if (t->kind == Semicolon || t->kind == Comma) {
+    if (t->kind == ';' || t->kind == ',') {
       return 1; // TODO : no end bracket?
     }
     // TODO : currently it doesn't support multi dimention
-    if (t->kind == Lbracket) {
+    if (t->kind == '[') {
       nextToken(t, 0); // point at ',', ';' or '['
       return 1;
     }
@@ -216,7 +216,7 @@ void init_var(TableEntry *ent, Token *t) {
 	if (ent->arrLen != -1 && i > ent->arrLen) {
 	  error("the number of init value exceeds that of predefined");
 	}
-      } while(t->kind == Comma);
+      } while(t->kind == ',');
       nextToken(t, 0);
     }
   }
@@ -227,17 +227,17 @@ int declare_var(TableEntry* ent, Token* t) {
   while (1) {
     set_array(ent, t);
     TableEntry *tmp =  enter_table_item(ent);
-    if (t->kind == Assign) {
+    if (t->kind == '=') {
       init_var(tmp, t);
     }
 
-    if (t->kind != Comma) {
+    if (t->kind != ',') {
       break; // TODO : suspicious
     }
     nextToken(t, 0); // next to ','
     set_name(ent, t);
   }
-  return t->kind == Semicolon;
+  return t->kind == ';';
 }
 
 int set_func_process(TableEntry* ent, Token *t) {
@@ -282,13 +282,13 @@ int declare_func(TableEntry* ent, Token* t) {
       set_name(&arg, t);
       enter_table_item(&arg); // to avoid multiple declaration in case of using declare_var
       (funcPtr->args)++;
-      if (t->kind != Comma) {
+      if (t->kind != ',') {
 	break;
       }
       nextToken(t, 0);
     }
   }
-  if (t->kind != Rparen) {
+  if (t->kind != ')') {
     error("end ')' is missing ");
   }
   nextToken(t, 0);
@@ -336,7 +336,7 @@ SymbolKind block(Token *t, TableEntry *func) {
   blockNest_ct++;
 
   Kind k = Others; // store last statement (for in case of return)
-  while (t->kind != Rbrace) {
+  while (t->kind != '}') {
     k = t->kind; // TODO : here? I think later of statement is better?
     statement(t);
   }

@@ -275,13 +275,13 @@ SymbolKind get_func_type() {
     Token tmp = {NulKind, "", 0, 0.0};
     nextToken(&tmp, 1);
     t_buf_enqueue(tmp);
-    if (tmp.kind == Rparen) {
+    if (tmp.kind == ')') {
       nextToken(&tmp, 1); //suspicious
       t_buf_enqueue(tmp);
       switch (tmp.kind) {
-      case Semicolon: // prototype
+      case ';': // prototype
 	return proto_ID;
-      case Lbrace:
+      case '{':
 	return func_ID; // function
       default:
 	return no_ID; // TODO : syntax error

@@ -88,7 +88,7 @@ int factor(Token *t) {
 	nextToken(t, 0);
       } else {
 	nextToken(t, 0);
-	if (t->kind == Lbracket) {
+	if (t->kind == '[') {
 	  // TODO : currently only [] based addressing
 	  genCode(LDA, te_tmp->level, te_tmp->code_addr); // load top start address of array
 	  expr_with_check(t, '[', ']');
@@ -189,7 +189,7 @@ int is_const_expr() {
       t_buf_open = 1;
       return -1; // TODO : invalid const expression
     }
-  } while (t.kind != Rbracket && t.kind != Colon); // TODO : this might cause forever loop?
+  } while (t.kind != ']' && t.kind != ':'); // TODO : this might cause forever loop?
   t_buf_open = 1;
   return 1;
 }
@@ -199,16 +199,16 @@ void callFunc(Token *t, TableEntry *te) {
   nextToken(t, 0); // point to '('
   nextToken(t, 0); // point to ')' or arguments
   int arg_cnt = 0;
-  if (t->kind != Rparen) {
+  if (t->kind != ')') {
     while (1) {
       expression(t, NON_T);
       ++arg_cnt;
-      if (t->kind != Comma)
+      if (t->kind != ',')
 	break;
       nextToken(t, 0);
     }
   }
-  if (t->kind != Rparen) {
+  if (t->kind != ')') {
     error("end ')' is missing");
   }
 

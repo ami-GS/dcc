@@ -40,7 +40,7 @@ int replace_def(Token *t, int save) {
       } else {
 	// func type
 	wrapNext(t, 0); // -> '('
-	if (t->kind != Lparen) {
+	if (t->kind != '(') {
 	  error("this identifier should be function type");
 	  return -1; // TODO : this definition is function type
 	}
@@ -49,10 +49,10 @@ int replace_def(Token *t, int save) {
 	int af_idx = 0, aNum = 0, k;
 
 	// save argumnets
-	while (t->kind != Rparen) {
+	while (t->kind != ')') {
 	  wrapNext(t, 0); // arg
-	  if (t->kind != Comma && t->kind != Rparen &&
-	      t->kind != Space && t->kind != Tab && t->kind != NewLine && t->kind != Blanks) {
+	  if (t->kind != ',' && t->kind != ')' &&
+	      t->kind != ' ' && t->kind != '\t' && t->kind != '\n' && t->kind != Blanks) {
 	    for (k = 0; t->text[k] != '\0'; k++) 
 	      arg_table_buf[aNum][k] = t->text[k];
 	    arg_table_buf[aNum++][k] = '\0';
@@ -126,15 +126,15 @@ void pre_define(Token *t) {
   int af_idx = 0;
   int replaced_idx = -1;
   wrapNext(t, 0);
-  if (t->kind == Lparen) {
+  if (t->kind == '(') {
     wrapNext(t, 0);
     // func type
-    while (t->kind != Rparen) {
+    while (t->kind != ')') {
       if (t->kind == Ident) {
 	for (i = 0; t->text[i] != '\0'; i++) 
 	  item.arg_table[item.argNum][i] = t->text[i];
 	item.arg_table[item.argNum++][i] = '\0';
-      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Blanks || t->kind == Comma)) {
+      } else if (!(t->kind == ' ' || t->kind == '\t' || t->kind == '\n' || t->kind == Blanks || t->kind == ',')) {
 	error("arguments of defined function should be identifier");
 	return -1;
       }
@@ -143,7 +143,7 @@ void pre_define(Token *t) {
 
     // until new line
     wrapNext(t, 0); // point at space
-    while (t->kind != NewLine) {
+    while (t->kind != '\n') {
       wrapNext(t, 0);
       if (t->kind == Ident) {
 	for (i = 0; i < item.argNum; i++) {
@@ -167,15 +167,15 @@ void pre_define(Token *t) {
 	      item.n_af[af_idx++] = define_table[replaced_idx].n_af[i];
 	  }
 	}
-      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Blanks)) {
+      } else if (!(t->kind == ' ' || t->kind == '\t' || t->kind == '\n' || t->kind == Blanks)) {
 	for (i = 0; t->text[i] != '\0'; i++)
 	  item.n_af[af_idx++] = t->text[i];
       }
     }
-  } else if (t->kind == Space || t->kind == Tab) {
+  } else if (t->kind == ' ' || t->kind == '\t') {
     // const type
     // until new line
-    while (t->kind != NewLine) {
+    while (t->kind != '\n') {
      wrapNext(t, 0);
       if (t->kind == Ident) {
 	// self replace
@@ -184,12 +184,12 @@ void pre_define(Token *t) {
 	  for (i = 0; define_table[replaced_idx].n_af[i] != '\0'; i++)
 	    item.n_af[af_idx++] = define_table[replaced_idx].n_af[i];
 	}
-      } else if (!(t->kind == Space || t->kind == Tab || t->kind == NewLine || t->kind == Blanks)) {
+      } else if (!(t->kind == ' ' || t->kind == '\t' || t->kind == '\n' || t->kind == Blanks)) {
 	for (i = 0; t->text[i] != '\0'; i++)
 	  item.n_af[af_idx++] = t->text[i];
       }
     }
-  } else if (t->kind == NewLine) {
+  } else if (t->kind == '\n') {
     item.n_af[af_idx++] = ' '; // for like #define DCC_HEADER_H_
   } else {
     error("invalid pre define syntax");

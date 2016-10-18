@@ -84,7 +84,7 @@ void st_break(Token *t) {
   // set jump to loop end
   genCode2(JMP, NO_FIX_BREAK_ADDR);
   loopNest[loopNest_ct-1].has_break = 1;
-  checkNxtTokenKind(Semicolon);
+  checkNxtTokenKind(';');
   nextToken(t, 0);
   return;
 }
@@ -95,7 +95,7 @@ void st_continue(Token *t) {
   }
   // set jump to loop top
   GEN_JMP_TOP(get_loop_top());
-  checkNxtTokenKind(Semicolon);
+  checkNxtTokenKind(';');
   nextToken(t, 0);
   return;
 }
@@ -160,7 +160,7 @@ void st_default(Token *t) {
   }
   // set address of switchNest[switchNest_ct].default_addr = ;
   switchNest[switchNest_ct-1].default_addr = code_ct;
-  if (!checkNxtTokenKind(Colon)) {
+  if (!checkNxtTokenKind(':')) {
     error("end ':' is missing");
   }
   nextToken(t, 0); nextToken(t, 0);
@@ -228,7 +228,7 @@ void st_do(Token *t) {
 void st_for(Token *t) {
   int loop_top, loop_buttom, inst_top, exp_label;
   nextToken(t, 0);
-  if (t->kind == Semicolon) {
+  if (t->kind == ';') {
     // no expr 1
     nextToken(t, 0);
   } else {
@@ -239,7 +239,7 @@ void st_for(Token *t) {
 
   // set label to loop. (1)
   LABEL_TOP(loop_top);
-  if (t->kind == Semicolon) {
+  if (t->kind == ';') {
     // no expr 2
     genCode2(LDI, 1); // true
     nextToken(t, 0);
@@ -254,7 +254,7 @@ void st_for(Token *t) {
   // set label to increment (4)
   begin_continue_break();
   LABEL_TOP(exp_label);
-  if (t->kind == Rparen) {
+  if (t->kind == ')') {
     // no expr 3
     nextToken(t, 0);
   } else {
@@ -277,7 +277,7 @@ void st_for(Token *t) {
 
 void st_return(Token *t) {
   nextToken(t, 0);
-  if (t->kind == Semicolon) {
+  if (t->kind == ';') {
     // check func return type, if not void, then error
     if (funcPtr->dType != VOID_T) {
       return -1; // this can be warning
@@ -299,7 +299,7 @@ void st_ident(Token *t) {
   if (te != NULL) {
     if ((te->kind == func_ID || te->kind == proto_ID) && te->dType == VOID_T) {
       callFunc(t, te); // TODO : currently 'callFunc' is distributed in 2 files
-      checkNxtTokenKind(Semicolon);
+      checkNxtTokenKind(';');
       nextToken(t, 0);
       return;
     }
