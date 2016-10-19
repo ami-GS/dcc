@@ -206,7 +206,7 @@ void to_left_val() {
   case VAL: case VALC: case VALD:
     --code_ct;
     break;
-  case LOD:
+  case LOD: case LODC:
     codes[code_ct-1].opcode = LDA;
     break;
   default:

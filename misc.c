@@ -18,10 +18,10 @@ void code_dump() {
 	  if (op == RET || op == STOP)
 	    printf("\n");
 	  break;
-	case LOD: case LDA: case LDI: case STO: case STOC: case STOD: case CALL: case ADBR:
+	case LOD: case LODC: case LDA: case LDI: case STO: case STOC: case STOD: case CALL: case ADBR:
 	case LIB: case JMP: case JPT: case JPF: case EQCMP:
 	  printf("%s\t%d", OpCodeStr[op], codes[i].opdata);
-	  if (codes[i].flag && (op == LOD || op == LDA || op == STO))
+	  if (codes[i].flag && (op == LOD || op == LODC || op == LDA || op == STO))
 	    printf("[b]"); // TODO : ???
 	  printf("\n");
 	  break;

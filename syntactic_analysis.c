@@ -84,7 +84,14 @@ int factor(Token *t) {
     switch (te_tmp->kind) {
     case var_ID: case arg_ID:
       if (te_tmp->arrLen == 0) {
-	genCode(LOD, te_tmp->level, te_tmp->code_addr);
+	switch (te_tmp->dType) {
+	case INT_T:
+	  genCode(LOD, te_tmp->level, te_tmp->code_addr); break;
+	case CHAR_T:
+	  genCode(LODC, te_tmp->level, te_tmp->code_addr); break;
+	default: // TODO : more type needed
+	  break;
+	}
 	nextToken(t, 0);
       } else {
 	nextToken(t, 0);

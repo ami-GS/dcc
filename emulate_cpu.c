@@ -92,15 +92,15 @@ int execute(Instruction *codes, int debug) {
       ASSIGN(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
       stack_ptr -= 2; break;
     case ASSC:
-      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
+      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sCHAR);
       stack_ptr -= 2; break;
     case ASSV:
       ASSIGN(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
       op_stack[stack_ptr-2].sINT = op_stack[stack_ptr-1].sINT;
       stack_ptr--; break;
     case ASVC:
-      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
-      op_stack[stack_ptr-2].sINT = op_stack[stack_ptr-1].sINT;
+      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sCHAR);
+      op_stack[stack_ptr-2].sCHAR = op_stack[stack_ptr-1].sCHAR;
       stack_ptr--; break;
     case CPY:
       op_stack[stack_ptr].sINT = op_stack[stack_ptr-1].sINT;
@@ -108,7 +108,7 @@ int execute(Instruction *codes, int debug) {
     case VAL: // address to value conversion
       op_stack[stack_ptr-1].sINT = MEMINT(op_stack[stack_ptr-1].sINT); break;
     case VALC:
-      op_stack[stack_ptr-1].sINT = memory[op_stack[stack_ptr-1].sINT]; break;
+      op_stack[stack_ptr-1].sCHAR = memory[op_stack[stack_ptr-1].sCHAR]; break;
     case EQCMP:
       // TODO : suspicious
       if (dat == op_stack[stack_ptr-1].sINT) {
