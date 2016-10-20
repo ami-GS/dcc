@@ -55,34 +55,49 @@ void ignoreLine(Token *t) {
 }
 
 void set_dtype(TableEntry* ent, Token* t) {
-  switch(t->kind) {
+  use_all_as_token = 1;
+  int is_pointer = 0;
+  Kind type = t->kind;
+  nextToken(t, 0);
+  if (t->kind == '*') {
+    use_all_as_token = 0;
+    is_pointer = 1;
+    nextToken(t, 0);
+  }
+
+  switch(type) {
   case Int:
-    ent->dType = INT_T;
+    ent->dType = INT_T + is_pointer;
     break;
   case Void:
-    ent->dType = VOID_T;
+    ent->dType = VOID_T + is_pointer;
     break;
   case Char:
-    ent->dType = CHAR_T;
+    ent->dType = CHAR_T + is_pointer;
     break; // STRING_T is needed?
   case Float:
-    ent->dType = FLOAT_T;
+    ent->dType = FLOAT_T + is_pointer;
     break;
   case Double:
-    ent->dType = DOUBLE_T;
+    ent->dType = DOUBLE_T + is_pointer;
     break;
   default:
     break;
     // TODO : other types can be placed
   }
-  nextToken(t, 0);
+  use_all_as_token = 0;
   return;
 }
 
 int set_name(TableEntry* ent, Token* t) {
-  if (t->kind != Ident) {
+  if (t->kind != Ident && t->kind != '*') {
     error("Token parse error");
   }
+  if (t->kind == '*' && ent->dType % 2 == 1) {
+    ent->dType += 1; // +1 can stand for pointer
+    nextToken(t, 0);
+  }
+
   int len;
   ent->name = malloc(sizeof(char) * (t->intVal + 1)); // TODO : error check, and must free
   for (len = 0; len < t->intVal ; len++) {
@@ -139,16 +154,25 @@ int set_array(TableEntry* ent, Token *t) {
   return 1;
 }
 
-int set_address(TableEntry *te) {
-  int i, size;
-  switch (te->dType) {
+int get_type_size(DataType dt) {
+  switch (dt) {
   case INT_T: case FLOAT_T:
-    size = INT_SIZE; break;
+    return INT_SIZE;
   case CHAR_T:
-    size = CHAR_SIZE; break;
+    return CHAR_SIZE;
   default:
-    break; // error
+    if (dt % 2 == 0) { // even number is pointer
+      return POINTER_SIZE;
+    } else {
+      error("invalid variable type");
+    }
   }
+  return -1; // TODO : dangerous
+}
+
+int set_address(TableEntry *te) {
+  int i, size = get_type_size(te->dType);
+
   switch (te->kind) {
   case var_ID:
     if (te->arrLen != 0)

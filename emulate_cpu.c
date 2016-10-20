@@ -68,6 +68,8 @@ int execute(Instruction *codes, int debug) {
       */
     case LOD:
       PUSH(MEMINT(addr)); break;
+    case LODA:
+      PUSH(addr); break;
     case LODC:
       PUSH(*(memory+addr)); break;
     case LDA:
@@ -94,6 +96,9 @@ int execute(Instruction *codes, int debug) {
     case ASSC:
       ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sCHAR);
       stack_ptr -= 2; break;
+    case ASSP:
+      ASSIGN(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
+      stack_ptr -= 2; break;
     case ASSV:
       ASSIGN(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
       op_stack[stack_ptr-2].sINT = op_stack[stack_ptr-1].sINT;
@@ -101,6 +106,10 @@ int execute(Instruction *codes, int debug) {
     case ASVC:
       ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sCHAR);
       op_stack[stack_ptr-2].sCHAR = op_stack[stack_ptr-1].sCHAR;
+      stack_ptr--; break;
+    case ASVP:
+      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
+      op_stack[stack_ptr-2].sINT = op_stack[stack_ptr-1].sINT;
       stack_ptr--; break;
     case CPY:
       op_stack[stack_ptr].sINT = op_stack[stack_ptr-1].sINT;

@@ -25,6 +25,9 @@ int genCode_unary(Kind k) {
   case Sub:
     op = NEG;
     break;
+  case Mul:
+    codes[code_ct-1].opcode = LODA;
+    return;
   case Not:
     op = NOT;
     break;
@@ -223,6 +226,8 @@ void remove_op_stack_top() {
     codes[code_ct-1].opcode = ASSC; break;
   case ASVD:
     codes[code_ct-1].opcode = ASSD; break;
+  case ASVP:
+    codes[code_ct-1].opcode = ASSP; break;
   default:
     genCode1(DEL);
   }

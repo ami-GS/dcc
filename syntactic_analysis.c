@@ -38,6 +38,9 @@ void expression(Token *t, DataType type) {
   case CHAR_T:
     genCode1(ASVC); break;
   default:
+    if (type != 0 && type % 2 == 0)
+      genCode1(ASVP);
+    // TODO : generate code for each pointer type
     break;
   }
 }
@@ -65,9 +68,12 @@ int factor(Token *t) {
   int find;
 
   switch (op) {
-  case Add: case Sub: case Not: case Incre: case Decre: case Bnot:
+  case Add: case Sub: case Not: case Incre: case Decre: case Bnot: case Mul:
     // like, +1, -1, !0, ~1
     nextToken(t, 0);
+    if (op == Mul && t->kind != Ident)
+      error("'*' can be used for identifier");
+
     factor(t);
     // set inc dec preprocessing
     if (op== Incre || op == Decre) {
@@ -90,6 +96,8 @@ int factor(Token *t) {
 	case CHAR_T:
 	  genCode(LODC, te_tmp->level, te_tmp->code_addr); break;
 	default: // TODO : more type needed
+	  if (te_tmp->dType % 2 == 0)
+	    genCode(LOD, te_tmp->level, te_tmp->code_addr);
 	  break;
 	}
 	nextToken(t, 0);
@@ -107,6 +115,8 @@ int factor(Token *t) {
 	  case DOUBLE_T:
 	    genCode2(LDI, DOUBLE_SIZE); break;
 	  default:
+	    if (te_tmp->dType % 2 == 0)
+	      genCode2(LDI, POINTER_SIZE);
 	    break;
 	  }
 	  genCode1(MULL); // index * data size
@@ -120,6 +130,8 @@ int factor(Token *t) {
 	  case DOUBLE_T:
 	    genCode1(VALD); break;
 	  default:
+	    if (te_tmp->dType % 2 == 0)
+	      genCode2(LDI, POINTER_SIZE);
 	    break;
 	  }
 	} else {
