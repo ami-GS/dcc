@@ -13,7 +13,7 @@ Currently the usage is limited.
 ### Supported types
 Types below are supported.
 
-pointer * is not supported stil. ('*' and '&' will be supported as unary operation below)
+& is not supported stil. (this will be supported as unary operation below)
 
 - Int
 
@@ -39,7 +39,7 @@ while (a < 5) {
 
 - pre & post position incre & decrement
 
-- switch, case, default
+- switch, case, default (nest capable)
 
 - continue
 
@@ -61,9 +61,9 @@ while (a < 5) {
 
 ### Passed expressions
 
-- binary operations (+ - * / %)
+- binary operations (+ - * / %) without pointer addressing
 
-- unary operations (+ - ! ++ --)
+- unary operations (+ - * ! ++ --)
 
 - binary bit operations (& | ^ << >>)
 
@@ -72,3 +72,5 @@ while (a < 5) {
 - binary boolean operations (== != <= => >= =< && ||)
 
 - compound operators (+= -= *= /= %= &= |= ^= <<= >>=)
+
+- comment (// /**/)
