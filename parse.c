@@ -187,6 +187,7 @@ int set_address(TableEntry *te) {
     // TODO : need to study for seting func addr
     te->code_addr = code_ct;
     for (i = 1; i <= te->args; i++) {
+      size = get_type_size((te+i)->dType);
       (te+i)->code_addr = malloc_L(size);
     }
     break;
