@@ -70,6 +70,8 @@ int execute(Instruction *codes, int debug) {
       PUSH(MEMINT(addr)); break;
     case LODA:
       PUSH(addr); break;
+    case LODV:
+      PUSH(MEMINT(MEMINT(addr))); break;
     case LODC:
       PUSH(*(memory+addr)); break;
     case LDA:

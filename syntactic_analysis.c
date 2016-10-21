@@ -68,7 +68,7 @@ int factor(Token *t) {
   int find;
 
   switch (op) {
-  case Add: case Sub: case Not: case Incre: case Decre: case Bnot: case Mul:
+  case Add: case Sub: case Not: case Incre: case Decre: case Bnot: case Mul: case Band:
     // like, +1, -1, !0, ~1
     nextToken(t, 0);
     if (op == Mul && t->kind != Ident)
@@ -97,7 +97,7 @@ int factor(Token *t) {
 	  genCode(LODC, te_tmp->level, te_tmp->code_addr); break;
 	default: // TODO : more type needed
 	  if (te_tmp->dType % 2 == 0)
-	    genCode(LOD, te_tmp->level, te_tmp->code_addr);
+	    genCode(LODA, te_tmp->level, te_tmp->code_addr);
 	  break;
 	}
 	nextToken(t, 0);
