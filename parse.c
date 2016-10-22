@@ -207,19 +207,25 @@ void init_var(TableEntry *ent, Token *t) {
   nextToken(t, 0); // point to '{'
   if (ent->dType == CHAR_T) {
     //nextToken(t, 0); // point to "...."
-    if (ent->arrLen == 0) {
-      ent->arrLen = t->intVal;
-    } else if (t->intVal > ent->arrLen) {
-      error("string length exceeds limits");
-    }
-    do {
+    if (t->kind == String) {
+      if (ent->arrLen == 0){
+	ent->arrLen = t->intVal;
+      } else if (t->intVal > ent->arrLen) {
+	error("string length exceeds limits");
+      }
+      do {
+	genCode(LDA, ent->level, ent->code_addr);
+	genCode2(LDI, CHAR_SIZE*i);
+	genCode1(ADDL);
+	genCode2(LDI, *(t->text+i)); // TODO : LDI?
+	genCode1(ASSC);
+	i++;
+      } while (ent->arrLen > i);
+    } else {
       genCode(LDA, ent->level, ent->code_addr);
-      genCode2(LDI, CHAR_SIZE*i);
-      genCode1(ADDL);
-      genCode2(LDI, *(t->text+i)); // TODO : LDI?
+      genCode2(LDI, t->intVal);
       genCode1(ASSC);
-      i++;
-    } while (ent->arrLen > i);
+    }
     nextToken(t, 0); // point to ';'
   } else { // TODO : currently only for INT_T
     if (ent->arrLen == 0) {
