@@ -51,7 +51,7 @@ void statement(Token *t) {
     // TODO : Build-in function, non-void returns
     st_build_in(t);
     break;
-  case Ident: case IntNum: // TODO : correct?
+  case Ident: case IntNum: case Mul: // TODO : correct?
     st_ident(t);
     break;
   case Incre: case Decre:
@@ -304,7 +304,17 @@ void st_ident(Token *t) {
       return;
     }
   }
-  expression(t, te->dType);
+  if (te == NULL && t->kind == '*') {
+    nextToken(t, 0);
+    te = search(t->text);
+    if (te == NULL || te->kind == func_ID || te->kind == proto_ID)
+      error("next to '*' symbol is not appropriate");
+    int c = code_ct; // TODO : workaround
+    expression(t, te->dType-1);
+    codes[c].opcode = LDV;
+  } else {
+    expression(t, te->dType);
+  }
   nextToken(t, 0);
   remove_op_stack_top();
   return;

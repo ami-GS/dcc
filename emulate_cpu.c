@@ -76,6 +76,8 @@ int execute(Instruction *codes, int debug) {
       PUSH(*(memory+addr)); break;
     case LDA:
       PUSH(addr); break;
+    case LDV:
+      PUSH(MEMINT(addr)); break;
     case LDI:
       PUSH(dat); break;
     case STO:
