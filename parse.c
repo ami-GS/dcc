@@ -18,7 +18,7 @@ void compile(char *fname) {
     TableEntry entryTmp = {no_ID, "", NON_T, GLOBAL, 0, 0, 0};
     switch(t.kind) {
       // type, #, ;, }, )
-    case Int: case Void:
+    case Int: case Void: case Char:
       set_dtype(&entryTmp, &t);
       set_name(&entryTmp, &t);
       if (t.kind == '(') {
@@ -195,9 +195,6 @@ int set_address(TableEntry *te) {
 }
 
 void set_main(TableEntry *ent) {
-    if (ent->dType != INT_T || ent->args != 0) {
-      return -1; // TODO : this is temporal, invalid main
-    }
     backpatch(0, ent->code_addr); // set main func code addr
     return 1;
 }
