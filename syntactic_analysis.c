@@ -198,7 +198,7 @@ int expr_with_check(Token *t, char l, char r) {
 }
 
 int is_const_expr() {
-  Token t = {NulKind, "", 0};
+  Token t = {NulKind, Specific, "", 0};
   t_buf_open = 0;
   do {
     nextToken(&t, 1);

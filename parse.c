@@ -12,7 +12,7 @@ TableEntry* funcPtr = NULL;
 
 void compile(char *fname) {
   fOpen(fname, "r");
-  Token t = {NulKind, "", 0};
+  Token t = {NulKind, Specific, "", 0};
   nextToken(&t, 0);
   while (t.kind != EOF_token) {
     TableEntry entryTmp = {no_ID, "", NON_T, GLOBAL, 0, 0, 0};
@@ -110,7 +110,7 @@ int set_name(TableEntry* ent, Token* t) {
 
 void countInitialization(TableEntry *ent) {
   int count = 0;
-  Token t = {NulKind, "", 0};
+  Token t = {NulKind, Specific, "", 0};
   do {
     nextToken(&t, 1);
     t_buf_enqueue(t);

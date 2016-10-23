@@ -13,30 +13,35 @@ typedef enum {
   Squote = '\'', Dquote = '\"', Comma = ',', Sharp = '#',
   Add = '+', Sub = '-', Mul = '*', Div = '/', Mod = '%', Assign = '=', Not = '!',
   Band = '&', Bor = '|', Bxor = '^', Bnot = '~',
+  Less = '<', Great = '>',
   Colon = ':', Semicolon = ';',
   Space = ' ', Tab = '\t', NewLine = '\n', Blanks,
-  Less = '<', Great = '>',
   NulKind = 150, Others, Ident,
-  Define, Include, Elif, Ifdef, Ifndef, Endif,
-  Incre, Decre, And, Or, Lshift, Rshift,
+  Define, Include, Elif, Ifdef, Ifndef, Endif,                                            // 153 - 158
+  Incre = 180, Decre, And, Or, Lshift, Rshift,                                            // 180 - 185
   Equal, AddAss, SubAss, MulAss, DivAss, ModAss,
   BandAss, BorAss, BxorAss, BnotAss, LsftAss, RsftAss,
-  NotEq, LessEq, EqLess, GreatEq, EqGreat,
-  Int, Float, Double, Char, Void,
-  String, IntNum, FloatNum, CharSymbol,
+  NotEq, LessEq, EqLess, GreatEq, EqGreat,                                                //     - 202
+  Int = 210, Float, Double, Char, Void,                                                   // 210 - 214
+  String = 230, IntNum, FloatNum, CharSymbol,                                             // 230 - 233
   Digit, Letter, VarName,
-  If, Else, For, Do, While,
+  If = 250, Else, For, Do, While,                                                         // 250
   Switch, Case, Default,
   Break, Continue, Return,
-  Printf, Exit, Input,
+  Printf, Exit, Input,                                                                    //     - 263
   LComment, MLCommS, MLCommE,
   EOF_token,
   END_list,
 } Kind;
 int cType[256];
 
+typedef enum {
+    Specific, Immediate, Operator, Statement, Paren, Type,
+} HighLevelKind;
+
 typedef struct {
   Kind kind;
+  HighLevelKind hKind;
   char text[TOKEN_TXT_SIZ];
   int intVal;
   double dVal;

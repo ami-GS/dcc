@@ -56,6 +56,26 @@ void initKind() {
   cType['&'] = Band; cType['|'] = Bor; cType['~'] = Bnot; cType['^'] = Bxor;
 }
 
+void set_hKind(Token *t) {
+  if (Lparen == t->kind || Rparen == t->kind || Lbrace == t->kind
+      || Rbrace == t->kind || Lbracket == t->kind || Rbracket == t->kind) {
+    t->hKind = Paren;
+  } else if (Add == t->kind || Sub == t->kind || Mul == t->kind || Div == t->kind ||
+	      Mod == t->kind || Not == t->kind || Band == t->kind || Bor == t->kind ||
+	      Bxor == t->kind || Bnot == t->kind || (Less <= t->kind && t->kind <= Great) ||
+	     (Incre <= t->kind && t->kind <= EqGreat)) {
+    t->hKind = Operator;
+  } else if (Int <= t->kind && t->kind <= Void) {
+    t->hKind = Type;
+  } else if (String <= t->kind && t->kind <= CharSymbol) {
+    t->hKind = Immediate;
+  } else if (If <= t->kind && t->kind <= Input) {
+    t->hKind = Statement;
+  } else {
+    t->hKind = Specific;
+  }
+}
+
 int nextChar(char *c) {
   // TODO : here is my own implementation. suspicious
   if (prevC > 0) {
@@ -237,13 +257,16 @@ int nextToken(Token *t, int q_lock) {
   }
   if (t->kind == NulKind)
     set_kind(t);
-  if (t->kind == Others)
+  if (t->kind == Others) {
     error("unknown token kind");
+  } else {
+    set_hKind(t);
+  }
   return 1;
 }
 
 int checkNxtTokenKind(Kind k) {
-  Token t = {NulKind, "", 0, 0.0};
+  Token t = {NulKind, Specific, "", 0, 0.0};
   nextToken(&t, 0);
   t_buf_enqueue(t);
   return t.kind == k;
@@ -272,7 +295,7 @@ SymbolKind get_func_type() {
   // TODO : this might use many memory of t_buf
   //        in case of there are many arguments
   do {
-    Token tmp = {NulKind, "", 0, 0.0};
+    Token tmp = {NulKind, Specific, "", 0, 0.0};
     nextToken(&tmp, 1);
     t_buf_enqueue(tmp);
     if (tmp.kind == ')') {

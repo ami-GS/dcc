@@ -341,7 +341,7 @@ void pre_endif(Token *t) {
 }
 
 void preprocess_sub() {
-  Token t = {NulKind, "", 0, 0.0};
+  Token t = {NulKind, Specific, "", 0, 0.0};
   while (t.kind != EOF_token) {
     wrapNext(&t, 0);
     if (t.kind == Sharp) {
