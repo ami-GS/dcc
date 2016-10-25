@@ -49,7 +49,7 @@ void initKind() {
   cType['['] = Lbracket; cType[']'] = Rbracket;
   cType['+'] = Add; cType['-'] = Sub; cType['*'] = Mul; cType['/'] = Div; cType['%'] = Mod;
   cType['='] = Assign; cType['<'] = Less; cType['>'] = Great;
-  cType[';'] = Semicolon; cType[','] = Comma;
+  cType[';'] = Semicolon; cType[','] = Comma; cType['.'] = Dot;
   cType['\''] = Squote; cType['"'] = Dquote;
   cType['#'] = Sharp;
   cType[' '] = Space; cType['\t'] = Tab; cType['\n'] = NewLine;
@@ -60,8 +60,8 @@ void set_hKind(Token *t) {
   if (Lparen == t->kind || Rparen == t->kind || Lbrace == t->kind
       || Rbrace == t->kind || Lbracket == t->kind || Rbracket == t->kind) {
     t->hKind = Paren;
-  } else if (Add == t->kind || Sub == t->kind || Mul == t->kind || Div == t->kind ||
-	      Mod == t->kind || Not == t->kind || Band == t->kind || Bor == t->kind ||
+  } else if (Add == t->kind || Sub == t->kind || Mul == t->kind || Div == t->kind || Arrow == t->kind ||
+	      Mod == t->kind || Not == t->kind || Band == t->kind || Bor == t->kind || Dot == t->kind ||
 	      Bxor == t->kind || Bnot == t->kind || (Less <= t->kind && t->kind <= Great) ||
 	     (Incre <= t->kind && t->kind <= EqGreat)) {
     t->hKind = Operator;
@@ -108,12 +108,12 @@ int is_ope2(const char *c1, const char *c2) {
   char s[2];
   s[0] = *c1; s[1] = *c2;
   // TODO : //, /* and */ are put here as workaround
-  char ope2[23][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
+  char ope2[24][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
 		      "=<", "=>", "!=", "+=", "-=", "*=", "/=",
 		      "%=", "<<", ">>", "&=", "|=", "^=", "//",
-		      "/*", "*/"};
+		      "/*", "*/", "->"};
   int i;
-  for (i = 0; i < 23; i++) {
+  for (i = 0; i < 24; i++) {
     if (ope2[i][0] == s[0] && ope2[i][1] == s[1]) {
       return 1;
     }

@@ -12,7 +12,7 @@ typedef enum {
   Lparen = '(', Rparen = ')', Lbrace = '{', Rbrace = '}', Lbracket = '[', Rbracket = ']',
   Squote = '\'', Dquote = '\"', Comma = ',', Sharp = '#',
   Add = '+', Sub = '-', Mul = '*', Div = '/', Mod = '%', Assign = '=', Not = '!',
-  Band = '&', Bor = '|', Bxor = '^', Bnot = '~',
+  Dot = '.', Band = '&', Bor = '|', Bxor = '^', Bnot = '~',
   Less = '<', Great = '>',
   Colon = ':', Semicolon = ';',
   Space = ' ', Tab = '\t', NewLine = '\n', Blanks,
@@ -21,7 +21,7 @@ typedef enum {
   Incre = 180, Decre, And, Or, Lshift, Rshift,                                            // 180 - 185
   Equal, AddAss, SubAss, MulAss, DivAss, ModAss,
   BandAss, BorAss, BxorAss, BnotAss, LsftAss, RsftAss,
-  NotEq, LessEq, EqLess, GreatEq, EqGreat,                                                //     - 202
+  NotEq, LessEq, EqLess, GreatEq, EqGreat, Arrow,                                         //     - 203
   Int = 210, Float, Double, Char, Void,                                                   // 210 - 214
   String = 230, IntNum, FloatNum, CharSymbol,                                             // 230 - 233
   Digit, Letter, VarName,
@@ -36,7 +36,7 @@ typedef enum {
 int cType[256];
 
 typedef enum {
-    Specific, Immediate, Operator, Statement, Paren, Type,
+    Specific, Immediate, Function, Operator, Statement, Paren, Type,
 } HighLevelKind;
 
 typedef struct {
@@ -67,7 +67,7 @@ static KeyWordType keyWdType[] = {
   {"++", Incre}, {"--", Decre}, {"&&", And}, {"||", Or},
   {"+", Add}, {"-", Sub}, {"*", Mul}, {"/", Div}, {"%", Mod}, {"=", Assign},
   {"&", Band}, {"|", Bor}, {"^", Bxor}, {"~", Bnot}, {"#", Sharp},
-  {"&=", BandAss}, {"|=", BorAss}, {"^=", BxorAss},
+  {"&=", BandAss}, {"|=", BorAss}, {"^=", BxorAss}, {".", Dot}, {"->", Arrow},
   {"(", Lparen}, {")", Rparen}, {"{", Lbrace}, {"}", Rbrace}, {"[", Lbracket}, {"]", Rbracket},
   {",", Comma}, {":", Colon}, {";", Semicolon},
   {" ", Space}, {"\t", Tab}, {"\n", NewLine},  {"", END_list},
