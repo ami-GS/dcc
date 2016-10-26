@@ -311,7 +311,7 @@ void st_ident(Token *t) {
       error("next to '*' symbol is not appropriate");
     int c = code_ct; // TODO : workaround
     expression(t, te->dType-1);
-    codes[c].opcode = LDV;
+    codes[c].opcode = LOD;
   } else {
     expression(t, te->dType);
   }

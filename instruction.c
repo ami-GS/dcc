@@ -26,10 +26,14 @@ int genCode_unary(Kind k) {
     op = NEG;
     break;
   case Mul:
-    codes[code_ct-1].opcode = LODV;
+    if (codes[code_ct-1].opcode == LDA) { // left val
+      codes[code_ct-1].opcode = LOD;
+    } else { // LOD of right val
+      codes[code_ct-1].opcode = LODV;
+    }
     return;
   case Band:
-    codes[code_ct-1].opcode = LODA;
+    codes[code_ct-1].opcode = LDA;
     return;
   case Not:
     op = NOT;
@@ -212,11 +216,11 @@ void to_left_val() {
   case VAL: case VALC: case VALD:
     --code_ct;
     break;
-  case LOD: case LODC: case LODA:
+  case LOD: case LODC:
     codes[code_ct-1].opcode = LDA;
     break;
   case LODV:
-    codes[code_ct-1].opcode = LDV; // LOAD Value Reference
+    codes[code_ct-1].opcode = LOD; // LOAD Value Reference
   default:
     return -1; // TODO : malicious left val
 

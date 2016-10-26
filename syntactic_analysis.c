@@ -97,7 +97,7 @@ int factor(Token *t) {
 	  genCode(LODC, te_tmp->level, te_tmp->code_addr); break;
 	default: // TODO : more type needed
 	  if (te_tmp->dType % 2 == 0)
-	    genCode(LODA, te_tmp->level, te_tmp->code_addr);
+	    genCode(LDA, te_tmp->level, te_tmp->code_addr);
 	  break;
 	}
 	nextToken(t, 0);
