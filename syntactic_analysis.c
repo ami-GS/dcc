@@ -1,193 +1,245 @@
-#include <string.h>
-#include <stdio.h>
-#include "syntactic_analysis.h"
+#include "letter_analysis.h"
 #include "opcode.h"
+#include "symbol_table.h"
 #include "instruction.h"
 #include "data_declare.h"
-#include "symbol_table.h"
+#include "syntactic_analysis.h"
 
-void expression(Token *t, DataType type) {
-  // researve expression type
-  Kind k;
-  term(t, 2);
-  switch (t->kind) {
-    // TODO : need to study
-  case Assign:
-    to_left_val();
-    nextToken(t, 0);
-    expression(t, NON_T);
-    break;
-  case AddAss: case SubAss: case MulAss: case DivAss: case ModAss: // case NotEq:
-  case BandAss: case BorAss: case BxorAss: case LsftAss: case RsftAss:
-    k = t->kind;
-    to_left_val();
-    genCode1(CPY);
-    genCode1(VAL);
-    nextToken(t, 0);
-    expression(t, NON_T);
-    genCode_binary(k);
-    break;
+
+int getLowestPriorityIdx(int st, int end) {
+  int lowest_pri = 128, pri = 0, idx = st;
+  int i, nest = 0;
+
+  if (st == 0 && end >= 2 && expr_tkns[1].kind == '[' && expr_tkns[end].kind == ']') { // for A[], A[1+2]
+    expr_tkns[1].kind = Add; expr_tkns[1].hKind = Operator; expr_tkns[1].text[0] = '+';
+    addressing++;
+    return 1;
+  } else if (expr_tkns[end].kind == ']') {
+    expr_tkns[end].kind = Mul; expr_tkns[end].hKind = Operator; expr_tkns[end].text[0] = '*';
+    addressing++;
+    return end;
   }
-  switch (type) {
-  case INT_T:
-    genCode1(ASSV); break;
-  case DOUBLE_T:
-    genCode1(ASVD); break;
-  case FLOAT_T:
-    genCode1(ASVF); break;
-  case CHAR_T:
-    genCode1(ASVC); break;
-  default:
-    if (type != 0 && type % 2 == 0)
-      genCode1(ASVP);
-    // TODO : generate code for each pointer type
-    break;
+
+
+  for (i = st; i <= end; i++) {
+    if (nest == 0 && expr_tkns[i].hKind == Operator) {
+      switch (expr_tkns[i].kind) {
+      case Comma:                                                                  pri = 0; break;
+      case Assign:                                                                 pri = 1; break;
+      case Or:                                                                     pri = 2; break;
+      case And:
+	pri = 3;
+	if (i == st || expr_tkns[i-1].hKind == Operator)
+	  pri = 13;
+	break;
+      case Bor:                                                                    pri = 4; break;
+      case Bxor:                                                                   pri = 5; break;
+      case Band:                                                                   pri = 6; break;
+      case Equal: case NotEq:                                                      pri = 7; break;
+      case Less: case LessEq: case EqLess: case Great: case GreatEq: case EqGreat: pri = 8; break;
+      case Lshift: case Rshift:                                                    pri = 9; break;
+      case Not: case Bnot:
+                                                                                   pri = 10; break;
+      case Sub: case Add:
+	pri = 10;
+	if (i == st || expr_tkns[i-1].hKind == Operator)
+	  pri = 13;
+	break;
+      case Mod: case Div: case Mul:
+	pri = 11;
+	if (expr_tkns[i].kind == Mul && (i == st || expr_tkns[i-1].hKind == Operator))
+	  pri = 13;
+	break;
+      case Incre: case Decre:
+	pri = 14;
+	if (i == st || expr_tkns[i-1].hKind == Operator)
+	  pri = 13;
+	break;
+      default:
+	continue;
+      }
+
+      if (!(pri == 1 && lowest_pri == 1) && lowest_pri >= pri) {
+	lowest_pri = pri;
+	idx = i;
+      }
+    } else if (expr_tkns[i].kind == Lparen || expr_tkns[i].kind == Lbracket) {
+      nest++;
+    } else if (expr_tkns[i].kind == Rparen || expr_tkns[i].kind == Rbracket) {
+      nest--;
+    }
   }
+  return idx;
 }
 
-void term(Token *t, int n) {
-  // TODO : need to study
-  if (n == 12) {
-    factor(t);
-    return;
+void makeTree(Node *root, int st, int end) {
+  if (st > end)
+    return; // finish
+  if (expr_tkns[st].kind == '(' && expr_tkns[end].kind == ')') {
+    st++; end--;
   }
-  term(t, n+1);
+  int idx = getLowestPriorityIdx(st, end);
+  root->tkn = &expr_tkns[idx];
 
-  Kind k;
-  while (n == opOder(t->kind)) {
-    k = t->kind;
-    nextToken(t, 0);
-    term(t, n+1);
-    genCode_binary(k);
+  root->l = &nodes[node_used_ct++];
+  makeTree(root->l, st, idx-1);
+  if (root->l->tkn == NULL)
+      root->l = NULL;
+
+  root->r = &nodes[node_used_ct++];
+  makeTree(root->r, idx+1, end);
+  if (root->tkn->kind == Mul && addressing != 0 && addressing % 2 == 0) {
+    root->r->tkn = (Token *)malloc(sizeof(Token));
+    root->r->tkn->kind = IntNum; root->r->tkn->hKind = Immediate; root->r->tkn->text[0] = 'T';
+    root->r->tkn->intVal = DATA_SIZE[left_val.dType];
+    root->r->tkn->dVal = 0;
+    addressing -= 2;
   }
+  if (root->r->tkn == NULL)
+    root->r = NULL;
+  return;
 }
 
-int factor(Token *t) {
-  Kind op = t->kind;
-  TableEntry *te_tmp = NULL;
-  int find;
+void dumpRevPolish(Node *root) {
+  if (root->l != NULL)
+    dumpRevPolish(root->l);
+  if (root->r != NULL)
+    dumpRevPolish(root->r);
+  if (root->tkn != NULL)
+    printf("%s", root->tkn->text);
+}
 
-  switch (op) {
-  case Add: case Sub: case Not: case Incre: case Decre: case Bnot: case Mul: case Band:
-    // like, +1, -1, !0, ~1
-    nextToken(t, 0);
-    if (op == Mul && t->kind != Ident)
-      error("'*' can be used for identifier");
+void genCode_tree(Node *root) {
+  if (gen_left == 0 && root->tkn->kind == Assign)
+    gen_left = 1; // the most left '='
+  if (root->l != NULL)
+    genCode_tree(root->l);
+  if (gen_left == 1 && root->tkn->kind == Assign)
+    gen_left = 0;
 
-    factor(t);
-    // set inc dec preprocessing
-    if (op== Incre || op == Decre) {
-      to_left_val();
-    }
-    genCode_unary(op);
-    break;
-  case Ident:
-    // TODO : search registered table item
-    te_tmp = search(t->text);
-    if (te_tmp == NULL) {
-      error("undefined symbol");
-    }
-    switch (te_tmp->kind) {
-    case var_ID: case arg_ID:
-      if (te_tmp->arrLen == 0) {
-	switch (te_tmp->dType) {
-	case INT_T:
-	  genCode(LOD, te_tmp->level, te_tmp->code_addr); break;
-	case CHAR_T:
-	  genCode(LODC, te_tmp->level, te_tmp->code_addr); break;
-	default: // TODO : more type needed
-	  if (te_tmp->dType % 2 == 0)
-	    genCode(LDA, te_tmp->level, te_tmp->code_addr);
-	  break;
-	}
-	nextToken(t, 0);
+  if (root->r != NULL)
+    genCode_tree(root->r);
+
+  int i=0;
+  TableEntry *te_tmp;
+  if (root->tkn != NULL) {
+    switch (root->tkn->kind) {
+    case Assign:
+      switch (left_val.dType) {
+      case INT_T:
+	genCode1(ASSV); break;
+      case DOUBLE_T:
+	genCode1(ASVD); break;
+      case FLOAT_T:
+	genCode1(ASVF); break;
+      case CHAR_T:
+	genCode1(ASVC); break;
+      default:
+	if (left_val.dType != 0 && left_val.dType % 2 == 0)
+	  genCode1(ASVP);
+	// TODO : generate code for each pointer type
+	break;
+      }
+      break;
+    case Add: case Sub: case Mul: case Div: case Mod: case Band:
+      if (root->l != NULL && root->r != NULL) {
+	genCode_binary(root->tkn->kind);
       } else {
-	nextToken(t, 0);
-	if (t->kind == '[') {
-	  // TODO : currently only [] based addressing
-	  genCode(LDA, te_tmp->level, te_tmp->code_addr); // load top start address of array
-	  expr_with_check(t, '[', ']');
-	  switch (te_tmp->dType) {
-	  case INT_T:
-	    genCode2(LDI, INT_SIZE); break;
-	  case CHAR_T:
-	    genCode2(LDI, CHAR_SIZE); break;
-	  case DOUBLE_T:
-	    genCode2(LDI, DOUBLE_SIZE); break;
-	  default:
-	    if (te_tmp->dType % 2 == 0)
-	      genCode2(LDI, POINTER_SIZE);
-	    break;
-	  }
-	  genCode1(MULL); // index * data size
-	  genCode1(ADDL); // add it to tp->adr
-	  // TODO : optimize here
-	  switch (te_tmp->dType) {
-	  case INT_T:
-	    genCode1(VAL); break; // pick up the value from address
-	  case CHAR_T:
-	    genCode1(VALC); break; // pick up the value from address
-	  case DOUBLE_T:
-	    genCode1(VALD); break;
-	  default:
-	    if (te_tmp->dType % 2 == 0)
-	      genCode2(LDI, POINTER_SIZE);
-	    break;
-	  }
-	} else {
-	  error("array requires index"); // TODO : this case is correct
-	}
-      }
-      if (t->kind == Incre || t->kind == Decre) { // for A++
-	to_left_val();
-	// TODO : need to study below
-	if (t->kind == Incre) {
-	  genCode1(INCL);
-	  genCode2(LDI, 1);
-	  genCode1(SUBL);
-	} else {
-	  genCode1(DECL);
-	  genCode2(LDI, 1);
-	  genCode1(ADDL);
-	}
-	nextToken(t, 0);
+	genCode_unary(root->tkn->kind);
+	if (gen_left == 1)
+	  to_left_val();
       }
       break;
-    case func_ID: case proto_ID:
-      if (te_tmp->dType == VOID_T) {
-	return -1; // TODO : void return function should not be in expression
-      }
-      callFunc(t, te_tmp);
-      nextToken(t, 0); // workaround
+    case Incre: case Decre:
+      if (codes[code_ct-1].opcode == LOD)
+	codes[code_ct-1].opcode = LDA;
+      genCode_unary(root->tkn->kind);
       break;
-    }
-    break;
-  case IntNum: case CharSymbol:
-    // TODO : also every type. Using TokenStack is the besy way?
-    genCode2(LDI, t->intVal);
-    nextToken(t, 0);
-    break;
-  case Lparen:
-    if (expr_with_check(t, '(', ')')) {
-      return -1; // TODO : error
-    }
-    break;
-  //case Printf: case Input: case Exit: // TODO : not yet implemented
+    case Ident:
+      te_tmp = search(root->tkn->text);
+      if (te_tmp != NULL && left_val.kind == no_ID)
+	left_val = *te_tmp;
 
-  default:
-    return -1; // TODO error
+      switch (te_tmp->kind) {
+      case func_ID: case proto_ID:
+	if (te_tmp->dType == VOID_T) {
+	  return -1;
+	}
+	// TODO : need argument processing
+	genCode2(CALL, te_tmp->code_addr);
+	break;
+      case var_ID: case arg_ID:
+	if (gen_left == 1) {
+	  genCode(LDA, te_tmp->level, te_tmp->code_addr); break;
+	}
+
+	if (te_tmp->arrLen == 0) {
+	  switch (te_tmp->dType) {
+	  case INT_T:
+	    genCode(LOD, te_tmp->level, te_tmp->code_addr); break;
+	  case CHAR_T:
+	    genCode(LODC, te_tmp->level, te_tmp->code_addr); break;
+	  default: // TODO : more type needed
+	    if (te_tmp->dType % 2 == 0)
+	      genCode(LDA, te_tmp->level, te_tmp->code_addr);
+	    break;
+	  }
+	} else { // array
+	  genCode(LDA, left_val.level, left_val.code_addr);
+	}
+	// incre decre ?
+	break;
+      }
+      break;
+    case IntNum:
+      if (root->tkn->text[0] == 'T') { // text should have 0 - 9
+	genCode2(LDI, DATA_SIZE[left_val.dType]);
+      } else {
+	genCode2(LDI, root->tkn->intVal);
+      }
+      break;
+    case CharSymbol:
+	genCode2(LDI, root->tkn->intVal);
+      break;
+    case String:
+      if (left_val.arrLen == 0)
+	left_val.arrLen = root->tkn->intVal; // this is for A[]
+      do {
+	genCode(LDA, left_val.level, left_val.code_addr);
+	genCode2(LDI, CHAR_SIZE*i);
+	genCode1(ADDL);
+	genCode2(LDI, *(root->tkn->text+i)); // TODO : LDI?
+	genCode1(ASSC);
+	i++;
+      } while (left_val.arrLen > i);
     }
-  //nextToken(t, 0); // TODO : no need?
+  }
 }
 
-int expr_with_check(Token *t, char l, char r) {
+void expression(Token *t, char endChar) {
+  int i;
+  for (i = 0; t->kind != endChar; i++) { // TODO ',' should be considered
+    expr_tkns[i] = *t;
+    nextToken(t, 0);
+  }
+  Node root = nodes[node_used_ct++];
+  left_val.kind = no_ID;
+  makeTree(&root, 0, i-1);
+  dumpRevPolish(&root);
+  printf("\n");
+  genCode_tree(&root);
+  if (root.tkn->kind == Assign)
+    remove_op_stack_top();
+}
+
+void expr_with_check(Token *t, char l, char r) {
   if (l != 0) {
     if (t->text[0] != l) {
       fprintf(stderr, "expression is not starting with %s", l);
     }
     nextToken(t, 0);
   }
-  expression(t, NON_T);
+  expression(t, r);
   if (r != 0) {
     if (t->text[0] != r) {
       fprintf(stderr, "expression is not ending with %s", r);
@@ -236,22 +288,4 @@ void callFunc(Token *t, TableEntry *te) {
   }
   genCode2(CALL, te->code_addr);
   return;
-}
-
-int opOder(Kind k) {
-  // TODO : can operation kind itself have order integer?
-  switch(k) {
-  case Mul: case Div: case Mod:                                                return 11;
-  case Add: case Sub:                                                          return 10;
-  case Lshift: case Rshift:                                                    return 9;
-  case Less: case LessEq: case EqLess: case Great: case GreatEq: case EqGreat: return 8;
-  case Equal: case NotEq:                                                      return 7;
-  case Band:                                                                   return 6;
-  case Bxor:                                                                   return 5;
-  case Bor:                                                                    return 4;
-  case And:                                                                    return 3;
-  case Or:                                                                     return 2;
-  case Assign:                                                                 return 1;
-  default:                                                                     return 0;
-  }
 }

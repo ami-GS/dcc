@@ -52,7 +52,8 @@ void statement(Token *t) {
     st_build_in(t);
     break;
   case Ident: case IntNum: case Mul: // TODO : correct?
-    st_ident(t);
+    expression(t, ';');
+    //st_ident(t);
     break;
   case Incre: case Decre:
     st_inc_dec(t);
@@ -310,10 +311,10 @@ void st_ident(Token *t) {
     if (te == NULL || te->kind == func_ID || te->kind == proto_ID)
       error("next to '*' symbol is not appropriate");
     int c = code_ct; // TODO : workaround
-    expression(t, te->dType-1);
+    //expression(t, te->dType-1);
     codes[c].opcode = LOD;
   } else {
-    expression(t, te->dType);
+    //expression(t, te->dType);
   }
   nextToken(t, 0);
   remove_op_stack_top();

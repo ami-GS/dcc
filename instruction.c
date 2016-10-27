@@ -26,11 +26,7 @@ int genCode_unary(Kind k) {
     op = NEG;
     break;
   case Mul:
-    if (codes[code_ct-1].opcode == LDA) { // left val
-      codes[code_ct-1].opcode = LOD;
-    } else { // LOD of right val
-      codes[code_ct-1].opcode = LODV;
-    }
+    codes[code_ct-1].opcode = LODV;
     return;
   case Band:
     codes[code_ct-1].opcode = LDA;
