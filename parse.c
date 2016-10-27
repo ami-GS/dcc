@@ -21,7 +21,7 @@ void compile(char *fname) {
     case Int: case Void: case Char:
       set_dtype(&entryTmp, &t);
       set_name(&entryTmp, &t);
-      if (t.kind == '(') {
+      if (checkNxtTokenKind('(')) {
 	declare_func(&entryTmp, &t);
       } else { // in case of ',' or '['
 	declare_var(&entryTmp, &t);
@@ -104,7 +104,6 @@ int set_name(TableEntry* ent, Token* t) {
     *(ent->name+len) = *(t->text+len);
   }
   *(ent->name+len) = '\0';
-  nextToken(t, 0); // pint at ',', '[', '(', ';'
   return 1;
 }
 
@@ -124,17 +123,18 @@ void countInitialization(TableEntry *ent) {
 }
 
 int set_array(TableEntry* ent, Token *t) {
+  nextToken(t, 0);
   while (t->kind == '[') {
     if (!is_const_expr()) {
       error("array length must be const value");
     }
-    nextToken(t, 0);
-    if (t->kind == ']') { // A[] = ...;
-      nextToken(t, 0); // point to '=' or another
+    if (checkNxtTokenKind(']')) { // A[] = ...;
+      nextToken(t, 0); nextToken(t, 0); // point to '=' or another
       countInitialization(ent);
       return 1; // no array length declaration
     }
-    expr_with_check(t, 0, ']'); // TODO : validate error?
+    // TODO : workaround
+    expr_with_check(t, '[', ']');
     // expr_with_check folds const expression.
     // the result assigned arrLen and it is not needed on codes
     ent->arrLen = codes[--code_ct].opdata; // TODO : suspicious, my implementation
@@ -203,7 +203,6 @@ void init_var(TableEntry *ent, Token *t) {
   int i = 0;
   nextToken(t, 0); // point to '{'
   if (ent->dType == CHAR_T) {
-    //nextToken(t, 0); // point to "...."
     if (t->kind == String) {
       if (ent->arrLen == 0){
 	ent->arrLen = t->intVal;
@@ -253,10 +252,14 @@ void init_var(TableEntry *ent, Token *t) {
 int declare_var(TableEntry* ent, Token* t) {
   ent->kind = var_ID;
   while (1) {
-    set_array(ent, t);
+    if (checkNxtTokenKind('['))
+	set_array(ent, t);
     TableEntry *tmp =  enter_table_item(ent);
-    if (t->kind == '=') {
-      init_var(tmp, t);
+    if (checkNxtTokenKind('=')) {
+      expression(t, ';');
+      //init_var(tmp, t);
+    } else {
+      nextToken(t, 0);
     }
 
     if (t->kind != ',') {
@@ -287,11 +290,12 @@ int declare_func(TableEntry* ent, Token* t) {
     // TODO : check all arguments for overload
     return -1;
   }
+
   int* argnum_ptr = &(ent->args);
   t_buf_open = 0;
   ent->kind = get_func_type();
   t_buf_open = 1;
-  nextToken(t, 0); // point at ')' or arguments
+  nextToken(t, 0); nextToken(t, 0); // point at ')' or arguments
   funcPtr = enter_table_item(ent); // TODO : funcPtr is not needed?
   // open local table
   open_local_table();

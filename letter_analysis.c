@@ -266,9 +266,14 @@ int nextToken(Token *t, int q_lock) {
 }
 
 int checkNxtTokenKind(Kind k) {
+  int from_q = t_buf_head != t_buf_tail;
   Token t = {NulKind, Specific, "", 0, 0.0};
   nextToken(&t, 0);
-  t_buf_enqueue(t);
+  if (from_q) {
+    t_buf_head -= from_q;
+  } else {
+    t_buf_enqueue(t);
+  }
   return t.kind == k;
 }
 
