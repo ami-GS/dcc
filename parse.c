@@ -312,6 +312,7 @@ int declare_func(TableEntry* ent, Token* t) {
     while (1) {
       set_dtype(&arg, t);
       set_name(&arg, t);
+      nextToken(t, 0);
       enter_table_item(&arg); // to avoid multiple declaration in case of using declare_var
       (funcPtr->args)++;
       if (t->kind != ',') {
