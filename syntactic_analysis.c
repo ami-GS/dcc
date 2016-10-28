@@ -10,19 +10,21 @@ int getLowestPriorityIdx(int st, int end) {
   int lowest_pri = 128, pri = 0, idx = st;
   int i, nest = 0;
 
-  if (st == 0 && end >= 2 && expr_tkns[1].kind == '[' && expr_tkns[end].kind == ']') { // for A[], A[1+2]
-    expr_tkns[1].kind = Add; expr_tkns[1].hKind = Operator; expr_tkns[1].text[0] = '+';
+  if (end-st >= 2 && expr_tkns[st+1].kind == '[' && expr_tkns[end].kind == ']') { // for A[], A[1+2]
+    expr_tkns[st+1].kind = Add; expr_tkns[st+1].hKind = Operator; expr_tkns[st+1].text[0] = '+';
     addressing++;
-    return 1;
+    return st+1;
   } else if (expr_tkns[end].kind == ']') {
     expr_tkns[end].kind = Mul; expr_tkns[end].hKind = Operator; expr_tkns[end].text[0] = '*';
     addressing++;
     return end;
   }
 
+  if (end-st >= 2 && expr_tkns[st+1].kind == '(' && expr_tkns[end].kind == ')') // for A(), A(a, b, c...)
+    return st; // use func name as root
 
   for (i = st; i <= end; i++) {
-    if (nest == 0 && expr_tkns[i].hKind == Operator) {
+    if (nest == 0 && (expr_tkns[i].hKind == Operator || expr_tkns[i].kind == Comma)) {
       switch (expr_tkns[i].kind) {
       case Comma:                                                                  pri = 0; break;
       case Assign:                                                                 pri = 1; break;
@@ -165,7 +167,6 @@ void genCode_tree(Node *root) {
 	if (te_tmp->dType == VOID_T) {
 	  return -1;
 	}
-	// TODO : need argument processing
 	genCode2(CALL, te_tmp->code_addr);
 	break;
       case var_ID: case arg_ID:
@@ -212,6 +213,9 @@ void genCode_tree(Node *root) {
 	genCode1(ASSC);
 	i++;
       } while (left_val.arrLen > i);
+      break;
+    case Comma:
+      break; // ignore?
     }
   }
 }
