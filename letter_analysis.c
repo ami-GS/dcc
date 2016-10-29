@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "letter_analysis.h"
+#include "misc.h"
 
 int t_buf_open = 0;
  // for creating '.i' file

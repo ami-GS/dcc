@@ -4,7 +4,9 @@
 #include "instruction.h"
 #include "data_declare.h"
 #include "syntactic_analysis.h"
-
+#include "parse.h"
+#include "misc.h"
+#include <stdlib.h>
 
 int getLowestPriorityIdx(int st, int end) {
   int lowest_pri = 128, pri = 0, idx = st;
@@ -239,18 +241,18 @@ void expression(Token *t, char endChar) {
 void expr_with_check(Token *t, char l, char r) {
   if (l != 0) {
     if (t->text[0] != l) {
-      fprintf(stderr, "expression is not starting with %s", l);
+      fprintf(stderr, "expression is not starting with '%c'", l);
     }
     nextToken(t, 0);
   }
   expression(t, r);
   if (r != 0) {
     if (t->text[0] != r) {
-      fprintf(stderr, "expression is not ending with %s", r);
+      fprintf(stderr, "expression is not ending with '%c'", r);
     }
     nextToken(t, 0);
   }
-  return 1;
+  return;
 }
 
 int is_const_expr() {

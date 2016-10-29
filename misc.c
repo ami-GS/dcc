@@ -27,7 +27,7 @@ void code_dump() {
 	  printf("\n");
 	  break;
 	default:
-	  return -1; // TODO : invalid operand
+	  printf("invalid operand to output");
 	}
     }
 }

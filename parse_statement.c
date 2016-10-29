@@ -4,6 +4,7 @@
 #include "parse.h"
 #include "opcode.h"
 #include "instruction.h"
+#include "misc.h"
 
 
 void statement(Token *t) {
@@ -223,7 +224,6 @@ void st_do(Token *t) {
   } else {
     error("'do' statement needs 'while'");
   }
-  return 1;
 }
 
 void st_for(Token *t) {
@@ -280,19 +280,16 @@ void st_return(Token *t) {
   nextToken(t, 0);
   if (t->kind == ';') {
     // check func return type, if not void, then error
-    if (funcPtr->dType != VOID_T) {
-      return -1; // this can be warning
-    }
+    if (funcPtr->dType != VOID_T)
+      error("Warnning : this function must return void");
   } else {
     expr_with_check(t, 0, ';');
     // return type comparison t->kind, func type
-    if (funcPtr->dType == VOID_T) {
-      return -1; // TODO : data type should be validated properly
-    }
+    if (funcPtr->dType == VOID_T)
+      error("Warnning : this function must not return anything");
   }
   // jump to caller
   genCode2(JMP, NO_FIX_RET_ADDR);
-  return;
 }
 
 void st_ident(Token *t) {

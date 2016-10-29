@@ -1,6 +1,7 @@
 #include "emulate_cpu.h"
 #include "instruction.h"
 #include "opcode.h"
+#include "misc.h"
 
 int stack_ptr = OP_STACK_BUTTOM;
 
@@ -38,7 +39,7 @@ int execute(Instruction *codes, int debug) {
       printf("%d:\t\t\t %s\t\t %d\t\t", pc, OpCodeStr[op], dat);
       int k;
       for (k = stack_ptr-1; k >= 0; k--) {
-	printf("%d ", op_stack[k]);
+	printf("%d ", op_stack[k].sINT);
       }
       printf("\n");
     }

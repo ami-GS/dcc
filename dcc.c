@@ -2,6 +2,7 @@
 #include "instruction.h"
 #include "misc.h"
 #include "preprocessor.h"
+#include "emulate_cpu.h"
 #include  <stdlib.h>
 
 int leave_ifile = 0;   // -i

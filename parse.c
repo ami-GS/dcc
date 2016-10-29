@@ -6,6 +6,7 @@
 #include "symbol_table.h"
 #include "syntactic_analysis.h"
 #include "malloc.h"
+#include "misc.h"
 
 TableEntry* funcPtr = NULL;
 #define is_main(p) (strcmp(p, "main")==0)
@@ -196,7 +197,6 @@ int set_address(TableEntry *te) {
 
 void set_main(TableEntry *ent) {
     backpatch(0, ent->code_addr); // set main func code addr
-    return 1;
 }
 
 void init_var(TableEntry *ent, Token *t) {

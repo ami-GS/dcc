@@ -1,5 +1,6 @@
 #include "preprocessor.h"
 #include "letter_analysis.h"
+#include "misc.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -115,7 +116,7 @@ void pre_define(Token *t) {
   wrapNext(t, 0); wrapNext(t, 0); // skip space
   if (search_def(t->text) != -1) {
     error("duplicating define");
-    return -1;
+    return;
   }
   define_item item = define_table[def_table_ct]; // just copy, not reference. this is intentional
   int i;
@@ -136,7 +137,7 @@ void pre_define(Token *t) {
 	item.arg_table[item.argNum++][i] = '\0';
       } else if (!(t->kind == ' ' || t->kind == '\t' || t->kind == '\n' || t->kind == Blanks || t->kind == ',')) {
 	error("arguments of defined function should be identifier");
-	return -1;
+	return;
       }
       wrapNext(t, 0);
     }
@@ -237,7 +238,7 @@ char *fOpen_i(char *fname) {
   currentLines[STREAM_SIZE-1] = 1;
   if ((streams[STREAM_SIZE-1] = fopen(fileNames[STREAM_SIZE-1], "w")) == NULL) {
     error("file cannot be opened");
-    return -1;
+    return NULL;
   }
   return fileNames[STREAM_SIZE-1];
 }

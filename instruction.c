@@ -1,6 +1,7 @@
 #include "instruction.h"
 #include "opcode.h"
 #include "letter_analysis.h"
+#include "misc.h"
 
 int code_ct = 0;
 
@@ -27,10 +28,10 @@ int genCode_unary(Kind k) {
     break;
   case Mul:
     codes[code_ct-1].opcode = LODV;
-    return;
+    return 1;
   case Band:
     codes[code_ct-1].opcode = LDA;
-    return;
+    return 1;
   case Not:
     op = NOT;
     break;
@@ -155,7 +156,7 @@ void backpatch_calladdr() {
 	codes[i].opdata = addr; // workaround
       }
       if (codes[i].opdata < 0) {
-	return -1; // TODO : unknow function //is this true?
+	error("unknown function"); // is this true?
       }
     }
   }
@@ -218,8 +219,7 @@ void to_left_val() {
   case LODV:
     codes[code_ct-1].opcode = LOD; // LOAD Value Reference
   default:
-    return -1; // TODO : malicious left val
-
+    error("malicious left value");
   }
 }
 
