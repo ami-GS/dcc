@@ -93,8 +93,10 @@ void makeTree(Node *root, int st, int end) {
 
   root->l = &nodes[node_used_ct++];
   makeTree(root->l, st, idx-1);
-  if (root->l->tkn == NULL)
+  if (root->l->tkn == NULL) {
       root->l = NULL;
+      node_used_ct--;
+  }
 
   root->r = &nodes[node_used_ct++];
   makeTree(root->r, idx+1, end);
@@ -104,8 +106,10 @@ void makeTree(Node *root, int st, int end) {
     root->r->tkn->dVal = 0;
     addressing -= 2;
   }
-  if (root->r->tkn == NULL)
+  if (root->r->tkn == NULL) {
     root->r = NULL;
+    node_used_ct--;
+  }
   return;
 }
 
@@ -180,10 +184,12 @@ void genCode_tree(Node *root) {
 	// incre decre ?
 	break;
       }
+      //}
       break;
     case IntNum:
       if (root->tkn->text[0] == 'T') { // text should have 0 - 9
 	genCode2(LDI, DATA_SIZE[left_val.dType]);
+	free(root->tkn);
       } else {
 	genCode2(LDI, root->tkn->intVal);
       }
