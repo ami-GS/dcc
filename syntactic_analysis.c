@@ -9,22 +9,11 @@
 #include <stdlib.h>
 
 int getLowestPriorityIdx(int st, int end) {
-  int lowest_pri = 128, pri = 0, idx = st;
+  if (st == end)
+    return st;
+
+  int lowest_pri = 128, pri = 129, idx = st;
   int i, nest = 0;
-
-  if (end-st >= 2 && expr_tkns[st+1].kind == '[' && expr_tkns[end].kind == ']') { // for A[], A[1+2]
-    expr_tkns[st+1].kind = Add; expr_tkns[st+1].hKind = Operator; expr_tkns[st+1].text[0] = '+';
-    addressing++;
-    return st+1;
-  } else if (expr_tkns[end].kind == ']') {
-    expr_tkns[end].kind = Mul; expr_tkns[end].hKind = Operator; expr_tkns[end].text[0] = '*';
-    addressing++;
-    return end;
-  }
-
-  if (end-st >= 2 && expr_tkns[st+1].kind == '(' && expr_tkns[end].kind == ')') // for A(), A(a, b, c...)
-    return st; // use func name as root
-
   for (i = st; i <= end; i++) {
     if (nest == 0 && (expr_tkns[i].hKind == Operator || expr_tkns[i].kind == Comma)) {
       switch (expr_tkns[i].kind) {
@@ -73,6 +62,23 @@ int getLowestPriorityIdx(int st, int end) {
       nest--;
     }
   }
+
+  if (pri == 129) {
+    if (end-st >= 2 && expr_tkns[st+1].kind == '[' && expr_tkns[end].kind == ']') { // for A[], A[1+2]
+      expr_tkns[st+1].kind = Add; expr_tkns[st+1].hKind = Operator; expr_tkns[st+1].text[0] = '[';
+      addressing++;
+      return st+1;
+    } else if (expr_tkns[end].kind == ']') {
+      expr_tkns[end].kind = Mul; expr_tkns[end].hKind = Operator; expr_tkns[end].text[0] = ']';
+      addressing++;
+      return end;
+    }
+    if (end-st >= 2 && expr_tkns[st+1].kind == '(' && expr_tkns[end].kind == ')') // for A(), A(a, b, c...)
+      return st; // use func name as root
+    if (st == 0 && expr_tkns[st].hKind == Type)
+      return st;
+  }
+
   return idx;
 }
 
@@ -95,7 +101,6 @@ void makeTree(Node *root, int st, int end) {
   if (root->tkn->kind == Mul && addressing != 0 && addressing % 2 == 0) {
     root->r->tkn = (Token *)malloc(sizeof(Token));
     root->r->tkn->kind = IntNum; root->r->tkn->hKind = Immediate; root->r->tkn->text[0] = 'T';
-    root->r->tkn->intVal = DATA_SIZE[left_val.dType];
     root->r->tkn->dVal = 0;
     addressing -= 2;
   }
@@ -148,11 +153,13 @@ void genCode_tree(Node *root) {
     case Add: case Sub: case Mul: case Div: case Mod: case Band:
       if (root->l != NULL && root->r != NULL) {
 	genCode_binary(root->tkn->kind);
+	if (codes[code_ct-1].opcode == ADDL && root->tkn->text[0] == '[') // TODO : workaround for [] addressing
+	  genCode1(VAL);
       } else {
 	genCode_unary(root->tkn->kind);
-	if (gen_left == 1)
-	  to_left_val();
       }
+      if (gen_left == 1)
+	to_left_val();
       break;
     case Incre: case Decre:
       if (codes[code_ct-1].opcode == LOD)
@@ -166,16 +173,9 @@ void genCode_tree(Node *root) {
 
       switch (te_tmp->kind) {
       case func_ID: case proto_ID:
-	if (te_tmp->dType == VOID_T) {
-	  return -1;
-	}
 	genCode2(CALL, te_tmp->code_addr);
 	break;
       case var_ID: case arg_ID:
-	if (gen_left == 1) {
-	  genCode(LDA, te_tmp->level, te_tmp->code_addr); break;
-	}
-
 	if (te_tmp->arrLen == 0) {
 	  switch (te_tmp->dType) {
 	  case INT_T:
@@ -188,8 +188,10 @@ void genCode_tree(Node *root) {
 	    break;
 	  }
 	} else { // array
-	  genCode(LDA, left_val.level, left_val.code_addr);
+	  genCode(LDA, te_tmp->level, te_tmp->code_addr);
 	}
+	if (gen_left == 1)
+	  to_left_val();
 	// incre decre ?
 	break;
       }

@@ -219,7 +219,7 @@ void to_left_val() {
   case LODV:
     codes[code_ct-1].opcode = LOD; // LOAD Value Reference
   default:
-    error("malicious left value");
+    break;
   }
 }
 

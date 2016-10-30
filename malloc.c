@@ -2,6 +2,7 @@
 #include "malloc.h"
 #include "instruction.h"
 #include "emulate_cpu.h"
+#include "misc.h"
 
 int localAddress;
 
