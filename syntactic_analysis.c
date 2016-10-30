@@ -134,21 +134,7 @@ void genCode_tree(Node *root) {
   if (root->tkn != NULL) {
     switch (root->tkn->kind) {
     case Assign:
-      switch (left_val.dType) {
-      case INT_T:
-	genCode1(ASSV); break;
-      case DOUBLE_T:
-	genCode1(ASVD); break;
-      case FLOAT_T:
-	genCode1(ASVF); break;
-      case CHAR_T:
-	genCode1(ASVC); break;
-      default:
-	if (left_val.dType != 0 && left_val.dType % 2 == 0)
-	  genCode1(ASVP);
-	// TODO : generate code for each pointer type
-	break;
-      }
+      genCode1(ASSV_TYPE[left_val.dType]);
       break;
     case Add: case Sub: case Mul: case Div: case Mod: case Band:
       if (root->l != NULL && root->r != NULL) {
@@ -168,25 +154,24 @@ void genCode_tree(Node *root) {
       break;
     case Ident:
       te_tmp = search(root->tkn->text);
-      if (te_tmp != NULL && left_val.kind == no_ID)
+      if (te_tmp != NULL && gen_left && left_val.kind == no_ID) {
 	left_val = *te_tmp;
-
+      } else if (te_tmp == NULL && declare_type > NON_T) {
+	set_entry_member(&left_val, var_ID, root->tkn->text, root->tkn->intVal, declare_type, LOCAL);
+	enter_table_item(&left_val);
+	if (gen_left) {
+	  te_tmp = &left_val;
+	} else {
+	  break;
+	}
+      }
       switch (te_tmp->kind) {
       case func_ID: case proto_ID:
 	genCode2(CALL, te_tmp->code_addr);
 	break;
       case var_ID: case arg_ID:
 	if (te_tmp->arrLen == 0) {
-	  switch (te_tmp->dType) {
-	  case INT_T:
-	    genCode(LOD, te_tmp->level, te_tmp->code_addr); break;
-	  case CHAR_T:
-	    genCode(LODC, te_tmp->level, te_tmp->code_addr); break;
-	  default: // TODO : more type needed
-	    if (te_tmp->dType % 2 == 0)
-	      genCode(LDA, te_tmp->level, te_tmp->code_addr);
-	    break;
-	  }
+	  genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
 	} else { // array
 	  genCode(LDA, te_tmp->level, te_tmp->code_addr);
 	}

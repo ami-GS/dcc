@@ -1,6 +1,9 @@
 #ifndef _DCC_SYMBOL_TABLE_H_
 #define _DCC_SYMBOL_TABLE_H_
 
+#include "opcode.h"
+#include "data_declare.h"
+
 typedef enum {
     GLOBAL, LOCAL, NO_LOCATION,
 } Level; //TODO : the locathion should be devided by each scope, which means each function have each level
@@ -9,6 +12,14 @@ static int scopeCnt = 0;
 typedef enum {
     NON_T, VOID_T, VOIDP_T, INT_T, INTP_T, SHORT_T, SHORTP_T, CHAR_T, CHARP_T, FLOAT_T, FLOATP_T, DOUBLE_T, DOUBLEP_T, // TODO : increase
 } DataType;
+
+
+static int DATA_SIZE[] = {-1, -1, POINTER_SIZE, INT_SIZE, POINTER_SIZE,
+                          SHORT_SIZE, POINTER_SIZE, CHAR_SIZE, POINTER_SIZE,
+                          FLOAT_SIZE, POINTER_SIZE, DOUBLE_SIZE, POINTER_SIZE};
+static int ASSV_TYPE[] = {-1, -1, -1, ASSV, ASVP, ASVS, ASVP, ASVC, ASVP, ASVF, ASVP, ASVD, ASVP};
+static int LOD_TYPE[] = {-1, -1, -1, LOD, LDA, LODS, LDA, LODC, LDA, LODF, LDA, LODD, LDA};
+
 
 typedef enum {
     no_ID, var_ID, func_ID, proto_ID, arg_ID, // TODO : increase
