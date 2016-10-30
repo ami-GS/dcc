@@ -275,7 +275,7 @@ int declare_var(TableEntry* ent, Token* t) {
 
     if (t->kind == ',') {
       nextToken(t, 0);// next to ','
-      if (t->kind != Ident) {
+      if (t->kind != Ident && t->kind != '*') {
 	error("after ',' should be Identifier");
 	return -1;
       }
