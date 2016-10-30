@@ -55,6 +55,18 @@ void ignoreLine(Token *t) {
   nextToken(t, 0);
 }
 
+DataType tkn2dType(Kind kind) {
+  switch(kind) {
+  case Int:     return INT_T;
+  case Void:    return VOID_T;
+  case Char:    return CHAR_T;
+  case Float:   return FLOAT_T;
+  case Double:  return DOUBLE_T;
+  default:      return NON_T;
+    // TODO : other types can be placed
+  }
+}
+
 void set_dtype(TableEntry* ent, Token* t) {
   use_all_as_token = 1;
   int is_pointer = 0;

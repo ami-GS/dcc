@@ -20,6 +20,6 @@ SymbolKind block(Token *t, TableEntry* funcPtr);
 int set_func_process(TableEntry *ent, Token *t);
 void countInitialization(TableEntry *ent);
 void ignoreLine(Token *t);
-
+DataType tkn2dType(Kind k);
 
 #endif // _DCC_PARSE_H_

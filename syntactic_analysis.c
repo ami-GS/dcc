@@ -15,7 +15,12 @@ int getLowestPriorityIdx(int st, int end) {
   int lowest_pri = 128, pri = 129, idx = st;
   int i, nest = 0;
   for (i = st; i <= end; i++) {
-    if (nest == 0 && (expr_tkns[i].hKind == Operator || expr_tkns[i].kind == Comma)) {
+    if (nest == 0 && (expr_tkns[i].hKind == Operator || expr_tkns[i].kind == Comma || expr_tkns[i].hKind == Type || expr_tkns[i].kind == Ident)) {
+      if (expr_tkns[i].hKind == Type) { // done is better than nothing
+	pri = 14;
+      } else if (expr_tkns[i].kind == Ident) {
+	pri = 13;
+      }
       switch (expr_tkns[i].kind) {
       case Comma:                                                                  pri = 0; break;
       case Assign:                                                                 pri = 1; break;
@@ -49,7 +54,8 @@ int getLowestPriorityIdx(int st, int end) {
 	  pri = 13;
 	break;
       default:
-	continue;
+	break;
+	//continue;
       }
 
       if (!(pri == 1 && lowest_pri == 1) && lowest_pri >= pri) {
@@ -75,8 +81,6 @@ int getLowestPriorityIdx(int st, int end) {
     }
     if (end-st >= 2 && expr_tkns[st+1].kind == '(' && expr_tkns[end].kind == ')') // for A(), A(a, b, c...)
       return st; // use func name as root
-    if (st == 0 && expr_tkns[st].hKind == Type)
-      return st;
   }
 
   return idx;
@@ -123,13 +127,17 @@ void dumpRevPolish(Node *root) {
 }
 
 void genCode_tree(Node *root) {
+  if (root->tkn->hKind == Type)
+    declare_type += tkn2dType(root->tkn->kind); // ';' can reset this?
+  if (declare_type > NON_T && root->tkn->kind == '*') // TODO : consider int* a, b; case
+    declare_type++; // indicate pointer
+
   if (gen_left == 0 && root->tkn->kind == Assign)
     gen_left = 1; // the most left '='
   if (root->l != NULL)
     genCode_tree(root->l);
   if (gen_left == 1 && root->tkn->kind == Assign)
     gen_left = 0;
-
   if (root->r != NULL)
     genCode_tree(root->r);
 

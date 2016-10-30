@@ -3,6 +3,7 @@
 #include "symbol_table.h"
 #include "letter_analysis.h"
 #include "parse.h"
+#include "misc.h"
 
 TableEntry SymbolTable[TABLE_MAX];
 //int tblEntryCnt = 0;
@@ -89,6 +90,7 @@ void del_func_entry(TableEntry *f1, TableEntry *f2) {
 }
 
 
+
 void open_local_table() {
   LTBL_START = table_ent_ct;
 }
@@ -109,5 +111,16 @@ void dupCheck(TableEntry *ent) {
   if (ent->kind == arg_ID) level++;
   if (p->level == level)
     error("duplicated declaration");
+}
 
+void set_entry_member(TableEntry *e, SymbolKind k, char *name, int len, DataType dt, Level l) { // TODO temporally limited arguments
+  int i;
+  e->kind = k;
+  e->name = malloc(sizeof(char) * (len + 1)); // TODO : error check, and must free
+  memcpy(e->name, name, len+1);
+  e->dType = dt;
+  e->level = l;
+  e->code_addr = 0;
+  e->arrLen = 0;
+  e->args = 0;
 }

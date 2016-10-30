@@ -20,6 +20,9 @@ static DataType expr_type = NON_T;
 static TableEntry left_val = {no_ID, "", NON_T, LOCAL, 0, 0, 0};;
 static int addressing = 0;
 static int gen_left = 0; // detect only first '='
+#define MAX_DEFINE_SIZE
+static DataType declare_type = NON_T;
+
 
 void expression(Token *t, char endChar);
 int getLowestPriorityIdx(int st, int end);
