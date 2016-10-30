@@ -251,24 +251,26 @@ void init_var(TableEntry *ent, Token *t) {
 
 int declare_var(TableEntry* ent, Token* t) {
   ent->kind = var_ID;
-  while (1) {
-    if (checkNxtTokenKind('['))
-	set_array(ent, t);
-    TableEntry *tmp =  enter_table_item(ent);
-    if (checkNxtTokenKind('=')) {
+  while (t->kind != ';') {
+    if (checkNxtTokenKind('[')) {
+      set_array(ent, t);
+    } else if (checkNxtTokenKind('=')) {
       expression(t, ';');
-      //init_var(tmp, t);
-    } else {
+    } else if (checkNxtTokenKind(';') || checkNxtTokenKind(',')) {
       nextToken(t, 0);
     }
+    enter_table_item(ent);
 
-    if (t->kind != ',') {
-      break; // TODO : suspicious
+    if (t->kind == ',') {
+      nextToken(t, 0);// next to ','
+      if (t->kind != Ident) {
+	error("after ',' should be Identifier");
+	return -1;
+      }
+      set_name(ent, t);
     }
-    nextToken(t, 0); // next to ','
-    set_name(ent, t);
   }
-  return t->kind == ';';
+  return 1;
 }
 
 int set_func_process(TableEntry* ent, Token *t) {
