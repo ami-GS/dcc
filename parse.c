@@ -211,56 +211,6 @@ void set_main(TableEntry *ent) {
     backpatch(0, ent->code_addr); // set main func code addr
 }
 
-void init_var(TableEntry *ent, Token *t) {
-  int i = 0;
-  nextToken(t, 0); // point to '{'
-  if (ent->dType == CHAR_T) {
-    if (t->kind == String) {
-      if (ent->arrLen == 0){
-	ent->arrLen = t->intVal;
-      } else if (t->intVal > ent->arrLen) {
-	error("string length exceeds limits");
-      }
-      do {
-	genCode(LDA, ent->level, ent->code_addr);
-	genCode2(LDI, CHAR_SIZE*i);
-	genCode1(ADDL);
-	genCode2(LDI, *(t->text+i)); // TODO : LDI?
-	genCode1(ASSC);
-	i++;
-      } while (ent->arrLen > i);
-    } else {
-      genCode(LDA, ent->level, ent->code_addr);
-      genCode2(LDI, t->intVal);
-      genCode1(ASSC);
-    }
-    nextToken(t, 0); // point to ';'
-  } else { // TODO : currently only for INT_T
-    if (ent->arrLen == 0) {
-      genCode(LDA, ent->level, ent->code_addr);
-      //expression(t, ent->dType);
-      remove_op_stack_top();
-    } else {
-      do {
-	nextToken(t, 0); // point to value
-	if (t->kind != IntNum) { // TODO : more flexible
-	  error("initialize type mismatch");
-	}
-	genCode(LDA, ent->level, ent->code_addr);
-	genCode2(LDI, INT_SIZE*i);
-	genCode1(ADDL);
-	//expression(t, ent->dType); // point to ',' or '}'
-	remove_op_stack_top();
-	++i;
-	if (ent->arrLen != -1 && i > ent->arrLen) {
-	  error("the number of init value exceeds that of predefined");
-	}
-      } while(t->kind == ',');
-      nextToken(t, 0);
-    }
-  }
-}
-
 int declare_var(TableEntry* ent, Token* t) {
   ent->kind = var_ID;
   while (t->kind != ';') {

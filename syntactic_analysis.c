@@ -271,28 +271,3 @@ int is_const_expr() {
   t_buf_open = 1;
   return 1;
 }
-
-
-void callFunc(Token *t, TableEntry *te) {
-  nextToken(t, 0); // point to '('
-  nextToken(t, 0); // point to ')' or arguments
-  int arg_cnt = 0;
-  if (t->kind != ')') {
-    while (1) {
-      expression(t, NON_T);
-      ++arg_cnt;
-      if (t->kind != ',')
-	break;
-      nextToken(t, 0);
-    }
-  }
-  if (t->kind != ')') {
-    error("end ')' is missing");
-  }
-
-  if (arg_cnt != te->args) {
-    error("few or many arguments for function");
-  }
-  genCode2(CALL, te->code_addr);
-  return;
-}

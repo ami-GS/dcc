@@ -54,7 +54,6 @@ void statement(Token *t) {
     break;
   case Ident: case IntNum: case Mul: // TODO : correct?
     expression(t, ';');
-    //st_ident(t);
     break;
   case Incre: case Decre:
     st_inc_dec(t);
@@ -290,32 +289,6 @@ void st_return(Token *t) {
   }
   // jump to caller
   genCode2(JMP, NO_FIX_RET_ADDR);
-}
-
-void st_ident(Token *t) {
-  TableEntry *te = search(t->text);
-  if (te != NULL) {
-    if ((te->kind == func_ID || te->kind == proto_ID) && te->dType == VOID_T) {
-      callFunc(t, te); // TODO : currently 'callFunc' is distributed in 2 files
-      checkNxtTokenKind(';');
-      nextToken(t, 0);
-      return;
-    }
-  }
-  if (te == NULL && t->kind == '*') {
-    nextToken(t, 0);
-    te = search(t->text);
-    if (te == NULL || te->kind == func_ID || te->kind == proto_ID)
-      error("next to '*' symbol is not appropriate");
-    int c = code_ct; // TODO : workaround
-    //expression(t, te->dType-1);
-    codes[c].opcode = LOD;
-  } else {
-    //expression(t, te->dType);
-  }
-  nextToken(t, 0);
-  remove_op_stack_top();
-  return;
 }
 
 void st_build_in_void(Token *t) {
