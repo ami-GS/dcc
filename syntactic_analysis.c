@@ -126,11 +126,21 @@ void genCode_tree(Node *root) {
     genCode_tree(root->r);
 
   int i=0;
+  int arrLen = 0;
   TableEntry *te_tmp;
   if (root->tkn != NULL) {
     switch (root->tkn->kind) {
     case Assign:
-      genCode1(ASSV_TYPE[left_val.dType]);
+      if (arrayCount > 0) {
+	while (i < arrayCount) {
+	  genCode1(ASSV_TYPE[left_val.dType]);
+	  if (i != arrayCount-1)
+	    remove_op_stack_top();
+	  i++;
+	}
+      } else {
+	genCode1(ASSV_TYPE[left_val.dType]);
+      }
       break;
     case Add: case Sub: case Mul: case Div: case Mod: case Band:
       if (root->l != NULL && root->r != NULL) {
@@ -140,6 +150,8 @@ void genCode_tree(Node *root) {
       } else {
 	genCode_unary(root->tkn->kind);
       }
+      if (declare_type > NON_T)
+	code_ct--; // for int A[5];, int A[5] = {1,2...}
       if (gen_left == 1)
 	to_left_val();
       break;
@@ -170,8 +182,12 @@ void genCode_tree(Node *root) {
       case var_ID: case arg_ID:
 	if (te_tmp->arrLen == 0) {
 	  genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
-	} else { // array
+	} else if (declare_type == NON_T) { // array
+	  genCode2(LDI, DATA_SIZE[te_tmp->dType]);
+	  genCode_binary(Mul);
 	  genCode(LDA, te_tmp->level, te_tmp->code_addr);
+	  genCode_binary(Add);
+	  genCode1(VAL);
 	}
 	if (gen_left == 1)
 	  to_left_val();
@@ -181,6 +197,16 @@ void genCode_tree(Node *root) {
       //}
       break;
     case IntNum:
+      if (left_val.kind != no_ID && left_val.arrLen > 0 && declare_type > 0) {
+	if (arrayCount < left_val.arrLen) {
+	  genCode2(LDI, DATA_SIZE[left_val.dType]);
+	  genCode2(LDI, arrayCount++);
+	  genCode_binary(Mul);
+	  genCode(LDA, left_val.level, left_val.code_addr);
+	  genCode_binary(Add);
+	} else {
+	  error("initialize length overflowing");
+	}
       }
       genCode2(LDI, root->tkn->intVal);
       break;
@@ -213,6 +239,8 @@ void expression(Token *t, char endChar) {
   }
   Node root = nodes[node_used_ct++];
   left_val.kind = no_ID;
+  arrayCount = 0;
+  declare_type = NON_T;
   makeTree(&root, 0, i-1);
   dumpRevPolish(&root);
   printf("\n");

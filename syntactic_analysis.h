@@ -22,6 +22,7 @@ static int addressing = 0;
 static int gen_left = 0; // detect only first '='
 #define MAX_DEFINE_SIZE
 static DataType declare_type = NON_T;
+static int arrayCount = 0;
 
 
 void expression(Token *t, char endChar);
