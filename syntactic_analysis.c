@@ -169,7 +169,9 @@ void genCode_tree(Node *root) {
       if (te_tmp != NULL && gen_left && left_val.kind == no_ID) {
 	left_val = *te_tmp;
       } else if (te_tmp == NULL && declare_type > NON_T) {
-	set_entry_member(&left_val, var_ID, root->tkn->text, root->tkn->intVal, declare_type, LOCAL);
+	if (codes[code_ct-1].opcode == LDI)
+	  arrLen = codes[--code_ct].opdata; // TODO : suspicious
+	set_entry_member(&left_val, var_ID, root->tkn->text, root->tkn->intVal, declare_type, LOCAL, arrLen);
 	enter_table_item(&left_val);
 	if (gen_left) {
 	  te_tmp = &left_val;
