@@ -17,19 +17,19 @@ int getLowestPriorityIdx(int st, int end) {
   for (i = st; i <= end; i++) {
     if (nest == 0 && (expr_tkns[i].hKind == Operator || expr_tkns[i].kind == Comma || expr_tkns[i].hKind == Type || expr_tkns[i].kind == Ident)) {
       if (expr_tkns[i].hKind == Type) { // done is better than nothing
-	pri = 14;
+                                                                                   pri = 15;
       } else if (expr_tkns[i].kind == Ident) {
-	pri = 13;
+	                                                                           pri = 14;
       }
       switch (expr_tkns[i].kind) {
       case Comma:                                                                  pri = 0; break;
       case Assign:                                                                 pri = 1; break;
       case Or:                                                                     pri = 2; break;
       case And:
-	pri = 3;
-	if (i == st || expr_tkns[i-1].hKind == Operator)
-	  pri = 13;
-	break;
+                                                                                   pri = 3;
+										   if (i == st || expr_tkns[i-1].hKind == Operator)
+										     pri = 13;
+										   break;
       case Bor:                                                                    pri = 4; break;
       case Bxor:                                                                   pri = 5; break;
       case Band:                                                                   pri = 6; break;
@@ -39,48 +39,33 @@ int getLowestPriorityIdx(int st, int end) {
       case Not: case Bnot:
                                                                                    pri = 10; break;
       case Sub: case Add:
-	pri = 10;
-	if (i == st || expr_tkns[i-1].hKind == Operator)
-	  pri = 13;
-	break;
+	                                                                           pri = 10;
+                                                                                   if (i == st || expr_tkns[i-1].hKind == Operator)
+										     pri = 13;
+										   break;
       case Mod: case Div: case Mul:
-	pri = 11;
-	if (expr_tkns[i].kind == Mul && (i == st || expr_tkns[i-1].hKind == Operator))
-	  pri = 13;
-	break;
+                                                                                   pri = 11;
+										   if (expr_tkns[i].kind == Mul && (i == st || expr_tkns[i-1].hKind == Operator))
+										     pri = 13;
+										   break;
       case Incre: case Decre:
-	pri = 14;
-	if (i == st || expr_tkns[i-1].hKind == Operator)
-	  pri = 13;
-	break;
+                                                                                   pri = 14;
+										   if (i == st || expr_tkns[i-1].hKind == Operator)
+										     pri = 13;
+										   break;
       default:
 	break;
-	//continue;
       }
 
       if (!(pri == 1 && lowest_pri == 1) && lowest_pri >= pri) {
 	lowest_pri = pri;
 	idx = i;
       }
-    } else if (expr_tkns[i].kind == Lparen || expr_tkns[i].kind == Lbracket) {
+    } else if (expr_tkns[i].kind == Lparen || expr_tkns[i].kind == Lbracket || expr_tkns[i].kind == Lbrace) {
       nest++;
-    } else if (expr_tkns[i].kind == Rparen || expr_tkns[i].kind == Rbracket) {
+    } else if (expr_tkns[i].kind == Rparen || expr_tkns[i].kind == Rbracket || expr_tkns[i].kind == Rbrace) {
       nest--;
     }
-  }
-
-  if (pri == 129) {
-    if (end-st >= 2 && expr_tkns[st+1].kind == '[' && expr_tkns[end].kind == ']') { // for A[], A[1+2]
-      expr_tkns[st+1].kind = Add; expr_tkns[st+1].hKind = Operator; expr_tkns[st+1].text[0] = '[';
-      addressing++;
-      return st+1;
-    } else if (expr_tkns[end].kind == ']') {
-      expr_tkns[end].kind = Mul; expr_tkns[end].hKind = Operator; expr_tkns[end].text[0] = ']';
-      addressing++;
-      return end;
-    }
-    if (end-st >= 2 && expr_tkns[st+1].kind == '(' && expr_tkns[end].kind == ')') // for A(), A(a, b, c...)
-      return st; // use func name as root
   }
 
   return idx;
@@ -91,7 +76,12 @@ void makeTree(Node *root, int st, int end) {
     return; // finish
   if (expr_tkns[st].kind == '(' && expr_tkns[end].kind == ')') {
     st++; end--;
+  } else if (expr_tkns[st].kind == '[' && expr_tkns[end].kind == ']') {
+    st++; end--;
+  } else if (expr_tkns[st].kind == '{' && expr_tkns[end].kind == '}') {
+    st++; end--;
   }
+
   int idx = getLowestPriorityIdx(st, end);
   root->tkn = &expr_tkns[idx];
 
@@ -104,12 +94,6 @@ void makeTree(Node *root, int st, int end) {
 
   root->r = &nodes[node_used_ct++];
   makeTree(root->r, idx+1, end);
-  if (root->tkn->kind == Mul && addressing != 0 && addressing % 2 == 0) {
-    root->r->tkn = (Token *)malloc(sizeof(Token));
-    root->r->tkn->kind = IntNum; root->r->tkn->hKind = Immediate; root->r->tkn->text[0] = 'T';
-    root->r->tkn->dVal = 0;
-    addressing -= 2;
-  }
   if (root->r->tkn == NULL) {
     root->r = NULL;
     node_used_ct--;
@@ -197,12 +181,8 @@ void genCode_tree(Node *root) {
       //}
       break;
     case IntNum:
-      if (root->tkn->text[0] == 'T') { // text should have 0 - 9
-	genCode2(LDI, DATA_SIZE[left_val.dType]);
-	free(root->tkn);
-      } else {
-	genCode2(LDI, root->tkn->intVal);
       }
+      genCode2(LDI, root->tkn->intVal);
       break;
     case CharSymbol:
 	genCode2(LDI, root->tkn->intVal);
