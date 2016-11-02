@@ -28,3 +28,12 @@ int malloc_L(int size) {
   localAddress += size;
   return localAddress - size; // start address
 }
+
+int malloc_more(TableEntry *te, int size) {
+  // for variable, int A[] = {1,2,3};
+  // size shall be, int A[] = {1,2} then 1
+  te->arrLen = size + 1;
+  if (te->level == GLOBAL)
+    return malloc_G(size); // NOTICE : initial address is malloced already.
+  return malloc_L(size);
+}

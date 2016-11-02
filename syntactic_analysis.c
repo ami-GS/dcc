@@ -6,6 +6,7 @@
 #include "syntactic_analysis.h"
 #include "parse.h"
 #include "misc.h"
+#include "malloc.h"
 #include <stdlib.h>
 
 int getLowestPriorityIdx(int st, int end) {
@@ -77,7 +78,14 @@ void makeTree(Node *root, int st, int end) {
   if (expr_tkns[st].kind == '(' && expr_tkns[end].kind == ')') {
     st++; end--;
   } else if (expr_tkns[st].kind == '[' && expr_tkns[end].kind == ']') {
-    st++; end--;
+    if (st + 1 == end) {
+      expr_tkns[st].kind = IntNum;
+      expr_tkns[st].hKind = Immediate;
+      expr_tkns[st].intVal = 0;
+      end--;
+    } else {
+      st++; end--;
+    }
   } else if (expr_tkns[st].kind == '{' && expr_tkns[end].kind == '}') {
     st++; end--;
   }
@@ -132,6 +140,11 @@ void genCode_tree(Node *root) {
     switch (root->tkn->kind) {
     case Assign:
       if (arrayCount > 0) {
+	if (empty_array) {
+	  te_tmp = search(left_val.name);
+	  malloc_more(te_tmp, arrayCount-1); // first address is already allocated
+	  empty_array = 0;
+	}
 	while (i < arrayCount) {
 	  genCode1(ASSV_TYPE[left_val.dType]);
 	  if (i != arrayCount-1)
@@ -180,7 +193,7 @@ void genCode_tree(Node *root) {
 	genCode2(CALL, te_tmp->code_addr);
 	break;
       case var_ID: case arg_ID:
-	if (te_tmp->arrLen == 0) {
+	if (te_tmp->arrLen == 0 && !empty_array) {
 	  genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
 	} else if (declare_type == NON_T) { // array
 	  genCode2(LDI, DATA_SIZE[te_tmp->dType]);
@@ -197,8 +210,8 @@ void genCode_tree(Node *root) {
       //}
       break;
     case IntNum:
-      if (left_val.kind != no_ID && left_val.arrLen > 0 && declare_type > 0) {
-	if (arrayCount < left_val.arrLen) {
+      if (left_val.kind != no_ID && (left_val.arrLen > 0 || empty_array) && declare_type > 0) {
+	if (arrayCount < left_val.arrLen || empty_array) {
 	  genCode2(LDI, DATA_SIZE[left_val.dType]);
 	  genCode2(LDI, arrayCount++);
 	  genCode_binary(Mul);
@@ -208,10 +221,12 @@ void genCode_tree(Node *root) {
 	  error("initialize length overflowing");
 	}
       }
+      if (root->tkn->text[0] == '[')
+	empty_array = 1;
       genCode2(LDI, root->tkn->intVal);
       break;
     case CharSymbol:
-	genCode2(LDI, root->tkn->intVal);
+      genCode2(LDI, root->tkn->intVal);
       break;
     case String:
       if (left_val.arrLen == 0)
