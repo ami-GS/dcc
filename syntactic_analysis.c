@@ -118,6 +118,97 @@ void dumpRevPolish(Node *root) {
     printf("%s", root->tkn->text);
 }
 
+void genCode_tree_assign() {
+  if (arrayCount > 0) {
+    if (empty_array) { // for int A[] = {1,2...}; initialization
+      TableEntry *te_tmp = search(left_val.name);
+      malloc_more(te_tmp, arrayCount-1); // first address is already allocated
+      empty_array = 0;
+    }
+    int i = 0;
+    while (i < arrayCount) {
+      genCode1(ASSV_TYPE[left_val.dType]);
+      if (i != arrayCount-1)
+	remove_op_stack_top();
+      i++;
+    }
+  } else {
+    genCode1(ASSV_TYPE[left_val.dType]);
+  }
+}
+
+void genCode_tree_addressing(int offset) {
+  genCode2(LDI, DATA_SIZE[left_val.dType]);
+  genCode2(LDI, offset);
+  genCode_binary(Mul);
+  genCode(LDA, left_val.level, left_val.code_addr);
+  genCode_binary(Add);
+}
+
+void genCode_tree_Ident(Token *tkn) {
+  TableEntry *te_tmp = search(tkn->text);
+  if (te_tmp != NULL && gen_left && left_val.kind == no_ID) {
+    left_val = *te_tmp;
+  } else if (te_tmp == NULL && declare_type > NON_T) { // newly declare
+    int arrLen = 0;
+    if (codes[code_ct-1].opcode == LDI)
+      arrLen = codes[--code_ct].opdata; // TODO : suspicious
+    set_entry_member(&left_val, var_ID, tkn->text, tkn->intVal, declare_type, LOCAL, arrLen);
+    enter_table_item(&left_val);
+    if (!gen_left)
+      return;
+    te_tmp = &left_val; // use it for initialization
+  }
+
+  switch (te_tmp->kind) { // for initialization
+  case func_ID: case proto_ID:
+    genCode2(CALL, te_tmp->code_addr);
+    break;
+  case var_ID: case arg_ID:
+    if (te_tmp->arrLen == 0 && !empty_array) {
+      genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
+    } else if (declare_type == NON_T) { // array
+      genCode2(LDI, DATA_SIZE[te_tmp->dType]);
+      genCode_binary(Mul);
+      genCode(LDA, te_tmp->level, te_tmp->code_addr);
+      genCode_binary(Add);
+      genCode1(VAL);
+    }
+    if (gen_left == 1)
+      to_left_val();
+    // incre decre ?
+    break;
+  }
+}
+
+void genCode_tree_IntNum(Token *tkn) {
+  if (left_val.kind != no_ID && (left_val.arrLen > 0 || empty_array) && declare_type > 0) {
+    if (arrayCount < left_val.arrLen || empty_array) {
+      genCode_tree_addressing(arrayCount++);
+    } else {
+      error("initialize length overflowing");
+    }
+  }
+  if (tkn->text[0] == '[') // for int A[] = {1,2,..};
+    empty_array = 1;
+  genCode2(LDI, tkn->intVal);
+}
+
+void genCode_tree_String(Token *tkn) {
+  if (left_val.arrLen == 0)
+    left_val.arrLen = tkn->intVal; // this is for A[]
+  if (declare_type == CHAR_T || empty_array) {
+    do {
+      genCode_tree_addressing(arrayCount);
+      genCode2(LDI, *(tkn->text+arrayCount++)); // TODO : LDI?
+    } while (left_val.arrLen > arrayCount);
+    if (tkn->intVal > left_val.arrLen)
+      error("initialize length overflowing");
+  } else {
+    error("string can be assign to char array");
+  }
+}
+
 void genCode_tree(Node *root) {
   if (root->tkn->hKind == Type)
     declare_type += tkn2dType(root->tkn->kind); // ';' can reset this?
@@ -134,37 +225,17 @@ void genCode_tree(Node *root) {
     genCode_tree(root->r);
 
   int i=0;
-  int arrLen = 0;
-  TableEntry *te_tmp;
   if (root->tkn != NULL) {
     switch (root->tkn->kind) {
     case Assign:
-      if (arrayCount > 0) {
-	if (empty_array) {
-	  te_tmp = search(left_val.name);
-	  malloc_more(te_tmp, arrayCount-1); // first address is already allocated
-	  empty_array = 0;
-	}
-	while (i < arrayCount) {
-	  genCode1(ASSV_TYPE[left_val.dType]);
-	  if (i != arrayCount-1)
-	    remove_op_stack_top();
-	  i++;
-	}
-      } else {
-	genCode1(ASSV_TYPE[left_val.dType]);
-      }
+      genCode_tree_assign();
       break;
-    case Add: case Sub: case Mul: case Div: case Mod: case Band:
+    case Add: case Sub: case Mul: case Div: case Mod: case Band: // TODO : More operators
       if (root->l != NULL && root->r != NULL) {
 	genCode_binary(root->tkn->kind);
-	if (codes[code_ct-1].opcode == ADDL && root->tkn->text[0] == '[') // TODO : workaround for [] addressing
-	  genCode1(VAL);
       } else {
 	genCode_unary(root->tkn->kind);
       }
-      if (declare_type > NON_T)
-	code_ct--; // for int A[5];, int A[5] = {1,2...}
       if (gen_left == 1)
 	to_left_val();
       break;
@@ -174,77 +245,16 @@ void genCode_tree(Node *root) {
       genCode_unary(root->tkn->kind);
       break;
     case Ident:
-      te_tmp = search(root->tkn->text);
-      if (te_tmp != NULL && gen_left && left_val.kind == no_ID) {
-	left_val = *te_tmp;
-      } else if (te_tmp == NULL && declare_type > NON_T) {
-	if (codes[code_ct-1].opcode == LDI)
-	  arrLen = codes[--code_ct].opdata; // TODO : suspicious
-	set_entry_member(&left_val, var_ID, root->tkn->text, root->tkn->intVal, declare_type, LOCAL, arrLen);
-	enter_table_item(&left_val);
-	if (gen_left) {
-	  te_tmp = &left_val;
-	} else {
-	  break;
-	}
-      }
-      switch (te_tmp->kind) {
-      case func_ID: case proto_ID:
-	genCode2(CALL, te_tmp->code_addr);
-	break;
-      case var_ID: case arg_ID:
-	if (te_tmp->arrLen == 0 && !empty_array) {
-	  genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
-	} else if (declare_type == NON_T) { // array
-	  genCode2(LDI, DATA_SIZE[te_tmp->dType]);
-	  genCode_binary(Mul);
-	  genCode(LDA, te_tmp->level, te_tmp->code_addr);
-	  genCode_binary(Add);
-	  genCode1(VAL);
-	}
-	if (gen_left == 1)
-	  to_left_val();
-	// incre decre ?
-	break;
-      }
-      //}
+      genCode_tree_Ident(root->tkn);
       break;
     case IntNum:
-      if (left_val.kind != no_ID && (left_val.arrLen > 0 || empty_array) && declare_type > 0) {
-	if (arrayCount < left_val.arrLen || empty_array) {
-	  genCode2(LDI, DATA_SIZE[left_val.dType]);
-	  genCode2(LDI, arrayCount++);
-	  genCode_binary(Mul);
-	  genCode(LDA, left_val.level, left_val.code_addr);
-	  genCode_binary(Add);
-	} else {
-	  error("initialize length overflowing");
-	}
-      }
-      if (root->tkn->text[0] == '[')
-	empty_array = 1;
-      genCode2(LDI, root->tkn->intVal);
+      genCode_tree_IntNum(root->tkn);
       break;
     case CharSymbol:
       genCode2(LDI, root->tkn->intVal);
       break;
     case String:
-      if (left_val.arrLen == 0)
-	left_val.arrLen = root->tkn->intVal; // this is for A[]
-      if (declare_type == CHAR_T || empty_array) {
-	do {
-	  genCode2(LDI, DATA_SIZE[left_val.dType]);
-	  genCode2(LDI, arrayCount);
-	  genCode_binary(Mul);
-	  genCode(LDA, left_val.level, left_val.code_addr);
-	  genCode_binary(Add);
-	  genCode2(LDI, *(root->tkn->text+arrayCount++)); // TODO : LDI?
-	} while (left_val.arrLen > arrayCount);
-	if (root->tkn->intVal > left_val.arrLen)
-	  error("initialize length overflowing");
-      } else {
-	error("string can be assign to char array");
-      }
+      genCode_tree_String(root->tkn);
       break;
     case Comma:
       break; // ignore?
@@ -254,7 +264,7 @@ void genCode_tree(Node *root) {
 
 void expression(Token *t, char endChar) {
   int i;
-  //node_used_ct = 0;
+  //node_used_ct = 0; // TODO : currently NULL is used as condition, need initialization
   for (i = 0; t->kind != endChar; i++) { // TODO ',' should be considered
     expr_tkns[i] = *t;
     nextToken(t, 0);
