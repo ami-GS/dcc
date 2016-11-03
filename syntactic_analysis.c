@@ -231,14 +231,20 @@ void genCode_tree(Node *root) {
     case String:
       if (left_val.arrLen == 0)
 	left_val.arrLen = root->tkn->intVal; // this is for A[]
-      do {
-	genCode(LDA, left_val.level, left_val.code_addr);
-	genCode2(LDI, CHAR_SIZE*i);
-	genCode1(ADDL);
-	genCode2(LDI, *(root->tkn->text+i)); // TODO : LDI?
-	genCode1(ASSC);
-	i++;
-      } while (left_val.arrLen > i);
+      if (declare_type == CHAR_T || empty_array) {
+	do {
+	  genCode2(LDI, DATA_SIZE[left_val.dType]);
+	  genCode2(LDI, arrayCount);
+	  genCode_binary(Mul);
+	  genCode(LDA, left_val.level, left_val.code_addr);
+	  genCode_binary(Add);
+	  genCode2(LDI, *(root->tkn->text+arrayCount++)); // TODO : LDI?
+	} while (left_val.arrLen > arrayCount);
+	if (root->tkn->intVal > left_val.arrLen)
+	  error("initialize length overflowing");
+      } else {
+	error("string can be assign to char array");
+      }
       break;
     case Comma:
       break; // ignore?
@@ -248,6 +254,7 @@ void genCode_tree(Node *root) {
 
 void expression(Token *t, char endChar) {
   int i;
+  //node_used_ct = 0;
   for (i = 0; t->kind != endChar; i++) { // TODO ',' should be considered
     expr_tkns[i] = *t;
     nextToken(t, 0);
