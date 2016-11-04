@@ -35,7 +35,7 @@ void genCode_tree_addressing(int offset);
 void genCode_tree_Ident(Token *tkn);
 void genCode_tree_IntNum(Token *tkn);
 void genCode_tree_String(Token *tkn);
-void genCode_tree(Node *root);
+void genCode_tree(Node *self, Node * root);
 void expr_with_check(Token *t, char l, char r);
 void callFunc(Token *t, TableEntry *te);
 // TODO : this is my own implementation. suspicious

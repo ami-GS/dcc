@@ -155,40 +155,34 @@ void genCode_tree_Ident(Token *tkn) {
       arrLen = codes[--code_ct].opdata; // TODO : suspicious
     set_entry_member(&left_val, var_ID, tkn->text, tkn->intVal, declare_type, LOCAL, arrLen);
     enter_table_item(&left_val);
-    if (!gen_left)
-      return;
-    te_tmp = &left_val; // use it for initialization
+    if (gen_left)
+      te_tmp = &left_val;
   }
 
-  switch (te_tmp->kind) { // for initialization
-  case func_ID: case proto_ID:
-    genCode2(CALL, te_tmp->code_addr);
-    break;
-  case var_ID: case arg_ID:
-    if (te_tmp->arrLen == 0 && !empty_array) {
-      genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
-    } else if (declare_type == NON_T) { // array
-      genCode2(LDI, DATA_SIZE[te_tmp->dType]);
-      genCode_binary(Mul);
-      genCode(LDA, te_tmp->level, te_tmp->code_addr);
-      genCode_binary(Add);
-      genCode1(VAL);
+  if (te_tmp != NULL) {
+    switch (te_tmp->kind) { // for initialization
+    case func_ID: case proto_ID:
+      genCode2(CALL, te_tmp->code_addr);
+      break;
+    case var_ID: case arg_ID:
+      if (te_tmp->arrLen == 0 && !(codes[code_ct].opcode == LDI && codes[code_ct].opdata == 0)) {
+	genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
+      } else if (te_tmp != &left_val) { // array
+	genCode2(LDI, DATA_SIZE[te_tmp->dType]);
+	genCode_binary(Mul);
+	genCode(LDA, te_tmp->level, te_tmp->code_addr);
+	genCode_binary(Add);
+	genCode1(VAL_TYPE[te_tmp->dType]);
+      }
+      if (gen_left == 1)
+	to_left_val();
+      // incre decre ?
+      break;
     }
-    if (gen_left == 1)
-      to_left_val();
-    // incre decre ?
-    break;
   }
 }
 
 void genCode_tree_IntNum(Token *tkn) {
-  if (left_val.kind != no_ID && (left_val.arrLen > 0 || empty_array) && declare_type > 0) {
-    if (arrayCount < left_val.arrLen || empty_array) {
-      genCode_tree_addressing(arrayCount++);
-    } else {
-      error("initialize length overflowing");
-    }
-  }
   if (tkn->text[0] == '[') // for int A[] = {1,2,..};
     empty_array = 1;
   genCode2(LDI, tkn->intVal);
@@ -209,32 +203,38 @@ void genCode_tree_String(Token *tkn) {
   }
 }
 
-void genCode_tree(Node *root) {
-  if (root->tkn->hKind == Type)
-    declare_type += tkn2dType(root->tkn->kind); // ';' can reset this?
-  if (declare_type > NON_T && root->tkn->kind == '*') // TODO : consider int* a, b; case
+void genCode_tree(Node *self, Node *root) {
+  if (root->tkn->kind == Comma && self->tkn->kind != Comma && declare_type > NON_T && (left_val.arrLen > 0 || empty_array)) {
+    if (arrayCount >= left_val.arrLen && !empty_array)
+      error("initialize length overflowing");
+    genCode_tree_addressing(arrayCount++);
+  }
+
+  if (self->tkn->hKind == Type)
+    declare_type += tkn2dType(self->tkn->kind); // ';' can reset this?
+  if (declare_type > NON_T && self->tkn->kind == '*') // TODO : consider int* a, b; case
     declare_type++; // indicate pointer
 
-  if (gen_left == 0 && root->tkn->kind == Assign)
+  if (gen_left == 0 && self->tkn->kind == Assign)
     gen_left = 1; // the most left '='
-  if (root->l != NULL)
-    genCode_tree(root->l);
-  if (gen_left == 1 && root->tkn->kind == Assign)
+  if (self->l != NULL)
+    genCode_tree(self->l, self);
+  if (gen_left == 1 && self->tkn->kind == Assign)
     gen_left = 0;
-  if (root->r != NULL)
-    genCode_tree(root->r);
+  if (self->r != NULL)
+    genCode_tree(self->r, self);
 
   int i=0;
-  if (root->tkn != NULL) {
-    switch (root->tkn->kind) {
+  if (self->tkn != NULL) {
+    switch (self->tkn->kind) {
     case Assign:
       genCode_tree_assign();
       break;
     case Add: case Sub: case Mul: case Div: case Mod: case Band: // TODO : More operators
-      if (root->l != NULL && root->r != NULL) {
-	genCode_binary(root->tkn->kind);
+      if (self->l != NULL && self->r != NULL) {
+	genCode_binary(self->tkn->kind);
       } else {
-	genCode_unary(root->tkn->kind);
+	genCode_unary(self->tkn->kind);
       }
       if (gen_left == 1)
 	to_left_val();
@@ -242,19 +242,19 @@ void genCode_tree(Node *root) {
     case Incre: case Decre:
       if (codes[code_ct-1].opcode == LOD)
 	codes[code_ct-1].opcode = LDA;
-      genCode_unary(root->tkn->kind);
+      genCode_unary(self->tkn->kind);
       break;
     case Ident:
-      genCode_tree_Ident(root->tkn);
+      genCode_tree_Ident(self->tkn);
       break;
     case IntNum:
-      genCode_tree_IntNum(root->tkn);
+      genCode_tree_IntNum(self->tkn);
       break;
     case CharSymbol:
-      genCode2(LDI, root->tkn->intVal);
+      genCode2(LDI, self->tkn->intVal);
       break;
     case String:
-      genCode_tree_String(root->tkn);
+      genCode_tree_String(self->tkn);
       break;
     case Comma:
       break; // ignore?
@@ -276,7 +276,7 @@ void expression(Token *t, char endChar) {
   makeTree(&root, 0, i-1);
   dumpRevPolish(&root);
   printf("\n");
-  genCode_tree(&root);
+  genCode_tree(&root, &root);
   if (root.tkn->kind == Assign)
     remove_op_stack_top();
 }
