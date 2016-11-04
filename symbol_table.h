@@ -19,6 +19,7 @@ static int DATA_SIZE[] = {-1, -1, POINTER_SIZE, INT_SIZE, POINTER_SIZE,
                           FLOAT_SIZE, POINTER_SIZE, DOUBLE_SIZE, POINTER_SIZE};
 static int ASSV_TYPE[] = {-1, -1, -1, ASSV, ASVP, ASVS, ASVP, ASVC, ASVP, ASVF, ASVP, ASVD, ASVP};
 static int LOD_TYPE[] = {-1, -1, -1, LOD, LDA, LODS, LDA, LODC, LDA, LODF, LDA, LODD, LDA};
+static int VAL_TYPE[] = {-1, -1, -1, VAL, VAL, VALS, VAL, VALC, VAL, VALF, VAL, VALD, VAL};
 
 
 typedef enum {

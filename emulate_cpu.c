@@ -118,7 +118,7 @@ int execute(Instruction *codes, int debug) {
     case VAL: // address to value conversion
       op_stack[stack_ptr-1].sINT = MEMINT(op_stack[stack_ptr-1].sINT); break;
     case VALC:
-      op_stack[stack_ptr-1].sCHAR = memory[op_stack[stack_ptr-1].sCHAR]; break;
+      op_stack[stack_ptr-1].sCHAR = memory[op_stack[stack_ptr-1].sINT]; break;
     case EQCMP:
       // TODO : suspicious
       if (dat == op_stack[stack_ptr-1].sINT) {
