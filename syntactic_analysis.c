@@ -16,13 +16,14 @@ int getLowestPriorityIdx(int st, int end) {
   int lowest_pri = 128, pri = 129, idx = st;
   int i, nest = 0;
   for (i = st; i <= end; i++) {
-    if (nest == 0 && (expr_tkns[i].hKind == Operator || expr_tkns[i].kind == Comma || expr_tkns[i].hKind == Type || expr_tkns[i].kind == Ident)) {
+    if (nest == 0 && (expr_tkns[i].hKind == Operator || expr_tkns[i].kind == Comma || expr_tkns[i].hKind == Type || expr_tkns[i].kind == Ident || expr_tkns[i].kind == Semicolon)) {
       if (expr_tkns[i].hKind == Type) { // done is better than nothing
                                                                                    pri = 15;
       } else if (expr_tkns[i].kind == Ident) {
 	                                                                           pri = 14;
       }
       switch (expr_tkns[i].kind) {
+      case Semicolon:                                                              pri = -1; break;
       case Comma:                                                                  pri = 0; break;
       case Assign:                                                                 pri = 1; break;
       case Or:                                                                     pri = 2; break;
@@ -96,8 +97,8 @@ void makeTree(Node *root, int st, int end) {
   root->l = &nodes[node_used_ct++];
   makeTree(root->l, st, idx-1);
   if (root->l->tkn == NULL) {
-      root->l = NULL;
-      node_used_ct--;
+    root->l = NULL;
+    node_used_ct--;
   }
 
   root->r = &nodes[node_used_ct++];
@@ -264,7 +265,16 @@ void genCode_tree(Node *self, Node *root) {
       break;
     case Comma:
       break; // ignore?
+    default:
+      break;
     }
+  }
+
+  if (root->tkn->kind == Semicolon && self->tkn->kind != Semicolon) {
+    remove_op_stack_top();
+    declare_type = NON_T;
+    arrayCount = 0;
+    left_val.kind = no_ID;
   }
 }
 
