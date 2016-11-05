@@ -32,6 +32,7 @@ void makeTree(Node *root, int st, int end);
 void dumpRevPolish(Node *root);
 void genCode_tree_assign();
 void genCode_tree_addressing(int offset);
+void genCode_tree_operator(Node *self);
 void genCode_tree_Ident(Token *tkn);
 void genCode_tree_IntNum(Token *tkn);
 void genCode_tree_String(Token *tkn);

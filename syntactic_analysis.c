@@ -157,6 +157,8 @@ void genCode_tree_Ident(Token *tkn) {
     enter_table_item(&left_val);
     if (gen_left)
       te_tmp = &left_val;
+  } else {
+    error("unknown identifier");
   }
 
   if (te_tmp != NULL) {
@@ -203,6 +205,16 @@ void genCode_tree_String(Token *tkn) {
   }
 }
 
+void genCode_tree_operator(Node *self) {
+  if (self->l != NULL && self->r != NULL) {
+    genCode_binary(self->tkn->kind);
+  } else {
+    genCode_unary(self->tkn->kind);
+  }
+  if (gen_left == 1)
+    to_left_val();
+}
+
 void genCode_tree(Node *self, Node *root) {
   if (root->tkn->kind == Comma && self->tkn->kind != Comma && declare_type > NON_T && (left_val.arrLen > 0 || empty_array)) {
     if (arrayCount >= left_val.arrLen && !empty_array)
@@ -231,13 +243,7 @@ void genCode_tree(Node *self, Node *root) {
       genCode_tree_assign();
       break;
     case Add: case Sub: case Mul: case Div: case Mod: case Band: // TODO : More operators
-      if (self->l != NULL && self->r != NULL) {
-	genCode_binary(self->tkn->kind);
-      } else {
-	genCode_unary(self->tkn->kind);
-      }
-      if (gen_left == 1)
-	to_left_val();
+      genCode_tree_operator(self);
       break;
     case Incre: case Decre:
       if (codes[code_ct-1].opcode == LOD)
