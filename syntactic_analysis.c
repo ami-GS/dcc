@@ -242,9 +242,16 @@ void genCode_tree(Node *self, Node *root) {
     switch (self->tkn->kind) {
     case Assign:
       genCode_tree_assign();
+      if (root->tkn->kind == Comma || root == self) { // when int A[2] = {1, a=b}; cause error
+	arrayCount = 0;
+	left_val.arrLen  = 0;
+	remove_op_stack_top();
+      }
       break;
     case Add: case Sub: case Mul: case Div: case Mod: case Band: // TODO : More operators
       genCode_tree_operator(self);
+      if (root->tkn->kind == Comma || root->tkn->kind == Semicolon)
+	remove_op_stack_top();
       break;
     case Incre: case Decre:
       if (codes[code_ct-1].opcode == LOD)
@@ -293,8 +300,6 @@ void expression(Token *t, char endChar) {
   dumpRevPolish(&root);
   printf("\n");
   genCode_tree(&root, &root);
-  if (root.tkn->kind == Assign)
-    remove_op_stack_top();
 }
 
 void expr_with_check(Token *t, char l, char r) {
