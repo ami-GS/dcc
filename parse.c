@@ -58,10 +58,15 @@ void ignoreLine(Token *t) {
 DataType tkn2dType(Kind kind) {
   switch(kind) {
   case Int:     return INT_T;
+  case IntP:    return INTP_T;
   case Void:    return VOID_T;
+  case VoidP:   return VOIDP_T;
   case Char:    return CHAR_T;
+  case CharP:   return CHARP_T;
   case Float:   return FLOAT_T;
+  case FloatP:  return FLOATP_T;
   case Double:  return DOUBLE_T;
+  case DoubleP: return DOUBLEP_T;
   default:      return NON_T;
     // TODO : other types can be placed
   }

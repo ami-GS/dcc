@@ -66,7 +66,7 @@ void set_hKind(Token *t) {
 	      Bxor == t->kind || Bnot == t->kind || (Less <= t->kind && t->kind <= Great) ||
 	     (Incre <= t->kind && t->kind <= EqGreat)) {
     t->hKind = Operator;
-  } else if (Int <= t->kind && t->kind <= Void) {
+  } else if (Int <= t->kind && t->kind <= VoidP) {
     t->hKind = Type;
   } else if (String <= t->kind && t->kind <= CharSymbol) {
     t->hKind = Immediate;

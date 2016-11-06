@@ -23,6 +23,7 @@ typedef enum {
   BandAss, BorAss, BxorAss, BnotAss, LsftAss, RsftAss,
   NotEq, LessEq, EqLess, GreatEq, EqGreat, Arrow,                                         //     - 203
   Int = 210, Float, Double, Char, Void,                                                   // 210 - 214
+  IntP, FloatP, DoubleP, CharP, VoidP,
   String = 230, IntNum, FloatNum, CharSymbol,                                             // 230 - 233
   Digit, Letter, VarName,
   If = 250, Else, For, Do, While,                                                         // 250
@@ -54,6 +55,7 @@ typedef struct {
 
 static KeyWordType keyWdType[] = {
   {"void", Void}, {"int", Int}, {"char", Char}, {"float", Float}, {"double", Double},
+  {"void*", VoidP}, {"int*", IntP}, {"char*", CharP}, {"float*", FloatP}, {"double*", DoubleP},
   {"if", If}, {"else", Else},
   {"for", For}, {"while", While}, {"do", Do},
   {"switch", Switch}, {"case", Case}, {"continue", Continue},
