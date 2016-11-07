@@ -16,11 +16,15 @@ int getLowestPriorityIdx(int st, int end) {
   int lowest_pri = 128, pri = 129, idx = st;
   int i, nest = 0;
   for (i = st; i <= end; i++) {
-    if (nest == 0 && (expr_tkns[i].hKind == Operator || expr_tkns[i].kind == Comma || expr_tkns[i].hKind == Type || expr_tkns[i].kind == Ident || expr_tkns[i].kind == Semicolon)) {
+    if (nest == 0 &&
+	(expr_tkns[i].hKind == Operator || expr_tkns[i].hKind == CombOpe || expr_tkns[i].kind == Comma
+	 || expr_tkns[i].hKind == Type || expr_tkns[i].kind == Ident || expr_tkns[i].kind == Semicolon)) {
       if (expr_tkns[i].hKind == Type) { // done is better than nothing
                                                                                    pri = 15;
       } else if (expr_tkns[i].kind == Ident) {
 	                                                                           pri = 14;
+      } else if (expr_tkns[i].hKind == CombOpe) {
+                                                                                   pri = 1;
       }
       switch (expr_tkns[i].kind) {
       case Semicolon:                                                              pri = -1; break;
@@ -76,6 +80,7 @@ int getLowestPriorityIdx(int st, int end) {
 void makeTree(Node *root, int st, int end) {
   if (st > end)
     return; // finish
+
   if (expr_tkns[st].kind == '(' && expr_tkns[end].kind == ')') {
     st++; end--;
   } else if (expr_tkns[st].kind == '[' && expr_tkns[end].kind == ']') {
@@ -148,9 +153,7 @@ void genCode_tree_addressing(int offset) {
 
 void genCode_tree_Ident(Token *tkn) {
   TableEntry *te_tmp = search(tkn->text);
-  if (te_tmp != NULL && gen_left && left_val.kind == no_ID) {
-    left_val = *te_tmp;
-  } else if (te_tmp == NULL && declare_type > NON_T) { // newly declare
+  if (te_tmp == NULL && declare_type > NON_T) {
     int arrLen = 0;
     if (codes[code_ct-1].opcode == LDI)
       arrLen = codes[--code_ct].opdata; // TODO : suspicious
@@ -158,9 +161,11 @@ void genCode_tree_Ident(Token *tkn) {
     enter_table_item(&left_val);
     if (gen_left)
       te_tmp = &left_val;
-  } else {
+  } else if (te_tmp == NULL) {
     error("unknown identifier");
   }
+  if (left_val.kind == no_ID)
+    left_val = *te_tmp;
 
   if (te_tmp != NULL) {
     switch (te_tmp->kind) { // for initialization
@@ -177,7 +182,7 @@ void genCode_tree_Ident(Token *tkn) {
 	genCode_binary(Add);
 	genCode1(VAL_TYPE[te_tmp->dType]);
       }
-      if (gen_left == 1)
+      if (gen_left >= 1)
 	to_left_val();
       // incre decre ?
       break;
@@ -212,8 +217,10 @@ void genCode_tree_operator(Node *self) {
   } else {
     genCode_unary(self->tkn->kind);
   }
-  if (gen_left == 1)
+  if (gen_left >= 1)
     to_left_val();
+  if (self->tkn->hKind == CombOpe)
+    genCode_tree_assign();
 }
 
 void genCode_tree(Node *self, Node *root) {
@@ -224,16 +231,19 @@ void genCode_tree(Node *self, Node *root) {
   }
 
   if (self->tkn->hKind == Type)
-    declare_type += tkn2dType(self->tkn->kind); // ';' can reset this?
+    declare_type = tkn2dType(self->tkn->kind); // ';' can reset this?
   if (declare_type > NON_T && self->tkn->kind == '*') // TODO : consider int* a, b; case
     declare_type++; // indicate pointer
 
-  if (gen_left == 0 && self->tkn->kind == Assign)
-    gen_left = 1; // the most left '='
+  if (gen_left == 0 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe)) {
+    gen_left = (self->tkn->kind == Assign);
+    gen_left =  (self->tkn->hKind == CombOpe) + 1; // the most left '='
+  }
   if (self->l != NULL)
     genCode_tree(self->l, self);
-  if (gen_left == 1 && self->tkn->kind == Assign)
+  if (gen_left >= 1 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe))
     gen_left = 0;
+
   if (self->r != NULL)
     genCode_tree(self->r, self);
 
@@ -248,11 +258,6 @@ void genCode_tree(Node *self, Node *root) {
 	remove_op_stack_top();
       }
       break;
-    case Add: case Sub: case Mul: case Div: case Mod: case Band: // TODO : More operators
-      genCode_tree_operator(self);
-      if (root->tkn->kind == Comma || root->tkn->kind == Semicolon)
-	remove_op_stack_top();
-      break;
     case Incre: case Decre:
       if (codes[code_ct-1].opcode == LOD)
 	codes[code_ct-1].opcode = LDA;
@@ -260,12 +265,18 @@ void genCode_tree(Node *self, Node *root) {
       break;
     case Ident:
       genCode_tree_Ident(self->tkn);
+      if (gen_left && root->tkn->hKind == CombOpe)
+	genCode(LOD_TYPE[left_val.dType], left_val.level, left_val.code_addr);
       break;
     case IntNum:
       genCode_tree_IntNum(self->tkn);
+      if (gen_left && root->tkn->hKind == CombOpe)
+	genCode(LOD_TYPE[left_val.dType], left_val.level, left_val.code_addr);
       break;
     case CharSymbol:
       genCode2(LDI, self->tkn->intVal);
+      if (gen_left && root->tkn->hKind == CombOpe)
+	genCode(LOD_TYPE[left_val.dType], left_val.level, left_val.code_addr);
       break;
     case String:
       genCode_tree_String(self->tkn);
@@ -273,6 +284,17 @@ void genCode_tree(Node *self, Node *root) {
     case Comma:
       break; // ignore?
     default:
+      switch (self->tkn->hKind) {
+      case Operator:
+	genCode_tree_operator(self);
+	if (root->tkn->kind == Comma || root->tkn->kind == Semicolon)
+	  remove_op_stack_top();
+	break;
+      case CombOpe:
+	genCode_tree_operator(self);
+	remove_op_stack_top();
+	break;
+      }
       break;
     }
   }

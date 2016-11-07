@@ -19,9 +19,9 @@ typedef enum {
   NulKind = 150, Others, Ident,
   Define, Include, Elif, Ifdef, Ifndef, Endif,                                            // 153 - 158
   Incre = 180, Decre, And, Or, Lshift, Rshift,                                            // 180 - 185
-  Equal, AddAss, SubAss, MulAss, DivAss, ModAss,
+  Equal, NotEq, LessEq, EqLess, GreatEq, EqGreat, Arrow,
+  AddAss, SubAss, MulAss, DivAss, ModAss,
   BandAss, BorAss, BxorAss, BnotAss, LsftAss, RsftAss,
-  NotEq, LessEq, EqLess, GreatEq, EqGreat, Arrow,                                         //     - 203
   Int = 210, Float, Double, Char, Void,                                                   // 210 - 214
   IntP, FloatP, DoubleP, CharP, VoidP,
   String = 230, IntNum, FloatNum, CharSymbol,                                             // 230 - 233
@@ -37,7 +37,7 @@ typedef enum {
 int cType[256];
 
 typedef enum {
-    Specific, Immediate, Function, Operator, Statement, Paren, Type,
+    Specific, Immediate, Function, Operator, CombOpe, Statement, Paren, Type,
 } HighLevelKind;
 
 typedef struct {
