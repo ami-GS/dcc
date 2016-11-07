@@ -65,7 +65,7 @@ void statement(Token *t) {
     nextToken(t, 0);
     break;
   case Int: case Float: case Char: // TODO : enhance here
-    st_declare(t);
+    expression(t, ';');
     break;
   case EOF_token:
     return; // TODO : unexpected error (occures when ';' is forgotten etc..)
