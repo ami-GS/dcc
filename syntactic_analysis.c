@@ -321,7 +321,8 @@ void expression(Token *t, char endChar) {
   makeTree(&root, 0, i-1);
   dumpRevPolish(&root);
   printf("\n");
-  genCode_tree(&root, &root);
+  if (root.tkn != NULL)
+    genCode_tree(&root, &root);
 }
 
 void expr_with_check(Token *t, char l, char r) {
