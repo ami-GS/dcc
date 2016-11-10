@@ -4,7 +4,14 @@ Daiki C Compiler
 ### Notice
 This is for my understandings of interpreter-compiler.
 
-Currently the usage is limited.
+Currently the usage is limited, but you can use example/ directory for testing.
+
+'''
+$ git clone https://github.com/ami-GS/dcc
+$ cd dcc
+$ make
+$ dcc example/fib.c -sm
+'''
 
 ## TODO
 These are TODO list specilly I would like to implement.
