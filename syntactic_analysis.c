@@ -155,9 +155,12 @@ void genCode_tree_Ident(Token *tkn) {
   TableEntry *te_tmp = search(tkn->text);
   if (te_tmp == NULL && declare_type > NON_T) {
     int arrLen = 0;
+    SymbolKind sKind = var_ID;
     if (codes[code_ct-1].opcode == LDI)
       arrLen = codes[--code_ct].opdata; // TODO : suspicious
-    set_entry_member(&left_val, var_ID, tkn->text, tkn->intVal, declare_type, LOCAL, arrLen);
+    if (funcPtr->args == -1)
+      sKind = arg_ID;
+    set_entry_member(&left_val, sKind, tkn->text, tkn->intVal, declare_type, LOCAL, arrLen);
     enter_table_item(&left_val);
     if (gen_left)
       te_tmp = &left_val;

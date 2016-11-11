@@ -25,6 +25,7 @@ void compile(char *fname) {
       if (checkNxtTokenKind('(')) {
 	declare_func(&entryTmp, &t);
       } else { // in case of ',' or '['
+	//expression(&t, ';');
 	declare_var(&entryTmp, &t);
       }
       break;
@@ -192,7 +193,7 @@ int set_address(TableEntry *te) {
   int i, size = get_type_size(te->dType);
 
   switch (te->kind) {
-  case var_ID:
+  case var_ID: case arg_ID:
     if (te->arrLen != 0)
       size *= te->arrLen; // other type should be capable
     if (te->level == GLOBAL) {
@@ -207,7 +208,7 @@ int set_address(TableEntry *te) {
     for (i = 1; i <= te->args; i++) {
       size = get_type_size((te+i)->dType);
       (te+i)->code_addr = malloc_L(size);
-    }
+      }
     break;
   }
 }
@@ -264,37 +265,15 @@ int declare_func(TableEntry* ent, Token* t) {
   t_buf_open = 0;
   ent->kind = get_func_type();
   t_buf_open = 1;
-  nextToken(t, 0); nextToken(t, 0); // point at ')' or arguments
+  nextToken(t, 0); // point at '(' or arguments
   funcPtr = enter_table_item(ent); // TODO : funcPtr is not needed?
   // open local table
   open_local_table();
 
-  // declare arguments
-  TableEntry arg = {arg_ID, "", NON_T, LOCAL, 0, 0, 0};
-  switch (t->kind) {
-  case Void:
-    nextToken(t, 0); // point to ')'
-    break;
-  case Rparen:
-    break;
-  default:
-    while (1) {
-      set_dtype(&arg, t);
-      set_name(&arg, t);
-      nextToken(t, 0);
-      enter_table_item(&arg); // to avoid multiple declaration in case of using declare_var
-      (funcPtr->args)++;
-      if (t->kind != ',') {
-	break;
-      }
-      nextToken(t, 0);
-    }
-  }
-  if (t->kind != ')') {
-    error("end ')' is missing ");
-  }
-  nextToken(t, 0);
-
+  int tmp = table_ent_ct;
+  funcPtr->args = -1;
+  expr_with_check(t, '(', ')');
+  funcPtr->args = table_ent_ct - tmp;
   set_address(funcPtr);
   // TODO : put func chck
 
