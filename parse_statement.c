@@ -53,7 +53,7 @@ void statement(Token *t) {
     st_build_in(t);
     break;
   case Ident: case IntNum: case Mul: // TODO : correct?
-    expression(t, ';');
+    expr_with_check(t, 0, ';');
     break;
   case Incre: case Decre:
     st_inc_dec(t);
@@ -64,8 +64,9 @@ void statement(Token *t) {
   case Semicolon:
     nextToken(t, 0);
     break;
-  case Int: case Float: case Char: // TODO : enhance here
-    expression(t, ';');
+  case Int: case Float: case Char: case Double:
+  case IntP: case FloatP: case CharP: case DoubleP:// TODO : enhance here
+    expr_with_check(t, 0, ';');
     break;
   case EOF_token:
     return; // TODO : unexpected error (occures when ';' is forgotten etc..)
@@ -227,14 +228,12 @@ void st_do(Token *t) {
 
 void st_for(Token *t) {
   int loop_top, loop_buttom, inst_top, exp_label;
-  nextToken(t, 0);
+  nextToken(t, 0); nextToken(t, 0);
   if (t->kind == ';') {
     // no expr 1
     nextToken(t, 0);
   } else {
     expr_with_check(t, 0, ';');
-    // remove result;
-    remove_op_stack_top();
   }
 
   // set label to loop. (1)

@@ -179,6 +179,8 @@ int get_type_size(DataType dt) {
     return INT_SIZE;
   case CHAR_T:
     return CHAR_SIZE;
+  case VOID_T:
+    return 0;
   default:
     if (dt % 2 == 0) { // even number is pointer
       return POINTER_SIZE;
