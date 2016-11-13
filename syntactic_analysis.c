@@ -128,7 +128,8 @@ void genCode_tree_assign() {
   if (arrayCount > 0) {
     if (empty_array) { // for int A[] = {1,2...}; initialization
       TableEntry *te_tmp = search(left_val.name);
-      malloc_more(te_tmp, arrayCount-1); // first address is already allocated
+      te_tmp->arrLen = arrayCount;
+      malloc_more(te_tmp, DATA_SIZE[te_tmp->dType] * (arrayCount-1)); // first address is already allocated
       empty_array = 0;
     }
     int i = 0;
@@ -156,8 +157,11 @@ void genCode_tree_Ident(Token *tkn) {
   if (te_tmp == NULL && declare_type > NON_T) {
     int arrLen = 0;
     SymbolKind sKind = var_ID;
-    if (codes[code_ct-1].opcode == LDI)
+    if (codes[code_ct-1].opcode == LDI) {
       arrLen = codes[--code_ct].opdata; // TODO : suspicious
+      if (declare_type > 0)
+	declare_type++; // pointer int A[], int A[5]
+    }
     if (funcPtr->args == -1)
       sKind = arg_ID;
     set_entry_member(&left_val, sKind, tkn->text, tkn->intVal, declare_type, LOCAL, arrLen);
@@ -234,9 +238,7 @@ void genCode_tree(Node *self, Node *root) {
   }
 
   if (self->tkn->hKind == Type)
-    declare_type = tkn2dType(self->tkn->kind); // ';' can reset this?
-  if (declare_type > NON_T && self->tkn->kind == '*') // TODO : consider int* a, b; case
-    declare_type++; // indicate pointer
+    declare_type = tkn2dType(self->tkn->kind) + (root->tkn->kind == '*'); // ';' can reset this?
 
   if (gen_left == 0 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe)) {
     gen_left = (self->tkn->kind == Assign);
