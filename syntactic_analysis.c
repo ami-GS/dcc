@@ -153,6 +153,7 @@ void genCode_tree_addressing(int offset) {
 }
 
 void genCode_tree_Ident(Node *root, Node *self) {
+  is_array = self->r != NULL; // TODO : experiment use
   TableEntry *te_tmp = search(self->tkn->text);
   if (te_tmp == NULL && declare_type > NON_T) {
     int arrLen = 0;
@@ -180,13 +181,13 @@ void genCode_tree_Ident(Node *root, Node *self) {
       genCode2(CALL, te_tmp->code_addr);
       break;
     case var_ID: case arg_ID:
-      if ((te_tmp->arrLen > 0 && self->r != NULL) || (te_tmp->arrLen == 0 && empty_array)) {
+      if (is_array && declare_type == NON_T) {
 	genCode2(LDI, DATA_SIZE[te_tmp->dType]);
 	genCode_binary(Mul);
 	genCode(LDA, te_tmp->level, te_tmp->code_addr);
 	genCode_binary(Add);
 	genCode1(VAL_TYPE[te_tmp->dType]);
-      } else {
+      } else if (!is_array) {
 	genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
       }
       if (gen_left >= 1 &&root->tkn->kind == Assign || root->tkn->hKind == CombOpe)
@@ -297,7 +298,8 @@ void genCode_tree(Node *self, Node *root) {
     case Comma:
       break; // ignore?
     default:
-      genCode_tree_operator(root, self);
+      if (self->tkn->hKind == Operator)
+	genCode_tree_operator(root, self);
       break;
     }
   }

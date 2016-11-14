@@ -24,6 +24,7 @@ static int gen_left = 0; // detect only first '='
 static DataType declare_type = NON_T;
 static int arrayCount = 0;
 static int empty_array = 0;
+static int is_array = 0;
 
 
 void expression(Token *t, char endChar);
