@@ -298,7 +298,7 @@ void genCode_tree(Node *self, Node *root) {
     case Comma:
       break; // ignore?
     default:
-      if (self->tkn->hKind == Operator)
+      if (self->tkn->hKind == Operator || self->tkn->hKind == CombOpe)
 	genCode_tree_operator(root, self);
       break;
     }
