@@ -190,7 +190,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
       } else if (!is_array) {
 	genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
       }
-      if (gen_left >= 1 &&root->tkn->kind == Assign || root->tkn->hKind == CombOpe)
+      if (gen_left >= 1 && (root->tkn->kind == Assign || root->tkn->hKind == CombOpe))
 	to_left_val();
       // incre decre ?
       break;

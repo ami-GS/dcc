@@ -259,7 +259,8 @@ void st_for(Token *t) {
   } else {
     expr_with_check(t, 0, ')');
     // remove result;
-    remove_op_stack_top();
+    if (codes[code_ct-1].opcode == INCL || codes[code_ct-1].opcode == DECL)
+      remove_op_stack_top();
   }
   // jump to label (1)
   GEN_JMP_TOP(loop_top);
