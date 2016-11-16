@@ -8,7 +8,7 @@
 #define NO_FIX_RET_ADDR -10002
 
 typedef struct {
-    char opcode;
+    OpCode opcode;
     char flag;
     int  opdata;
 } Instruction;

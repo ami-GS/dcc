@@ -22,8 +22,8 @@ typedef enum {
   Equal, NotEq, LessEq, EqLess, GreatEq, EqGreat, Arrow,
   AddAss, SubAss, MulAss, DivAss, ModAss,
   BandAss, BorAss, BxorAss, BnotAss, LsftAss, RsftAss,
-  Int = 210, Float, Double, Char, Void,                                                   // 210 - 214
-  IntP, FloatP, DoubleP, CharP, VoidP,
+  Int = 210, Short, Float, Double, Char, Void,                                                   // 210 - 214
+  IntP, ShortP, FloatP, DoubleP, CharP, VoidP,
   String = 230, IntNum, FloatNum, CharSymbol,                                             // 230 - 233
   Digit, Letter, VarName,
   If = 250, Else, For, Do, While,                                                         // 250

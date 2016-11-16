@@ -60,6 +60,8 @@ DataType tkn2dType(Kind kind) {
   switch(kind) {
   case Int:     return INT_T;
   case IntP:    return INTP_T;
+  case Short:   return SHORT_T;
+  case ShortP:   return SHORTP_T;
   case Void:    return VOID_T;
   case VoidP:   return VOIDP_T;
   case Char:    return CHAR_T;
@@ -173,26 +175,8 @@ int set_array(TableEntry* ent, Token *t) {
   return 1;
 }
 
-int get_type_size(DataType dt) {
-  switch (dt) {
-  case INT_T: case FLOAT_T:
-    return INT_SIZE;
-  case CHAR_T:
-    return CHAR_SIZE;
-  case VOID_T:
-    return 0;
-  default:
-    if (dt % 2 == 0) { // even number is pointer
-      return POINTER_SIZE;
-    } else {
-      error("invalid variable type");
-    }
-  }
-  return -1; // TODO : dangerous
-}
-
 int set_address(TableEntry *te) {
-  int i, size = get_type_size(te->dType);
+  int i, size = DATA_SIZE[te->dType];
 
   switch (te->kind) {
   case var_ID: case arg_ID:
@@ -208,7 +192,7 @@ int set_address(TableEntry *te) {
     // TODO : need to study for seting func addr
     te->code_addr = code_ct;
     for (i = 1; i <= te->args; i++) {
-      size = get_type_size((te+i)->dType);
+      size = DATA_SIZE[(te+i)->dType];
       (te+i)->code_addr = malloc_L(size);
       }
     break;
@@ -299,7 +283,7 @@ int begin_declare_func(TableEntry *func) {
   genCode(STO, LOCAL, 0); // store return address
   int i;
   for (i = func->args; i > 0; i--) { // store arguments
-    genCode(STO, LOCAL, (func+i)->code_addr);
+    genCode(STO_TYPE[(func+i)->dType], LOCAL, (func+i)->code_addr);
   }
 }
 
