@@ -192,7 +192,6 @@ void genCode_tree_Ident(Node *root, Node *self) {
       }
       if (gen_left >= 1 && (root->tkn->kind == Assign || root->tkn->hKind == CombOpe))
 	to_left_val();
-      // incre decre ?
       break;
     }
   }
@@ -245,6 +244,24 @@ void genCode_tree_operator(Node *root, Node *self) {
     remove_op_stack_top();
 }
 
+void genCode_tree_incdec(Node *root, Node *self) {
+  if (codes[code_ct-1].opcode == LOD) {
+    if (self->r != NULL) { // for ++A;
+      codes[code_ct-1].opcode = LDA;
+      genCode_unary(self->tkn->kind);
+    } else if (self->l != NULL) { // for A++
+      codes[code_ct] = codes[code_ct-1];
+      codes[code_ct++].opcode = LDA;
+      genCode_unary(self->tkn->kind);
+      genCode1(DEL);
+    } else {
+      error("no variable for inc/decrement");
+    }
+  } else {
+    error("an error"); // TODO : what error here?
+  }
+}
+
 void genCode_tree(Node *self, Node *root) {
   if (root->tkn->kind == Comma && self->tkn->kind != Comma && declare_type > NON_T && (left_val.arrLen > 0 || empty_array)) {
     if (arrayCount >= left_val.arrLen && !empty_array)
@@ -279,9 +296,7 @@ void genCode_tree(Node *self, Node *root) {
       }
       break;
     case Incre: case Decre:
-      if (codes[code_ct-1].opcode == LOD)
-	codes[code_ct-1].opcode = LDA;
-      genCode_unary(self->tkn->kind);
+      genCode_tree_incdec(root, self);
       break;
     case Ident:
       genCode_tree_Ident(root, self);
