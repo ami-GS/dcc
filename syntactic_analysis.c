@@ -16,53 +16,59 @@ int getLowestPriorityIdx(int st, int end) {
   int lowest_pri = 128, pri = 129, idx = st;
   int i, nest = 0;
   for (i = st; i <= end; i++) {
-    if (nest == 0 &&
+    if (nest == 0 && // TODO : need to improve these conditions
 	(expr_tkns[i].hKind == Operator || expr_tkns[i].hKind == CombOpe || expr_tkns[i].kind == Comma
-	 || expr_tkns[i].hKind == Type || expr_tkns[i].kind == Ident || expr_tkns[i].kind == Semicolon)) {
-      if (expr_tkns[i].hKind == Type) { // done is better than nothing
-                                                                                   pri = 15;
-      } else if (expr_tkns[i].kind == Ident) {
-	                                                                           pri = 14;
+       || expr_tkns[i].hKind == Type || expr_tkns[i].kind == Ident || expr_tkns[i].kind == Semicolon)) {
+      if (expr_tkns[i].kind == Semicolon) {
+	                            pri = -1;
+      } else if (expr_tkns[i].kind == Comma) {
+	                            pri = 0;
       } else if (expr_tkns[i].hKind == CombOpe) {
-                                                                                   pri = 1;
+	                            pri = 1;
+      } else if (expr_tkns[i].hKind == Operator) {
+	switch (expr_tkns[i].kind) {
+	case Assign:                pri = 1; break;
+	case Or:                    pri = 2; break;
+	case And:
+	                            pri = 3;
+				    if (i == st || expr_tkns[i-1].hKind == Operator)
+				      pri = 13;
+				    break;
+	case Bor:                   pri = 4; break;
+	case Bxor:                  pri = 5; break;
+	case Band:                  pri = 6; break;
+	case Equal: case NotEq:     pri = 7; break;
+	case Less: case LessEq:
+	case EqLess: case Great:
+	case GreatEq: case EqGreat: pri = 8; break;
+	case Lshift: case Rshift:   pri = 9; break;
+	case Not: case Bnot:        pri = 10; break;
+	case Sub: case Add:
+                                    pri = 10;
+				    if (i == st || expr_tkns[i-1].hKind == Operator)
+				      pri = 13;
+				    break;
+	case Mod: case Div:	    pri = 11; break;
+	case Mul:
+                                    pri = 11;
+				    if (i == st || expr_tkns[i-1].hKind == Operator)
+				      pri = 13;
+				    break;
+	case Incre: case Decre:
+                                    pri = 14;
+				    if (i == st || expr_tkns[i-1].hKind == Operator)
+				      pri = 13;
+				    break;
+	default:
+	  continue;
+	}
+      } else if (expr_tkns[i].kind == Ident) {
+	pri = 14;
+      } else if (expr_tkns[i].hKind == Type) {
+	pri = 15;
+      } else {
+	continue;
       }
-      switch (expr_tkns[i].kind) {
-      case Semicolon:                                                              pri = -1; break;
-      case Comma:                                                                  pri = 0; break;
-      case Assign:                                                                 pri = 1; break;
-      case Or:                                                                     pri = 2; break;
-      case And:
-                                                                                   pri = 3;
-										   if (i == st || expr_tkns[i-1].hKind == Operator)
-										     pri = 13;
-										   break;
-      case Bor:                                                                    pri = 4; break;
-      case Bxor:                                                                   pri = 5; break;
-      case Band:                                                                   pri = 6; break;
-      case Equal: case NotEq:                                                      pri = 7; break;
-      case Less: case LessEq: case EqLess: case Great: case GreatEq: case EqGreat: pri = 8; break;
-      case Lshift: case Rshift:                                                    pri = 9; break;
-      case Not: case Bnot:
-                                                                                   pri = 10; break;
-      case Sub: case Add:
-	                                                                           pri = 10;
-                                                                                   if (i == st || expr_tkns[i-1].hKind == Operator)
-										     pri = 13;
-										   break;
-      case Mod: case Div: case Mul:
-                                                                                   pri = 11;
-										   if (expr_tkns[i].kind == Mul && (i == st || expr_tkns[i-1].hKind == Operator))
-										     pri = 13;
-										   break;
-      case Incre: case Decre:
-                                                                                   pri = 14;
-										   if (i == st || expr_tkns[i-1].hKind == Operator)
-										     pri = 13;
-										   break;
-      default:
-	break;
-      }
-
       if (!(pri == 1 && lowest_pri == 1) && lowest_pri >= pri) {
 	lowest_pri = pri;
 	idx = i;
