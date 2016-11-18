@@ -7,6 +7,7 @@
 
 int leave_ifile = 0;   // -i
 int show_assembly = 0; // -s
+int run = 0; // -r
 int show_movement = 0; // -m
 
 int  main(int argc, char *argv[]) {
@@ -26,6 +27,7 @@ int  main(int argc, char *argv[]) {
 	switch (argv[i][j]) {
 	case 'i': leave_ifile = 1; break;
 	case 's': show_assembly = 1; break;
+	case 'r': run = 1; break;
 	case 'm': show_movement = 1; break;
 	}
       }
@@ -47,5 +49,6 @@ int  main(int argc, char *argv[]) {
   if (codes[0].opdata < 0)
     error("'main' function is missing");
 
-  execute(codes, show_movement);
+  if (run)
+    execute(codes, show_movement);
 }
