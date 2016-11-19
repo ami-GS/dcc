@@ -56,7 +56,7 @@ void statement(Token *t) {
     expr_with_check(t, 0, ';');
     break;
   case Incre: case Decre:
-    st_inc_dec(t);
+    expr_with_check(t, 0, ';');
     break;
   case Lbrace:
     block(t, NULL);
@@ -258,9 +258,6 @@ void st_for(Token *t) {
     nextToken(t, 0);
   } else {
     expr_with_check(t, 0, ')');
-    // remove result;
-    if (codes[code_ct-1].opcode == INCL || codes[code_ct-1].opcode == DECL)
-      remove_op_stack_top();
   }
   // jump to label (1)
   GEN_JMP_TOP(loop_top);
@@ -296,12 +293,6 @@ void st_build_in_void(Token *t) {
 }
 
 void st_build_in(Token *t) {
-  return;
-}
-
-void st_inc_dec(Token *t) {
-  expr_with_check(t, 0, ';');
-  remove_op_stack_top();
   return;
 }
 

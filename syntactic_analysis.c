@@ -185,6 +185,8 @@ void genCode_tree_Ident(Node *root, Node *self) {
     switch (te_tmp->kind) { // for initialization
     case func_ID: case proto_ID:
       genCode2(CALL, te_tmp->code_addr);
+      if (te_tmp->dType != VOID_T && root == self)
+	genCode1(DEL);
       break;
     case var_ID: case arg_ID:
       if (is_array && declare_type == NON_T) {
@@ -266,6 +268,8 @@ void genCode_tree_incdec(Node *root, Node *self) {
   } else {
     error("an error"); // TODO : what error here?
   }
+  if (root == self)
+    genCode1(DEL); // for A++; or ++A;
 }
 
 void genCode_tree(Node *self, Node *root) {
