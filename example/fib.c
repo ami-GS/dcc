@@ -4,7 +4,7 @@ This is fibonacci calculator.
 Usage
 
 >> make
->> dcc example/fib.c -sm
+>> dcc example/fig.c -srm
 
 Final output line should be like
 1: STOP 0 34
