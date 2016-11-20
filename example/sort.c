@@ -70,12 +70,33 @@ void quick_loop(int len) {
   check_stack(A[0], A[1], A[2], A[3], A[4], A[5], A[6], A[7], A[8], A[9]);
 }
 
-
+void quick_rec(int *list, int st, int en) {
+  int i = st, j = en, tmp;
+  int pivot;
+  pivot = list[(st+en)/2];
+  while (1) {
+    while (list[i] < pivot) ++i;
+    while (list[j] > pivot) --j;
+    if (i >= j)
+      break;
+    tmp = list[i];
+    list[i] = list[j];
+    list[j] = tmp;
+    ++i;
+    --j;
+  }
+  if (st < i - 1)
+    quick_rec(list, st, i-1);
+  if (en > j + 1)
+    quick_rec(list, j+1, en);
+}
 
 int main() {
-  // currently pointer cannot be passed correctly
   int len = 10;
+  int A[] = {9,10,7,8,5,0,3,22,1,6};
   bubble_loop(len);
   quick_loop(len);
+  quick_rec(A, 0, len-1);
+  check_stack(A[0], A[1], A[2], A[3], A[4], A[5], A[6], A[7], A[8], A[9]);
   return 10101;
 }
