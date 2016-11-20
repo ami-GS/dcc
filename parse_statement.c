@@ -281,8 +281,12 @@ void st_return(Token *t) {
   } else {
     expr_with_check(t, 0, ';');
     // return type comparison t->kind, func type
-    if (funcPtr->dType == VOID_T)
+    if (funcPtr->dType != VOID_T) {
+      if (codes[code_ct-1].opcode == DEL)
+	code_ct--;
+    } else {
       error("Warnning : this function must not return anything");
+    }
   }
   // jump to caller
   genCode2(JMP, NO_FIX_RET_ADDR);
