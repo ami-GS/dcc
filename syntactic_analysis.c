@@ -166,8 +166,6 @@ void genCode_tree_Ident(Node *root, Node *self) {
     SymbolKind sKind = var_ID;
     if (codes[code_ct-1].opcode == LDI) {
       arrLen = codes[--code_ct].opdata; // TODO : suspicious
-      if (declare_type > 0)
-	declare_type++; // pointer int A[], int A[5]
     }
     if (funcPtr->args == -1)
       sKind = arg_ID;
@@ -192,11 +190,21 @@ void genCode_tree_Ident(Node *root, Node *self) {
       if (is_array && declare_type == NON_T) {
 	genCode2(LDI, DATA_SIZE[te_tmp->dType]);
 	genCode_binary(Mul);
-	genCode(LDA, te_tmp->level, te_tmp->code_addr);
+	if (te_tmp->dType%2 == 0) {
+	  genCode(LOD, te_tmp->level, te_tmp->code_addr);
+	} else {
+	  genCode(LDA, te_tmp->level, te_tmp->code_addr);
+	}
 	genCode_binary(Add);
 	genCode1(VAL_TYPE[te_tmp->dType]);
       } else if (!is_array) {
-	genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
+	if (te_tmp->arrLen == 0 && te_tmp->dType%2 == 0) {
+	  genCode(LOD, te_tmp->level, te_tmp->code_addr); // for loading pointer
+	} else if (te_tmp->arrLen == 0) {
+	  genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
+	} else {
+	  genCode(LDA, te_tmp->level, te_tmp->code_addr); // for int A[] = {2,3}; A;
+	}
       }
       if (gen_left >= 1 && (root->tkn->kind == Assign || root->tkn->hKind == CombOpe))
 	to_left_val();
@@ -246,10 +254,10 @@ void genCode_tree_operator(Node *root, Node *self) {
   }
   if (gen_left >= 1)
     to_left_val();
-  if (self->tkn->hKind == CombOpe)
+  if (self->tkn->hKind == CombOpe) {
     genCode_tree_assign();
-  if (self->tkn->hKind == CombOpe || root->tkn->kind == Comma || root->tkn->kind == Semicolon)
     remove_op_stack_top();
+  }
 }
 
 void genCode_tree_incdec(Node *root, Node *self) {
