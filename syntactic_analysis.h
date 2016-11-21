@@ -11,7 +11,7 @@ struct Node {
   Token *tkn;
 };
 
-#define MAX_NODES 1024
+#define MAX_NODES 64
 static Node nodes[MAX_NODES];
 static int node_used_ct = 0;
 #define MAX_EXPR_TOKENS 256

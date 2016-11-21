@@ -159,6 +159,7 @@ void genCode_tree_addressing(int offset) {
 }
 
 void genCode_tree_Ident(Node *root, Node *self) {
+  //is_bracket_addressing = self->r != NULL;
   is_array = self->r != NULL; // TODO : experiment use
   TableEntry *te_tmp = search(self->tkn->text);
   if (te_tmp == NULL && declare_type > NON_T) {
@@ -346,8 +347,12 @@ void genCode_tree(Node *self, Node *root) {
 }
 
 void expression(Token *t, char endChar) {
+  while (node_used_ct > 0) {
+    nodes[--node_used_ct].l = NULL;
+    nodes[node_used_ct].r = NULL;
+    nodes[node_used_ct].tkn = NULL;
+  }
   int i;
-  //node_used_ct = 0; // TODO : currently NULL is used as condition, need initialization
   for (i = 0; t->kind != endChar; i++) { // TODO ',' should be considered
     expr_tkns[i] = *t;
     nextToken(t, 0);
