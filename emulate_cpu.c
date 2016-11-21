@@ -71,6 +71,12 @@ int execute(Instruction *codes, int debug) {
       PUSH(MEMINT(addr)); break;
     case LODV:
       PUSH(MEMINT(MEMINT(addr))); break;
+    case LODS:
+      PUSH(MEMSHORT(addr)); break;
+    case LODF:
+      PUSH(MEMINT(addr)); break;
+    case LODD:
+      PUSH(MEMDOUBLE(addr)); break; // TODO : this should not work well
     case LODC:
       PUSH(*(memory+addr)); break;
     case LDA:
@@ -81,10 +87,21 @@ int execute(Instruction *codes, int debug) {
       ASSIGN(addr, op_stack[stack_ptr-1].sINT);
       stack_ptr--;
       break;
-    case STOC:
-      ASSIGN_CHAR(addr, op_stack[stack_ptr-1].sINT);
+    case STOS:
+      ASSIGN(addr, op_stack[stack_ptr-1].sSRT);
       stack_ptr--;
       break;
+    case STOF:
+      ASSIGN(addr, op_stack[stack_ptr-1].sSRT);
+      stack_ptr--;
+      break;
+    case STOC:
+      ASSIGN_CHAR(addr, op_stack[stack_ptr-1].sCHAR);
+      stack_ptr--;
+      break;
+    case STOD:
+      ASSIGN(addr, op_stack[stack_ptr-1].sDBL);
+      stack_ptr--;
     case ADBR:  // research frame for calling func
       baseReg += dat;
       //TODO : boundary chech for stack overflow
@@ -97,6 +114,15 @@ int execute(Instruction *codes, int debug) {
     case ASSC:
       ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sCHAR);
       stack_ptr -= 2; break;
+    case ASSS:
+      ASSIGN_SHORT(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sSRT);
+      stack_ptr -= 2; break;
+    case ASSF:
+      ASSIGN_FLOAT(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sFLT);
+      stack_ptr -= 2; break;
+    case ASSD:
+      ASSIGN_DOUBLE(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sDBL);
+      stack_ptr -= 2; break;
     case ASSP:
       ASSIGN(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
       stack_ptr -= 2; break;
@@ -107,6 +133,18 @@ int execute(Instruction *codes, int debug) {
     case ASVC:
       ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sCHAR);
       op_stack[stack_ptr-2].sCHAR = op_stack[stack_ptr-1].sCHAR;
+      stack_ptr--; break;
+    case ASVS:
+      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sSRT);
+      op_stack[stack_ptr-2].sSRT = op_stack[stack_ptr-1].sSRT;
+      stack_ptr--; break;
+    case ASVF:
+      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sFLT);
+      op_stack[stack_ptr-2].sFLT = op_stack[stack_ptr-1].sFLT;
+      stack_ptr--; break;
+    case ASVD:
+      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sDBL);
+      op_stack[stack_ptr-2].sDBL = op_stack[stack_ptr-1].sDBL;
       stack_ptr--; break;
     case ASVP:
       ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
@@ -119,6 +157,12 @@ int execute(Instruction *codes, int debug) {
       op_stack[stack_ptr-1].sINT = MEMINT(op_stack[stack_ptr-1].sINT); break;
     case VALC:
       op_stack[stack_ptr-1].sCHAR = memory[op_stack[stack_ptr-1].sINT]; break;
+    case VALS:
+      op_stack[stack_ptr-1].sSRT = memory[op_stack[stack_ptr-1].sINT]; break;
+    case VALF:
+      op_stack[stack_ptr-1].sFLT = memory[op_stack[stack_ptr-1].sINT]; break;
+    case VALD:
+      op_stack[stack_ptr-1].sDBL = memory[op_stack[stack_ptr-1].sINT]; break;
     case EQCMP:
       // TODO : suspicious
       if (dat == op_stack[stack_ptr-1].sINT) {
