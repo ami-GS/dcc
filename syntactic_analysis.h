@@ -19,12 +19,12 @@ static Token expr_tkns[MAX_EXPR_TOKENS];
 static DataType expr_type = NON_T;
 static TableEntry left_val = {no_ID, "", NON_T, LOCAL, 0, 0, 0};;
 static int addressing = 0;
-static int gen_left = 0; // detect only first '='
+static int left_most_assign = 0;
 #define MAX_DEFINE_SIZE
 static DataType declare_type = NON_T;
 static int arrayCount = 0;
 static int empty_array = 0;
-static int is_array = 0;
+static int is_bracket_addressing = 0;
 
 
 void expression(Token *t, char endChar);
