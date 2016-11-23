@@ -56,9 +56,6 @@ void statement(Token *t) {
   case Incre: case Decre:// TODO : correct?
     expr_with_check(t, 0, ';');
     break;
-  case Incre: case Decre:
-    expr_with_check(t, 0, ';');
-    break;
   case Lbrace:
     block(t, NULL);
     break;
