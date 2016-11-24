@@ -24,6 +24,7 @@ typedef enum {
   BandAss, BorAss, BxorAss, BnotAss, LsftAss, RsftAss,
   Int = 210, Short, Float, Double, Char, Void,                                                   // 210 - 214
   IntP, ShortP, FloatP, DoubleP, CharP, VoidP,
+  Struct, Static, Const, Union, Typedef, Extern,
   String = 230, IntNum, FloatNum, CharSymbol,                                             // 230 - 233
   Digit, Letter, VarName,
   If = 250, Else, For, Do, While,                                                         // 250
@@ -37,7 +38,7 @@ typedef enum {
 int cType[256];
 
 typedef enum {
-    Specific, Immediate, Function, Operator, CombOpe, Statement, Paren, Type,
+    Specific, Immediate, Function, Operator, CombOpe, Statement, Paren, Type, Modifier,
 } HighLevelKind;
 
 typedef struct {
@@ -56,6 +57,7 @@ typedef struct {
 static KeyWordType keyWdType[] = {
   {"void", Void}, {"int", Int}, {"char", Char}, {"float", Float}, {"double", Double},
   {"void*", VoidP}, {"int*", IntP}, {"char*", CharP}, {"float*", FloatP}, {"double*", DoubleP},
+  {"struct", Struct}, {"static", Static}, {"const", Const}, {"union", Union},  {"typedef", Typedef}, {"extern", Extern},
   {"if", If}, {"else", Else},
   {"for", For}, {"while", While}, {"do", Do},
   {"switch", Switch}, {"case", Case}, {"continue", Continue},

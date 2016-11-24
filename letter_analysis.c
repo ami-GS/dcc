@@ -70,6 +70,8 @@ void set_hKind(Token *t) {
     t->hKind = CombOpe;
   } else if (Int <= t->kind && t->kind <= VoidP) {
     t->hKind = Type;
+  } else if (Struct <= t->kind && t->kind <= Extern) {
+    t->hKind = Modifier;
   } else if (String <= t->kind && t->kind <= CharSymbol) {
     t->hKind = Immediate;
   } else if (If <= t->kind && t->kind <= Input) {

@@ -17,9 +17,7 @@ void compile(char *fname) {
   nextToken(&t, 0);
   while (t.kind != EOF_token) {
     TableEntry entryTmp = {no_ID, "", NON_T, GLOBAL, 0, 0, 0};
-    switch(t.kind) {
-      // type, #, ;, }, )
-    case Int: case Void: case Char:
+    if (t.hKind == Type) {
       set_dtype(&entryTmp, &t);
       set_name(&entryTmp, &t);
       if (checkNxtTokenKind('(')) {
@@ -28,18 +26,22 @@ void compile(char *fname) {
 	//expression(&t, ';');
 	declare_var(&entryTmp, &t);
       }
-      break;
-    case Semicolon:
-      nextToken(&t, 0);
-      break;
-    case Ident:
-      statement(&t);
-      break;
-    case Sharp:
-      ignoreLine(&t);
-      break;
-    default:
-      error("unknown token kind");
+    } else if (t.hKind == Modifier) {
+      // TBD
+    } else {
+      switch(t.kind) {
+      case Semicolon:
+	nextToken(&t, 0);
+	break;
+      case Ident:
+	statement(&t);
+	break;
+      case Sharp:
+	ignoreLine(&t);
+	break;
+      default:
+	error("unknown token kind");
+      }
     }
   }
   backpatch_calladdr();
@@ -61,7 +63,7 @@ DataType tkn2dType(Kind kind) {
   case Int:     return INT_T;
   case IntP:    return INTP_T;
   case Short:   return SHORT_T;
-  case ShortP:   return SHORTP_T;
+  case ShortP:  return SHORTP_T;
   case Void:    return VOID_T;
   case VoidP:   return VOIDP_T;
   case Char:    return CHAR_T;
