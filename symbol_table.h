@@ -51,7 +51,7 @@ static int LTBL_START = 0;
 TableEntry *get_table_entry(char *name);
 TableEntry *enter_table_item(TableEntry* ent);
 TableEntry *search(char *text);
-void set_entry_member(TableEntry *e, SymbolKind k, char *name, int len, DataType dt, Level l, int arrLen); // TODO temporally limited arguments
+void set_entry_member(TableEntry *e, SymbolKind k, char *name, int len, Level l, int arrLen); // TODO temporally limited arguments
 void del_func_entry(TableEntry *f1, TableEntry *f2);
 void open_local_table();
 void close_local_table();

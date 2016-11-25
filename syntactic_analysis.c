@@ -161,7 +161,7 @@ void genCode_tree_addressing(int offset) {
 void genCode_tree_Ident(Node *root, Node *self) {
   is_bracket_addressing = self->r != NULL;
   TableEntry *te_tmp = search(self->tkn->text);
-  if (te_tmp == NULL && declare_type > NON_T) {
+  if (te_tmp == NULL && left_val.dType > NON_T) {
     int arrLen = 0;
     SymbolKind sKind = var_ID;
     if (is_bracket_addressing)
@@ -169,15 +169,15 @@ void genCode_tree_Ident(Node *root, Node *self) {
       arrLen = codes[--code_ct].opdata;
     if (funcPtr->args == -1)
       sKind = arg_ID;
-    set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, declare_type, LOCAL, arrLen);
+    set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
     enter_table_item(&left_val);
     if (left_most_assign)
       te_tmp = &left_val;
   } else if (te_tmp == NULL) {
     error("unknown identifier");
-  }
-  if (left_val.kind == no_ID)
+  } else if (left_val.kind == no_ID) {
     left_val = *te_tmp;
+  }
 
   if (te_tmp != NULL) {
     switch (te_tmp->kind) { // for initialization
@@ -187,7 +187,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
 	genCode1(DEL);
       break;
     case var_ID: case arg_ID:
-      if (is_bracket_addressing && declare_type == NON_T) {
+      if (is_bracket_addressing && !is_declare) {
 	genCode2(LDI, DATA_SIZE[te_tmp->dType]);
 	genCode_binary(Mul);
 	genCode(LDA, te_tmp->level, te_tmp->code_addr);
@@ -230,7 +230,7 @@ void genCode_tree_CharSymbol(Node *root, Node *self) {
 void genCode_tree_String(Token *tkn) {
   if (left_val.arrLen == 0)
     left_val.arrLen = tkn->intVal; // this is for A[]
-  if (declare_type == CHAR_T || empty_array) {
+  if (left_val.dType == CHAR_T || empty_array) {
     do {
       genCode_tree_addressing(arrayCount);
       genCode2(LDI, *(tkn->text+arrayCount++)); // TODO : LDI?
@@ -279,7 +279,7 @@ void genCode_tree_incdec(Node *root, Node *self) {
 }
 
 void genCode_tree(Node *self, Node *root) {
-  if (root->tkn->kind == Comma && self->tkn->kind != Comma && declare_type > NON_T && (left_val.arrLen > 0 || empty_array)) {
+  if (root->tkn->kind == Comma && self->tkn->kind != Comma && is_declare && (left_val.arrLen > 0 || empty_array)) {
     if (arrayCount >= left_val.arrLen && !empty_array)
       error("initialize length overflowing");
     genCode_tree_addressing(arrayCount++);
@@ -330,7 +330,8 @@ void genCode_tree(Node *self, Node *root) {
 	genCode_tree_operator(root, self);
 	break;
       case Type:
-	declare_type = tkn2dType(self->tkn->kind) + (root->tkn->kind == '*');
+        left_val.dType = tkn2dType(self->tkn->kind) + (root->tkn->kind == '*');
+	is_declare = 1;
 	break;
       }
       break;
@@ -339,7 +340,8 @@ void genCode_tree(Node *self, Node *root) {
 
   if (root->tkn->kind == Semicolon && self->tkn->kind != Semicolon) {
     remove_op_stack_top();
-    declare_type = NON_T;
+    left_val.dType = NON_T;
+    is_declare = 0;
     arrayCount = 0;
     left_val.kind = no_ID;
   }
@@ -359,7 +361,8 @@ void expression(Token *t, char endChar) {
   Node root = nodes[node_used_ct++];
   left_val.kind = no_ID;
   arrayCount = 0;
-  declare_type = NON_T;
+  left_val.dType = NON_T;
+  is_declare = 0;
   makeTree(&root, 0, i-1);
   dumpRevPolish(&root);
   printf("\n");

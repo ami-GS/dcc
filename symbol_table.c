@@ -113,12 +113,11 @@ void dupCheck(TableEntry *ent) {
     error("duplicated declaration");
 }
 
-void set_entry_member(TableEntry *e, SymbolKind k, char *name, int len, DataType dt, Level l, int arrLen) { // TODO temporally limited arguments
+void set_entry_member(TableEntry *e, SymbolKind k, char *name, int len, Level l, int arrLen) { // TODO temporally limited arguments
   int i;
   e->kind = k;
   e->name = malloc(sizeof(char) * (len + 1)); // TODO : error check, and must free
   memcpy(e->name, name, len+1);
-  e->dType = dt;
   e->level = l;
   e->code_addr = 0;
   e->arrLen = arrLen;
