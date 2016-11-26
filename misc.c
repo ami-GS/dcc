@@ -28,7 +28,7 @@ void code_dump() {
 	  printf("\n");
 	  break;
 	default:
-	  printf("invalid operand to output");
+	  printf("invalid operand OP=%d, DAT=%d\n", op, codes[i].opdata);
 	}
     }
 }
