@@ -16,7 +16,9 @@ void compile(char *fname) {
   Token t = {NulKind, Specific, "", 0};
   nextToken(&t, 0);
   while (t.kind != EOF_token) {
-    TableEntry entryTmp = {no_ID, "", NON_T, GLOBAL, 0, 0, 0};
+    VarElement varelem = {NON_T, "", NON_M, 0, 0};
+    TableEntry entryTmp = {no_ID, &varelem, GLOBAL, 0};
+
     if (t.hKind == Type) {
       set_dtype(&entryTmp, &t);
       set_name(&entryTmp, &t);
@@ -90,19 +92,19 @@ void set_dtype(TableEntry* ent, Token* t) {
 
   switch(type) {
   case Int:
-    ent->dType = INT_T + is_pointer;
+    ent->var->dType = INT_T + is_pointer;
     break;
   case Void:
-    ent->dType = VOID_T + is_pointer;
+    ent->var->dType = VOID_T + is_pointer;
     break;
   case Char:
-    ent->dType = CHAR_T + is_pointer;
+    ent->var->dType = CHAR_T + is_pointer;
     break; // STRING_T is needed?
   case Float:
-    ent->dType = FLOAT_T + is_pointer;
+    ent->var->dType = FLOAT_T + is_pointer;
     break;
   case Double:
-    ent->dType = DOUBLE_T + is_pointer;
+    ent->var->dType = DOUBLE_T + is_pointer;
     break;
   default:
     break;
@@ -116,17 +118,17 @@ int set_name(TableEntry* ent, Token* t) {
   if (t->kind != Ident && t->kind != '*') {
     error("Token parse error");
   }
-  if (t->kind == '*' && ent->dType % 2 == 1) {
-    ent->dType += 1; // +1 can stand for pointer
+  if (t->kind == '*' && ent->var->dType % 2 == 1) {
+    ent->var->dType += 1; // +1 can stand for pointer
     nextToken(t, 0);
   }
 
   int len;
-  ent->name = malloc(sizeof(char) * (t->intVal + 1)); // TODO : error check, and must free
+  ent->var->name = malloc(sizeof(char) * (t->intVal + 1)); // TODO : error check, and must free
   for (len = 0; len < t->intVal ; len++) {
-    *(ent->name+len) = *(t->text+len);
+    *(ent->var->name+len) = *(t->text+len);
   }
-  *(ent->name+len) = '\0';
+  *(ent->var->name+len) = '\0';
   return 1;
 }
 
@@ -136,13 +138,13 @@ void countInitialization(TableEntry *ent) {
   do {
     nextToken(&t, 1);
     t_buf_enqueue(t);
-    if (ent->dType == CHAR_T && t.kind == String) { // for char A = "1234abcs...";
-      ent->arrLen = t.intVal;
+    if (ent->var->dType == CHAR_T && t.kind == String) { // for char A = "1234abcs...";
+      ent->var->arrLen = t.intVal;
       return;
     }
     count += (t.kind == ',');
   } while(t.kind != '}');
-  ent->arrLen = count + 1;
+  ent->var->arrLen = count + 1;
 }
 
 int set_array(TableEntry* ent, Token *t) {
@@ -159,9 +161,9 @@ int set_array(TableEntry* ent, Token *t) {
     // TODO : workaround
     expr_with_check(t, '[', ']');
     // expr_with_check folds const expression.
-    // the result assigned arrLen and it is not needed on codes
-    ent->arrLen = codes[--code_ct].opdata; // TODO : suspicious, my implementation
-    if (ent->arrLen <= 0) {
+    // the result assigned var->arrLen and it is not needed on codes
+    ent->var->arrLen = codes[--code_ct].opdata; // TODO : suspicious, my implementation
+    if (ent->var->arrLen <= 0) {
       error("invalid array length");
     }
 
@@ -178,31 +180,31 @@ int set_array(TableEntry* ent, Token *t) {
 }
 
 int set_address(TableEntry *te) {
-  int i, size = DATA_SIZE[te->dType];
+  int i, size = DATA_SIZE[te->var->dType];
 
   switch (te->kind) {
   case var_ID: case arg_ID:
-    if (te->arrLen != 0)
-      size *= te->arrLen; // other type should be capable
+    if (te->var->arrLen != 0)
+      size *= te->var->arrLen; // other type should be capable
     if (te->level == GLOBAL) {
-      te->code_addr = malloc_G(size);
+      te->var->code_addr = malloc_G(size);
       break;
     }
-    te->code_addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
+    te->var->code_addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
     break;
   case func_ID:
     // TODO : need to study for seting func addr
-    te->code_addr = code_ct;
+    te->var->code_addr = code_ct;
     for (i = 1; i <= te->args; i++) {
-      size = DATA_SIZE[(te+i)->dType];
-      (te+i)->code_addr = malloc_L(size);
+      size = DATA_SIZE[(te+i)->var->dType];
+      (te+i)->var->code_addr = malloc_L(size);
       }
     break;
   }
 }
 
 void set_main(TableEntry *ent) {
-    backpatch(0, ent->code_addr); // set main func code addr
+  backpatch(0, ent->var->code_addr); // set main func code addr
 }
 
 int declare_var(TableEntry* ent, Token* t) {
@@ -231,7 +233,7 @@ int declare_var(TableEntry* ent, Token* t) {
 
 int set_func_process(TableEntry* ent, Token *t) {
   // TODO : if this is main(), then do special case
-  if (is_main(ent->name))
+  if (is_main(ent->var->name))
     set_main(ent);
   begin_declare_func(ent);
   SymbolKind last_statement = block(t, ent);
@@ -242,7 +244,7 @@ int set_func_process(TableEntry* ent, Token *t) {
 
 int declare_func(TableEntry* ent, Token* t) {
   localAddress = START_LOCAL_ADDRESS;
-  TableEntry* entTmp = get_table_entry(ent->name);
+  TableEntry* entTmp = get_table_entry(ent->var->name);
   // TODO : prototype can be declared several times with warning
   if (entTmp != NULL && entTmp->kind == func_ID && entTmp->kind == proto_ID) {
     // TODO : check all arguments for overload
@@ -285,16 +287,16 @@ int begin_declare_func(TableEntry *func) {
   genCode(STO, LOCAL, 0); // store return address
   int i;
   for (i = func->args; i > 0; i--) { // store arguments
-    genCode(STO_TYPE[(func+i)->dType], LOCAL, (func+i)->code_addr);
+    genCode(STO_TYPE[(func+i)->var->dType], LOCAL, (func+i)->var->code_addr);
   }
 }
 
 int end_declare_func(TableEntry *func, SymbolKind last) {
-  backpatch(func->code_addr, -localAddress); // researve local frame for function call
+  backpatch(func->var->code_addr, -localAddress); // researve local frame for function call
   if (last != Return) {
     // TODO : here
   }
-  backpatch_return(funcPtr->code_addr);
+  backpatch_return(funcPtr->var->code_addr);
   genCode(LOD, LOCAL, 0); // load return address to op_stack
   genCode2(ADBR, localAddress); // release local frame
   genCode1(RET); // Return

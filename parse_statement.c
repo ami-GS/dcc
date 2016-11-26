@@ -274,12 +274,12 @@ void st_return(Token *t) {
   nextToken(t, 0);
   if (t->kind == ';') {
     // check func return type, if not void, then error
-    if (funcPtr->dType != VOID_T)
+    if (funcPtr->var->dType != VOID_T)
       error("Warnning : this function must return void");
   } else {
     expr_with_check(t, 0, ';');
     // return type comparison t->kind, func type
-    if (funcPtr->dType != VOID_T) {
+    if (funcPtr->var->dType != VOID_T) {
       if (codes[code_ct-1].opcode == DEL)
 	code_ct--;
     } else {
@@ -300,7 +300,8 @@ void st_build_in(Token *t) {
 
 void st_declare(Token *t) {
   while (t->kind == Int || t->kind == Char || t->kind == Float) { // TODO : not only Int
-    TableEntry tmp = {no_ID, "", NON_T, LOCAL, 0, 0, 0};
+    VarElement vartmp = {NON_T, "", NON_M, 0, 0};
+    TableEntry tmp = {no_ID, &vartmp, LOCAL, 0};
     set_dtype(&tmp, t);
     set_name(&tmp, t);
     declare_var(&tmp, t);

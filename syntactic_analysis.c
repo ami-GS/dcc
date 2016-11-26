@@ -133,35 +133,35 @@ void dumpRevPolish(Node *root) {
 void genCode_tree_assign() {
   if (arrayCount > 0) {
     if (empty_array) { // for int A[] = {1,2...}; initialization
-      TableEntry *te_tmp = search(left_val.name);
-      te_tmp->arrLen = arrayCount;
-      malloc_more(te_tmp, DATA_SIZE[te_tmp->dType] * (arrayCount-1)); // first address is already allocated
+      TableEntry *te_tmp = search(left_val.var->name);
+      te_tmp->var->arrLen = arrayCount;
+      malloc_more(te_tmp, DATA_SIZE[te_tmp->var->dType] * (arrayCount-1)); // first address is already allocated
       empty_array = 0;
     }
     int i = 0;
     while (i < arrayCount) {
-      genCode1(ASSV_TYPE[left_val.dType]);
+      genCode1(ASSV_TYPE[left_val.var->dType]);
       if (i != arrayCount-1)
 	remove_op_stack_top();
       i++;
     }
   } else {
-    genCode1(ASSV_TYPE[left_val.dType]);
+    genCode1(ASSV_TYPE[left_val.var->dType]);
   }
 }
 
 void genCode_tree_addressing(int offset) {
-  genCode2(LDI, DATA_SIZE[left_val.dType]);
+  genCode2(LDI, DATA_SIZE[left_val.var->dType]);
   genCode2(LDI, offset);
   genCode_binary(Mul);
-  genCode(LDA, left_val.level, left_val.code_addr);
+  genCode(LDA, left_val.level, left_val.var->code_addr);
   genCode_binary(Add);
 }
 
 void genCode_tree_Ident(Node *root, Node *self) {
   is_bracket_addressing = self->r != NULL;
   TableEntry *te_tmp = search(self->tkn->text);
-  if (te_tmp == NULL && left_val.dType > NON_T) {
+  if (te_tmp == NULL && left_val.var->dType > NON_T) {
     int arrLen = 0;
     SymbolKind sKind = var_ID;
     if (is_bracket_addressing)
@@ -182,26 +182,26 @@ void genCode_tree_Ident(Node *root, Node *self) {
   if (te_tmp != NULL) {
     switch (te_tmp->kind) { // for initialization
     case func_ID: case proto_ID:
-      genCode2(CALL, te_tmp->code_addr);
-      if (te_tmp->dType != VOID_T && root == self)
+      genCode2(CALL, te_tmp->var->code_addr);
+      if (te_tmp->var->dType != VOID_T && root == self)
 	genCode1(DEL);
       break;
     case var_ID: case arg_ID:
       if (is_bracket_addressing && !is_declare) {
-	genCode2(LDI, DATA_SIZE[te_tmp->dType]);
+	genCode2(LDI, DATA_SIZE[te_tmp->var->dType]);
 	genCode_binary(Mul);
-	genCode(LDA, te_tmp->level, te_tmp->code_addr);
-	if (te_tmp->dType%2 == 0)
+	genCode(LDA, te_tmp->level, te_tmp->var->code_addr);
+	if (te_tmp->var->dType%2 == 0)
 	  codes[code_ct-1].opcode = LOD;
 	genCode_binary(Add);
-	genCode1(VAL_TYPE[te_tmp->dType]);
+	genCode1(VAL_TYPE[te_tmp->var->dType]);
       } else if (!is_bracket_addressing) {
-	if (te_tmp->arrLen == 0 && te_tmp->dType%2 == 0) {
-	  genCode(LOD, te_tmp->level, te_tmp->code_addr); // for loading pointer
-	} else if (te_tmp->arrLen == 0) {
-	  genCode(LOD_TYPE[te_tmp->dType], te_tmp->level, te_tmp->code_addr);
+	if (te_tmp->var->arrLen == 0 && te_tmp->var->dType%2 == 0) {
+	  genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
+	} else if (te_tmp->var->arrLen == 0) {
+	  genCode(LOD_TYPE[te_tmp->var->dType], te_tmp->level, te_tmp->var->code_addr);
 	} else {
-	  genCode(LDA, te_tmp->level, te_tmp->code_addr); // for int A[] = {2,3}; A;
+	  genCode(LDA, te_tmp->level, te_tmp->var->code_addr); // for int A[] = {2,3}; A;
 	}
       }
       if (left_most_assign >= 1 && (root->tkn->kind == Assign || root->tkn->hKind == CombOpe))
@@ -210,7 +210,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
     }
   }
   if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
-    genCode(LOD_TYPE[left_val.dType], left_val.level, left_val.code_addr);
+    genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
 }
 
 void genCode_tree_IntNum(Node *root, Node *self) {
@@ -218,24 +218,24 @@ void genCode_tree_IntNum(Node *root, Node *self) {
     empty_array = 1;
   genCode2(LDI, self->tkn->intVal);
   if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
-    genCode(LOD_TYPE[left_val.dType], left_val.level, left_val.code_addr);
+    genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
 }
 
 void genCode_tree_CharSymbol(Node *root, Node *self) {
   genCode2(LDI, self->tkn->intVal);
   if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
-    genCode(LOD_TYPE[left_val.dType], left_val.level, left_val.code_addr);
+    genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
 }
 
 void genCode_tree_String(Token *tkn) {
-  if (left_val.arrLen == 0)
-    left_val.arrLen = tkn->intVal; // this is for A[]
-  if (left_val.dType == CHAR_T || empty_array) {
+  if (left_val.var->arrLen == 0)
+    left_val.var->arrLen = tkn->intVal; // this is for A[]
+  if (left_val.var->dType == CHAR_T || empty_array) {
     do {
       genCode_tree_addressing(arrayCount);
       genCode2(LDI, *(tkn->text+arrayCount++)); // TODO : LDI?
-    } while (left_val.arrLen > arrayCount);
-    if (tkn->intVal > left_val.arrLen)
+    } while (left_val.var->arrLen > arrayCount);
+    if (tkn->intVal > left_val.var->arrLen)
       error("initialize length overflowing");
   } else {
     error("string can be assign to char array");
@@ -279,8 +279,8 @@ void genCode_tree_incdec(Node *root, Node *self) {
 }
 
 void genCode_tree(Node *self, Node *root) {
-  if (root->tkn->kind == Comma && self->tkn->kind != Comma && is_declare && (left_val.arrLen > 0 || empty_array)) {
-    if (arrayCount >= left_val.arrLen && !empty_array)
+  if (root->tkn->kind == Comma && self->tkn->kind != Comma && is_declare && (left_val.var->arrLen > 0 || empty_array)) {
+    if (arrayCount >= left_val.var->arrLen && !empty_array)
       error("initialize length overflowing");
     genCode_tree_addressing(arrayCount++);
   }
@@ -303,7 +303,7 @@ void genCode_tree(Node *self, Node *root) {
       genCode_tree_assign();
       if (root->tkn->kind == Comma || root == self) { // when int A[2] = {1, a=b}; cause error
 	arrayCount = 0;
-	left_val.arrLen = 0;
+	left_val.var->arrLen = 0;
 	remove_op_stack_top();
       }
       break;
@@ -330,7 +330,7 @@ void genCode_tree(Node *self, Node *root) {
 	genCode_tree_operator(root, self);
 	break;
       case Type:
-        left_val.dType = tkn2dType(self->tkn->kind) + (root->tkn->kind == '*');
+        left_val.var->dType = tkn2dType(self->tkn->kind) + (root->tkn->kind == '*');
 	is_declare = 1;
 	break;
       }
@@ -340,7 +340,7 @@ void genCode_tree(Node *self, Node *root) {
 
   if (root->tkn->kind == Semicolon && self->tkn->kind != Semicolon) {
     remove_op_stack_top();
-    left_val.dType = NON_T;
+    left_val.var->dType = NON_T;
     is_declare = 0;
     arrayCount = 0;
     left_val.kind = no_ID;
@@ -361,7 +361,7 @@ void expression(Token *t, char endChar) {
   Node root = nodes[node_used_ct++];
   left_val.kind = no_ID;
   arrayCount = 0;
-  left_val.dType = NON_T;
+  //left_val.var->dType = NON_T;
   is_declare = 0;
   makeTree(&root, 0, i-1);
   dumpRevPolish(&root);

@@ -13,11 +13,11 @@ TableEntry* get_table_entry(char *name) {
   int i, j;
   for (i = 0; i < table_ent_ct; i++) {
     for (j = 0; *(name+j) != '\0'; j++) {
-      if (*(name+j) != *(SymbolTable[i].name+j)) {
+      if (*(name+j) != *(SymbolTable[i].var->name+j)) {
 	break;
       }
     }
-    if (*(SymbolTable[i].name+j) == '\0') {
+    if (*(SymbolTable[i].var->name+j) == '\0') {
       return &SymbolTable[i];
     }
   }
@@ -45,14 +45,21 @@ TableEntry *enter_table_item(TableEntry* ent) {
     set_address(ent);
   } else if (ent->kind == func_ID ) {
     // apply func setting
-    ent->code_addr = -table_ent_ct;
-    TableEntry* e = get_table_entry(ent->name);
+    ent->var->code_addr = -table_ent_ct;
+    TableEntry* e = get_table_entry(ent->var->name);
   if (e != NULL && e->kind == proto_ID)
-      e->code_addr = -table_ent_ct;
+      e->var->code_addr = -table_ent_ct;
   } else if (ent->kind == proto_ID) {
-    ent->code_addr = -table_ent_ct; // code.opdata -> SymbolTable[code] ->
+    ent->var->code_addr = -table_ent_ct; // code.opdata -> SymbolTable[code] ->
   }
   SymbolTable[table_ent_ct] = *ent;
+  SymbolTable[table_ent_ct].var = (VarElement *)malloc(sizeof(VarElement));
+  // TODO : memcpy
+  SymbolTable[table_ent_ct].var->dType = ent->var->dType;
+  SymbolTable[table_ent_ct].var->name = ent->var->name;
+  SymbolTable[table_ent_ct].var->modifier = ent->var->modifier;
+  SymbolTable[table_ent_ct].var->code_addr = ent->var->code_addr;
+  SymbolTable[table_ent_ct].var->arrLen = ent->var->arrLen;
   return &SymbolTable[table_ent_ct++];
 }
 
@@ -60,12 +67,12 @@ TableEntry *enter_table_item(TableEntry* ent) {
 TableEntry *search(char *text) {
   int i;
   for (i = table_ent_ct-1; i >= LTBL_START; i--) {
-    if (strcmp(SymbolTable[i].name, text) == 0) {
+    if (strcmp(SymbolTable[i].var->name, text) == 0) {
       return SymbolTable + i;
     }
   }
   for (; i >= GTBL_START; i--) {
-    if (SymbolTable[i].kind != arg_ID && strcmp(SymbolTable[i].name, text) == 0) {
+    if (SymbolTable[i].kind != arg_ID && strcmp(SymbolTable[i].var->name, text) == 0) {
       return SymbolTable + i;
     }
   }
@@ -77,7 +84,7 @@ void del_func_entry(TableEntry *f1, TableEntry *f2) {
     return;
   }
   // TODO : NULL check
-  if (f1->dType != f2->dType || f1->args != f2->args)
+  if (f1->var->dType != f2->var->dType || f1->args != f2->args)
     return; // overload
   if (f1->kind == proto_ID && f2->kind == func_ID) {
     int i;
@@ -106,7 +113,7 @@ void dupCheck(TableEntry *ent) {
     return;
 
   int level = blockNest_ct;
-  TableEntry *p = search(ent->name);
+  TableEntry *p = search(ent->var->name);
   if (p == NULL) return;
   if (ent->kind == arg_ID) level++;
   if (p->level == level)
@@ -116,10 +123,10 @@ void dupCheck(TableEntry *ent) {
 void set_entry_member(TableEntry *e, SymbolKind k, char *name, int len, Level l, int arrLen) { // TODO temporally limited arguments
   int i;
   e->kind = k;
-  e->name = malloc(sizeof(char) * (len + 1)); // TODO : error check, and must free
-  memcpy(e->name, name, len+1);
+  e->var->name = malloc(sizeof(char) * (len + 1)); // TODO : error check, and must free
+  memcpy(e->var->name, name, len+1);
   e->level = l;
-  e->code_addr = 0;
-  e->arrLen = arrLen;
+  e->var->code_addr = 0;
+  e->var->arrLen = arrLen;
   e->args = 0;
 }

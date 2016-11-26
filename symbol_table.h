@@ -13,6 +13,9 @@ typedef enum {
     NON_T, VOID_T, VOIDP_T, INT_T, INTP_T, SHORT_T, SHORTP_T, CHAR_T, CHARP_T, FLOAT_T, FLOATP_T, DOUBLE_T, DOUBLEP_T, // TODO : increase
 } DataType;
 
+typedef enum {
+    NON_M = 0, STRUCT_M = 1, STATIC_M = 2, CONST_M = 4, UNION_M = 8, EXTERN_M = 16,
+} ModifierMask;
 
 static int DATA_SIZE[] = {-1, -1, POINTER_SIZE, INT_SIZE, POINTER_SIZE,
                           SHORT_SIZE, POINTER_SIZE, CHAR_SIZE, POINTER_SIZE,
@@ -27,19 +30,27 @@ typedef enum {
 } SymbolKind;
 
 typedef struct {
-    SymbolKind  kind;
-    char       *name;
-    DataType   dType;
-    Level      level;  // local, global etc..
-    //int        scope; // TODO : after finish implementation, this can change to Level
-    int         code_addr;
-
+    DataType dType;
+    char *name;
+    char modifier;
+    int code_addr;
     // for variable
     int       arrLen;
+} VarElement;
 
+typedef struct {
+    SymbolKind  kind;
+    VarElement  *var; // will be list when this is struct
+    Level      level;  // local, global etc..
     // for function
     int         args;
 } TableEntry;
+
+typedef struct {
+    DataType baseType; // TODO : this should be recursive
+    char     *newType;
+    int      is_struct;
+} TypeDefEntry;
 
 #define TABLE_MAX 65536
 extern TableEntry SymbolTable[TABLE_MAX];

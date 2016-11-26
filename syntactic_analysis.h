@@ -17,7 +17,8 @@ static int node_used_ct = 0;
 #define MAX_EXPR_TOKENS 256
 static Token expr_tkns[MAX_EXPR_TOKENS];
 static DataType expr_type = NON_T;
-static TableEntry left_val = {no_ID, "", NON_T, LOCAL, 0, 0, 0};;
+static VarElement left_varelem = {NON_T, "", NON_M, 0, 0};
+static TableEntry left_val = {no_ID, &left_varelem, LOCAL, 0};
 static int addressing = 0;
 static int left_most_assign = 0;
 #define MAX_DEFINE_SIZE
