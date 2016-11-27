@@ -29,6 +29,7 @@ void compile(char *fname) {
 	declare_var(&entryTmp, &t);
       }
     } else if (t.hKind == Modifier) {
+      statement(&t);
       // TBD
     } else {
       switch(t.kind) {

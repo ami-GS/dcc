@@ -62,7 +62,7 @@ void statement(Token *t) {
   case Semicolon:
     nextToken(t, 0);
     break;
-  case Int: case Float: case Char: case Double:
+  case Int: case Float: case Char: case Double: case Struct: case Typedef:
   case IntP: case FloatP: case CharP: case DoubleP:// TODO : enhance here
     expr_with_check(t, 0, ';');
     break;

@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "malloc.h"
 #include <stdlib.h>
+#include <string.h>
 
 int getLowestPriorityIdx(int st, int end) {
   if (st == end)
@@ -68,7 +69,7 @@ int getLowestPriorityIdx(int st, int end) {
 	}
       } else if (expr_tkns[i].kind == Ident) {
 	pri = 14;
-      } else if (expr_tkns[i].hKind == Type) {
+      } else if (expr_tkns[i].hKind == Type || expr_tkns[i].hKind == Modifier) {
 	pri = 15;
       } else {
 	continue;
@@ -127,7 +128,7 @@ void dumpRevPolish(Node *root) {
   if (root->r != NULL)
     dumpRevPolish(root->r);
   if (root->tkn != NULL)
-    printf("%s", root->tkn->text);
+    printf("%s ", root->tkn->text);
 }
 
 void genCode_tree_assign() {
@@ -158,21 +159,56 @@ void genCode_tree_addressing(int offset) {
   genCode_binary(Add);
 }
 
+void define_type(Node *root, Node *self) {
+  int i;
+  for (i = 0; i < typedef_ent_ct; i++) {
+    if (memcmp(TypeDefTable[i].tagName, self->tkn->text, self->tkn->intVal) == 0) {
+      is_declare = 1;
+      left_val.structEntCount = TypeDefTable[i].structEntCount;
+      return;
+    }
+  }
+
+  if (self->l->tkn->kind == Struct) { // means tag of struct \
+    is_typedef = 0;
+    TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
+    memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
+    return;
+  }
+  if (TypeDefTable[typedef_ent_ct].var == NULL)
+    TypeDefTable[typedef_ent_ct].var = (VarElement *)malloc(sizeof(VarElement)); // TODO : not cool
+  VarElement *varp = TypeDefTable[typedef_ent_ct].var;
+  for (i = 0; i < TypeDefTable[typedef_ent_ct].structEntCount; i++) {
+    varp->nxtVar = (VarElement *)malloc(sizeof(VarElement)); // TODO : free
+    varp = varp->nxtVar;
+  }
+  memcpy(varp, left_val.var, sizeof(VarElement));
+  memcpy(varp->name, left_val.var->name, 10); // TODO : temporally
+  TypeDefTable[typedef_ent_ct].structEntCount++;
+}
+
 void genCode_tree_Ident(Node *root, Node *self) {
   is_bracket_addressing = self->r != NULL;
   TableEntry *te_tmp = search(self->tkn->text);
   if (te_tmp == NULL && left_val.var->dType > NON_T) {
     int arrLen = 0;
     SymbolKind sKind = var_ID;
+    // this stands for bracket addressing, remove LDI of stack top
     if (is_bracket_addressing)
-      // this stands for bracket addressing, remove LDI of stack top
       arrLen = codes[--code_ct].opdata;
-    if (funcPtr->args == -1)
+    if (funcPtr != NULL && funcPtr->args == -1)
       sKind = arg_ID;
     set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
+    if (is_typedef) {
+      define_type(root, self); // not cool
+      return;
+    }
     enter_table_item(&left_val);
     if (left_most_assign)
       te_tmp = &left_val;
+  } else if (is_typedef) { // means tag of struct
+    define_type(root, self); // not cool
+    return;
   } else if (te_tmp == NULL) {
     error("unknown identifier");
   } else if (left_val.kind == no_ID) {
@@ -322,6 +358,9 @@ void genCode_tree(Node *self, Node *root) {
     case String:
       genCode_tree_String(self->tkn);
       break;
+    case Struct:
+      is_typedef = 1;
+      break;
     case Comma:
       break; // ignore?
     default:
@@ -339,7 +378,8 @@ void genCode_tree(Node *self, Node *root) {
   }
 
   if (root->tkn->kind == Semicolon && self->tkn->kind != Semicolon) {
-    remove_op_stack_top();
+    if (!is_typedef)
+      remove_op_stack_top();
     left_val.var->dType = NON_T;
     is_declare = 0;
     arrayCount = 0;
@@ -353,16 +393,24 @@ void expression(Token *t, char endChar) {
     nodes[node_used_ct].r = NULL;
     nodes[node_used_ct].tkn = NULL;
   }
-  int i;
-  for (i = 0; t->kind != endChar; i++) { // TODO ',' should be considered
+  int i, nest = 0;
+  for (i = 0; !(t->kind == endChar && nest == 0); i++) { // TODO ',' should be considered
     expr_tkns[i] = *t;
+    if (expr_tkns[i].kind == Lparen || expr_tkns[i].kind == Lbracket || expr_tkns[i].kind == Lbrace) {
+      nest++;
+    } else if (expr_tkns[i].kind == Rparen || expr_tkns[i].kind == Rbracket || expr_tkns[i].kind == Rbrace) {
+      if (nest == 0)
+	error("Invalid ')', ']', '}'");
+      nest--;
+    }
     nextToken(t, 0);
-  }
+    }
   Node root = nodes[node_used_ct++];
   left_val.kind = no_ID;
   arrayCount = 0;
   //left_val.var->dType = NON_T;
   is_declare = 0;
+  is_typedef = 0;
   makeTree(&root, 0, i-1);
   dumpRevPolish(&root);
   printf("\n");

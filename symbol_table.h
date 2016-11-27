@@ -29,14 +29,17 @@ typedef enum {
     no_ID, var_ID, func_ID, proto_ID, arg_ID, // TODO : increase
 } SymbolKind;
 
-typedef struct {
+typedef struct VarElement VarElement;
+
+struct VarElement {
     DataType dType;
     char *name;
     char modifier;
     int code_addr;
     // for variable
     int       arrLen;
-} VarElement;
+    VarElement *nxtVar;
+};
 
 typedef struct {
     SymbolKind  kind;
@@ -44,17 +47,25 @@ typedef struct {
     Level      level;  // local, global etc..
     // for function
     int         args;
+    // for struct
+    int     structEntCount; // means struct
 } TableEntry;
 
 typedef struct {
     DataType baseType; // TODO : this should be recursive
     char     *newType;
-    int      is_struct;
+
+    int      structEntCount; // if 1 <= then struct
+    char     *tagName; // if struct
+    VarElement  *var;   // if struct
 } TypeDefEntry;
 
 #define TABLE_MAX 65536
 extern TableEntry SymbolTable[TABLE_MAX];
 extern int table_ent_ct;
+#define TYPEDEF_MAX 1024
+extern TypeDefEntry TypeDefTable[TYPEDEF_MAX];
+extern int typedef_ent_ct;
 #define GTBL_START 0
 static int LTBL_START = 0;
 #define LTBL_EMPTY TABLE_MAX+1

@@ -23,6 +23,7 @@ static int addressing = 0;
 static int left_most_assign = 0;
 #define MAX_DEFINE_SIZE
 static char is_declare = 0;
+static char is_typedef = 0;
 static int arrayCount = 0;
 static int empty_array = 0;
 static int is_bracket_addressing = 0;
