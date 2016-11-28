@@ -33,5 +33,6 @@ int binary_expr(OpCode op, int d1, int d2);
 void to_left_val();
 int const_fold(OpCode op);
 void remove_op_stack_top();
+int is_binaryOP(OpCode op);
 
 #endif // _DCC_INSTRUCTION_H_
