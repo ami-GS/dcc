@@ -298,18 +298,6 @@ void st_build_in(Token *t) {
   return;
 }
 
-void st_declare(Token *t) {
-  while (t->kind == Int || t->kind == Char || t->kind == Float) { // TODO : not only Int
-    VarElement vartmp = {NON_T, "", NON_M, 0, 0};
-    TableEntry tmp = {no_ID, &vartmp, LOCAL, 0};
-    set_dtype(&tmp, t);
-    set_name(&tmp, t);
-    declare_var(&tmp, t);
-    nextToken(t, 0);
-  }
-  return;
-}
-
 void begin_switch() {
   if (switchNest_ct >= MAX_SWITCH_NEST_SIZ) {
     error("switch is nesting over limitation");

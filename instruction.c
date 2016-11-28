@@ -210,10 +210,10 @@ int binary_expr(OpCode op, int d1, int d2) {
 void to_left_val() {
   // TODO : I need study more here
   switch (codes[code_ct-1].opcode) {
-  case VAL: case VALC: case VALD:
+  case VAL: case VALS: case VALF: case VALC: case VALD:
     --code_ct;
     break;
-  case LOD: case LODC:
+  case LOD: case LODS: case LODF: case LODC: case LODD:
     codes[code_ct-1].opcode = LDA;
     break;
   case LODV:
@@ -227,6 +227,10 @@ void remove_op_stack_top() {
   switch (codes[code_ct-1].opcode) {
   case ASSV:
     codes[code_ct-1].opcode = ASS; break;
+  case ASVS:
+    codes[code_ct-1].opcode = ASSS; break;
+  case ASVF:
+    codes[code_ct-1].opcode = ASSF; break;
   case ASVC:
     codes[code_ct-1].opcode = ASSC; break;
   case ASVD:

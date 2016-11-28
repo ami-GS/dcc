@@ -35,4 +35,9 @@ int const_fold(OpCode op);
 void remove_op_stack_top();
 int is_binaryOP(OpCode op);
 
+#define GEN_JMP_TOP(addr) genCode2(JMP, addr)
+#define GEN_JMP_BUTTOM(addr) addr=genCode2(JMP, 0)
+#define GEN_JPF_BUTTOM(addr) addr=genCode2(JPF, 0)
+#define GEN_JPT_BUTTOM(addr) genCode2(JPT, addr)
+
 #endif // _DCC_INSTRUCTION_H_

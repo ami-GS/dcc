@@ -5,11 +5,6 @@
 #include "opcode.h"
 
 #define LABEL_TOP(addr) addr=code_ct
-// TODO : here?
-#define GEN_JMP_TOP(addr) genCode2(JMP, addr)
-#define GEN_JMP_BUTTOM(addr) addr=genCode2(JMP, 0)
-#define GEN_JPF_BUTTOM(addr) addr=genCode2(JPF, 0)
-#define GEN_JPT_BUTTOM(addr) genCode2(JPT, addr)
 
 #define MAX_LOOP_NEST_SIZ 100
 struct {
@@ -50,7 +45,6 @@ void st_build_in(Token *t);
 void st_ident(Token *t);
 void st_lbrace(Token *t);
 void st_semicolon(Token *t);
-void st_declare(Token *t);
 void st_EOF(Token *t);
 void begin_switch();
 void end_switch();
