@@ -2,7 +2,6 @@
 #include "opcode.h"
 #include "symbol_table.h"
 #include "instruction.h"
-#include "data_declare.h"
 #include "syntactic_analysis.h"
 #include "parse.h"
 #include "misc.h"

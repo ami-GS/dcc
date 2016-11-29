@@ -1,7 +1,6 @@
 #ifndef _DCC_MALLOC_H_
 #define _DCC_MALLOC_H_
 
-#include "data_declare.h"
 #include "symbol_table.h"
 
 extern int localAddress;

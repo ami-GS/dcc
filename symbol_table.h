@@ -2,7 +2,13 @@
 #define _DCC_SYMBOL_TABLE_H_
 
 #include "opcode.h"
-#include "data_declare.h"
+
+#define INT_SIZE 4
+#define FLOAT_SIZE INT_SIZE
+#define SHORT_SIZE 2
+#define DOUBLE_SIZE 8
+#define CHAR_SIZE 1
+#define POINTER_SIZE INT_SIZE // TODO 8?. currently, this should be same as INT_SIZE
 
 typedef enum {
     GLOBAL, LOCAL, NO_LOCATION,
