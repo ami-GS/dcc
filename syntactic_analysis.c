@@ -160,11 +160,19 @@ void genCode_tree_addressing(int offset) {
 }
 
 void define_type(Node *root, Node *self) {
-  int i;
+  int i, j;
   for (i = 0; i < typedef_ent_ct; i++) {
     if (memcmp(TypeDefTable[i].tagName, self->tkn->text, self->tkn->intVal) == 0) {
       is_declare = 1;
+      VarElement *varr = TypeDefTable[i].var;
+      VarElement *varl = left_val.var;
       left_val.structEntCount = TypeDefTable[i].structEntCount;
+      for (j = 0; j < left_val.structEntCount; j++) {
+	varl->nxtVar = (VarElement *)malloc(sizeof(VarElement));
+	varl = varl->nxtVar;
+	memcpy(varl, varr, sizeof(VarElement));
+	varr = varr->nxtVar;
+      }
       return;
     }
   }
@@ -190,7 +198,7 @@ void define_type(Node *root, Node *self) {
 void genCode_tree_Ident(Node *root, Node *self) {
   is_bracket_addressing = self->r != NULL;
   TableEntry *te_tmp = search(self->tkn->text);
-  if (te_tmp == NULL && left_val.var->dType > NON_T) {
+  if (te_tmp == NULL && (left_val.var->dType > NON_T || is_declare)) {
     int arrLen = 0;
     SymbolKind sKind = var_ID;
     // this stands for bracket addressing, remove LDI of stack top
@@ -199,7 +207,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
     if (funcPtr != NULL && funcPtr->args == -1)
       sKind = arg_ID;
     set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
-    if (is_typedef) {
+    if (is_typedef && !left_val.structEntCount) {
       define_type(root, self); // not cool
       return;
     }
@@ -408,6 +416,9 @@ void expression(Token *t, char endChar) {
   Node root = nodes[node_used_ct++];
   left_val.kind = no_ID;
   arrayCount = 0;
+  left_val.var = (VarElement *)malloc(sizeof(VarElement));
+  memset(left_val.var, 0, sizeof(VarElement));
+  left_val.structEntCount = 0;
   //left_val.var->dType = NON_T;
   is_declare = 0;
   is_typedef = 0;

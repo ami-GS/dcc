@@ -181,17 +181,25 @@ int set_array(TableEntry* ent, Token *t) {
 }
 
 int set_address(TableEntry *te) {
-  int i, size = DATA_SIZE[te->var->dType];
-
+  int i = 0, size;
+  VarElement *var = te->var;
   switch (te->kind) {
   case var_ID: case arg_ID:
-    if (te->var->arrLen != 0)
-      size *= te->var->arrLen; // other type should be capable
-    if (te->level == GLOBAL) {
-      te->var->code_addr = malloc_G(size);
-      break;
-    }
-    te->var->code_addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
+    size = DATA_SIZE[var->dType];
+    do {
+      if (te->structEntCount) {
+	var = var->nxtVar;
+	size = DATA_SIZE[var->dType];
+      }
+      if (var->arrLen != 0)
+	size *= var->arrLen; // other type should be capable
+      if (te->level == GLOBAL) {
+	var->code_addr = malloc_G(size);
+	break;
+      }
+      var->code_addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
+      i++;
+    } while (i < te->structEntCount);
     break;
   case func_ID:
     // TODO : need to study for seting func addr
@@ -199,7 +207,7 @@ int set_address(TableEntry *te) {
     for (i = 1; i <= te->args; i++) {
       size = DATA_SIZE[(te+i)->var->dType];
       (te+i)->var->code_addr = malloc_L(size);
-      }
+    }
     break;
   }
 }
