@@ -59,6 +59,7 @@ int getLowestPriorityIdx(int st, int end) {
 				      pri = 13;
 				    break;
 	case Incre: case Decre:
+	case Dot: case Arrow:
                                     pri = 14;
 				    if (i == st || expr_tkns[i-1].hKind == Operator)
 				      pri = 13;
@@ -67,9 +68,9 @@ int getLowestPriorityIdx(int st, int end) {
 	  continue;
 	}
       } else if (expr_tkns[i].kind == Ident) {
-	pri = 14;
-      } else if (expr_tkns[i].hKind == Type || expr_tkns[i].hKind == Modifier) {
 	pri = 15;
+      } else if (expr_tkns[i].hKind == Type || expr_tkns[i].hKind == Modifier) {
+	pri = 16;
       } else {
 	continue;
       }
@@ -196,6 +197,23 @@ void define_type(Node *root, Node *self) {
 
 void genCode_tree_Ident(Node *root, Node *self) {
   is_bracket_addressing = self->r != NULL;
+  if (is_dot_arrow_addressing && root->r == self) {
+    int i, match_flag = 0, addr_acc = 0;
+    VarElement *var = left_val.var->nxtVar;
+    for (i = 0; i < left_val.structEntCount; i++) {
+      if (strcmp(var->name, self->tkn->text) == 0) {
+	match_flag = 1;
+	break;
+      }
+      addr_acc += DATA_SIZE[var->dType];
+    }
+    if (match_flag) {
+      genCode2(LDI, addr_acc);
+      genCode2(ADDL, addr_acc);
+    } else {
+      error("no such a member in the struct");
+    }
+  }
   TableEntry *te_tmp = search(self->tkn->text);
   if (te_tmp == NULL && (left_val.var->dType > NON_T || is_declare)) {
     int arrLen = 0;
@@ -328,6 +346,8 @@ void genCode_tree(Node *self, Node *root) {
     genCode_tree_addressing(arrayCount++);
   }
 
+  if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
+    is_dot_arrow_addressing = 1;
   if (left_most_assign == 0 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe)) {
     left_most_assign = (self->tkn->hKind == CombOpe) + 1; // the most left '='
   }
@@ -338,6 +358,8 @@ void genCode_tree(Node *self, Node *root) {
 
   if (self->r != NULL)
     genCode_tree(self->r, self);
+  if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
+    is_dot_arrow_addressing = 0;
 
   int i=0;
   if (self->tkn != NULL) {

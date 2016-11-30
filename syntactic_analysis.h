@@ -27,6 +27,7 @@ static char is_typedef = 0;
 static int arrayCount = 0;
 static int empty_array = 0;
 static int is_bracket_addressing = 0;
+static int is_dot_arrow_addressing = 0;
 
 
 void expression(Token *t, char endChar);

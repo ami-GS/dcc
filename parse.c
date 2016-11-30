@@ -200,6 +200,10 @@ int set_address(TableEntry *te) {
       var->code_addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
       i++;
     } while (i < te->structEntCount);
+    if (te->structEntCount) {
+      te->var->code_addr = te->var->nxtVar->code_addr;
+      te->var->dType = te->var->nxtVar->dType;
+    }
     break;
   case func_ID:
     // TODO : need to study for seting func addr
