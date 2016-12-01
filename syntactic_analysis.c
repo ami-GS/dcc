@@ -187,7 +187,8 @@ void define_type(Node *root, Node *self) {
     TypeDefTable[typedef_ent_ct].var = (VarElement *)malloc(sizeof(VarElement)); // TODO : not cool
   VarElement *varp = TypeDefTable[typedef_ent_ct].var;
   for (i = 0; i < TypeDefTable[typedef_ent_ct].structEntCount; i++) {
-    varp->nxtVar = (VarElement *)malloc(sizeof(VarElement)); // TODO : free
+    if (varp->nxtVar == NULL)
+      varp->nxtVar = (VarElement *)malloc(sizeof(VarElement)); // TODO : free
     varp = varp->nxtVar;
   }
   memcpy(varp, left_val.var, sizeof(VarElement));
@@ -206,10 +207,13 @@ void genCode_tree_Ident(Node *root, Node *self) {
 	break;
       }
       addr_acc += DATA_SIZE[var->dType];
+      var = var->nxtVar;
     }
     if (match_flag) {
+      to_left_val();
       genCode2(LDI, addr_acc);
       genCode2(ADDL, addr_acc);
+      return;
     } else {
       error("no such a member in the struct");
     }
@@ -392,6 +396,10 @@ void genCode_tree(Node *self, Node *root) {
       break;
     case Comma:
       break; // ignore?
+    case Dot:
+      if (!left_most_assign)
+	genCode1(VAL);
+      break;
     default:
       switch (self->tkn->hKind) {
       case Operator: case CombOpe:
