@@ -213,6 +213,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
       to_left_val();
       genCode2(LDI, addr_acc);
       genCode2(ADDL, addr_acc);
+      left_val.var = var;
       return;
     } else {
       error("no such a member in the struct");
@@ -261,7 +262,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
 	genCode_binary(Add);
 	genCode1(VAL_TYPE[te_tmp->var->dType]);
       } else if (!is_bracket_addressing) {
-	if (te_tmp->var->arrLen == 0 && te_tmp->var->dType%2 == 0) {
+	if (te_tmp->var->arrLen == 0 && (te_tmp->var->dType != STRUCT_T &&te_tmp->var->dType%2 == 0)) {
 	  genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
 	} else if (te_tmp->var->arrLen == 0) {
 	  genCode(LOD_TYPE[te_tmp->var->dType], te_tmp->level, te_tmp->var->code_addr);
@@ -398,7 +399,7 @@ void genCode_tree(Node *self, Node *root) {
       break; // ignore?
     case Dot:
       if (!left_most_assign)
-	genCode1(VAL);
+	genCode1(VAL_TYPE[left_val.var->dType]);
       break;
     default:
       switch (self->tkn->hKind) {

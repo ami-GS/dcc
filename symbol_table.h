@@ -16,7 +16,7 @@ typedef enum {
 static int scopeCnt = 0;
 
 typedef enum {
-    NON_T, VOID_T, VOIDP_T, INT_T, INTP_T, SHORT_T, SHORTP_T, CHAR_T, CHARP_T, FLOAT_T, FLOATP_T, DOUBLE_T, DOUBLEP_T, // TODO : increase
+    NON_T, VOID_T, VOIDP_T, INT_T, INTP_T, SHORT_T, SHORTP_T, CHAR_T, CHARP_T, FLOAT_T, FLOATP_T, DOUBLE_T, DOUBLEP_T, STRUCT_T, STRUCTP_T, // TODO : increase
 } DataType;
 
 typedef enum {
@@ -25,11 +25,12 @@ typedef enum {
 
 static int DATA_SIZE[] = {-1, -1, POINTER_SIZE, INT_SIZE, POINTER_SIZE,
                           SHORT_SIZE, POINTER_SIZE, CHAR_SIZE, POINTER_SIZE,
-                          FLOAT_SIZE, POINTER_SIZE, DOUBLE_SIZE, POINTER_SIZE};
-static int ASSV_TYPE[] = {-1, -1, -1, ASSV, ASVP, ASVS, ASVP, ASVC, ASVP, ASVF, ASVP, ASVD, ASVP};
-static int LOD_TYPE[] = {-1, -1, -1, LOD, LDA, LODS, LDA, LODC, LDA, LODF, LDA, LODD, LDA};
-static int VAL_TYPE[] = {-1, -1, -1, VAL, VAL, VALS, VAL, VALC, VAL, VALF, VAL, VALD, VAL};
-static int STO_TYPE[] = {-1, -1, -1, STO, STO, STOS, STO, STOC, STO, STOF, STO, STOD, STO};
+                          FLOAT_SIZE, POINTER_SIZE, DOUBLE_SIZE, POINTER_SIZE,
+                          -1, POINTER_SIZE};
+static int ASSV_TYPE[] = {-1, -1, -1, ASSV, ASVP, ASVS, ASVP, ASVC, ASVP, ASVF, ASVP, ASVD, ASVP, -1, ASVP};
+static int LOD_TYPE[] = {-1, -1, -1, LOD, LDA, LODS, LDA, LODC, LDA, LODF, LDA, LODD, LDA, LDA, -1};
+static int VAL_TYPE[] = {-1, -1, -1, VAL, VAL, VALS, VAL, VALC, VAL, VALF, VAL, VALD, VAL, -1, -1};
+static int STO_TYPE[] = {-1, -1, -1, STO, STO, STOS, STO, STOC, STO, STOF, STO, STOD, STO, -1, -1};
 
 typedef enum {
     no_ID, var_ID, func_ID, proto_ID, arg_ID, // TODO : increase

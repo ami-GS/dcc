@@ -202,7 +202,7 @@ int set_address(TableEntry *te) {
     } while (i < te->structEntCount);
     if (te->structEntCount) {
       te->var->code_addr = te->var->nxtVar->code_addr;
-      te->var->dType = te->var->nxtVar->dType;
+      te->var->dType = STRUCT_T;
     }
     break;
   case func_ID:
