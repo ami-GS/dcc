@@ -11,6 +11,11 @@ struct Node {
   Token *tkn;
 };
 
+typedef enum {
+    IS_LEFT = 0x1, IS_DECLARE = 0x2, IS_STRUCT = 0x4, MEMBER_ACCESS = 0x8, BRACKET_ACCESS = 0x10, IS_TYPEDEF = 0x20,
+} ParseFlag;
+static ParseFlag parse_flag = 0;
+
 #define MAX_NODES 64
 static Node nodes[MAX_NODES];
 static int node_used_ct = 0;

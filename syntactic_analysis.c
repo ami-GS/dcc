@@ -163,7 +163,9 @@ void define_type(Node *root, Node *self) {
   int i, j;
   for (i = 0; i < typedef_ent_ct; i++) {
     if (memcmp(TypeDefTable[i].tagName, self->tkn->text, self->tkn->intVal) == 0) {
-      is_declare = 1;
+      parse_flag |= IS_DECLARE;
+      parse_flag &= ~IS_TYPEDEF; // not define type, but declaration
+      left_val.var->dType = STRUCT_T;
       VarElement *varr = TypeDefTable[i].var;
       VarElement *varl = left_val.var;
       left_val.structEntCount = TypeDefTable[i].structEntCount;
@@ -178,7 +180,7 @@ void define_type(Node *root, Node *self) {
   }
 
   if (self->l->tkn->kind == Struct) { // means tag of struct \
-    is_typedef = 0;
+    parse_flag |= IS_TYPEDEF;
     TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
     memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
     return;
@@ -197,8 +199,12 @@ void define_type(Node *root, Node *self) {
 }
 
 void genCode_tree_Ident(Node *root, Node *self) {
-  is_bracket_addressing = self->r != NULL;
-  if (is_dot_arrow_addressing && root->r == self) {
+  if (self->r != NULL && (self->r->tkn->kind == Ident || self->r->tkn->kind == IntNum || self->r->tkn->hKind == Operator))
+    parse_flag |= BRACKET_ACCESS;
+  else
+    parse_flag &= ~BRACKET_ACCESS;
+
+  if ((parse_flag & MEMBER_ACCESS) && root->r == self) {
     int i, match_flag = 0, addr_acc = 0;
     VarElement *var = left_val.var->nxtVar;
     for (i = 0; i < left_val.structEntCount; i++) {
@@ -352,7 +358,7 @@ void genCode_tree(Node *self, Node *root) {
   }
 
   if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
-    is_dot_arrow_addressing = 1;
+    parse_flag |= MEMBER_ACCESS;
   if (left_most_assign == 0 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe)) {
     left_most_assign = (self->tkn->hKind == CombOpe) + 1; // the most left '='
   }
@@ -364,7 +370,7 @@ void genCode_tree(Node *self, Node *root) {
   if (self->r != NULL)
     genCode_tree(self->r, self);
   if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
-    is_dot_arrow_addressing = 0;
+    parse_flag ^= MEMBER_ACCESS;
 
   int i=0;
   if (self->tkn != NULL) {
@@ -393,7 +399,7 @@ void genCode_tree(Node *self, Node *root) {
       genCode_tree_String(self->tkn);
       break;
     case Struct:
-      is_typedef = 1;
+      parse_flag |= IS_TYPEDEF;
       break;
     case Comma:
       break; // ignore?
@@ -408,7 +414,7 @@ void genCode_tree(Node *self, Node *root) {
 	break;
       case Type:
         left_val.var->dType = tkn2dType(self->tkn->kind) + (root->tkn->kind == '*');
-	is_declare = 1;
+	parse_flag |= IS_DECLARE;
 	break;
       }
       break;
@@ -416,10 +422,10 @@ void genCode_tree(Node *self, Node *root) {
   }
 
   if (root->tkn->kind == Semicolon && self->tkn->kind != Semicolon) {
-    if (!is_typedef)
+    if (!(parse_flag & IS_TYPEDEF))
       remove_op_stack_top();
     left_val.var->dType = NON_T;
-    is_declare = 0;
+    parse_flag &= ~IS_DECLARE;
     arrayCount = 0;
     left_val.kind = no_ID;
   }
@@ -448,10 +454,7 @@ void expression(Token *t, char endChar) {
   arrayCount = 0;
   left_val.var = (VarElement *)malloc(sizeof(VarElement));
   memset(left_val.var, 0, sizeof(VarElement));
-  left_val.structEntCount = 0;
-  //left_val.var->dType = NON_T;
-  is_declare = 0;
-  is_typedef = 0;
+  parse_flag = 0;
   makeTree(&root, 0, i-1);
   dumpRevPolish(&root);
   printf("\n");
