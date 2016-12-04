@@ -49,6 +49,8 @@ void genCode_tree_CharSymbol(Node *root, Node *self);
 void genCode_tree_String(Token *tkn);
 void genCode_tree_incdec(Node *root, Node *self);
 void genCode_tree(Node *self, Node * root);
+void go_left_node(Node *self, Node *root);
+void go_right_node(Node *self, Node *root);
 void expr_with_check(Token *t, char l, char r);
 void callFunc(Token *t, TableEntry *te);
 // TODO : this is my own implementation. suspicious

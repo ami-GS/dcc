@@ -353,13 +353,7 @@ void genCode_tree_incdec(Node *root, Node *self) {
     genCode1(DEL); // for A++; or ++A;
 }
 
-void genCode_tree(Node *self, Node *root) {
-  if (root->tkn->kind == Comma && self->tkn->kind != Comma && is_declare && (left_val.var->arrLen > 0 || empty_array)) {
-    if (arrayCount >= left_val.var->arrLen && !empty_array)
-      error("initialize length overflowing");
-    genCode_tree_addressing(arrayCount++);
-  }
-
+void go_left_node(Node *self, Node *root) {
   if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
     parse_flag |= MEMBER_ACCESS;
   if (left_most_assign == 0 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe)) {
@@ -369,11 +363,23 @@ void genCode_tree(Node *self, Node *root) {
     genCode_tree(self->l, self);
   if (left_most_assign >= 1 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe))
     left_most_assign = 0;
+}
 
+void go_right_node(Node *self, Node *root) {
   if (self->r != NULL)
     genCode_tree(self->r, self);
   if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
     parse_flag ^= MEMBER_ACCESS;
+}
+
+void genCode_tree(Node *self, Node *root) {
+  if (root->tkn->kind == Comma && self->tkn->kind != Comma && (parse_flag & IS_DECLARE) && (left_val.var->arrLen > 0 || empty_array)) {
+    if (arrayCount >= left_val.var->arrLen && !empty_array)
+      error("initialize length overflowing");
+    genCode_tree_addressing(arrayCount++);
+  }
+  go_left_node(self, root);
+  go_right_node(self, root);
 
   int i=0;
   if (self->tkn != NULL) {
