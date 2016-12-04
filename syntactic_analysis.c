@@ -198,6 +198,37 @@ void define_type(Node *root, Node *self) {
   TypeDefTable[typedef_ent_ct].structEntCount++;
 }
 
+void _genCode_tree_Ident(Node *root, Node *self) {
+  switch (te_tmp->kind) { // for initialization
+  case func_ID: case proto_ID:
+    genCode2(CALL, te_tmp->var->code_addr);
+    if (te_tmp->var->dType != VOID_T && root == self)
+      genCode1(DEL);
+    break;
+  case var_ID: case arg_ID:
+    if ((parse_flag & BRACKET_ACCESS) == BRACKET_ACCESS && !(parse_flag & IS_DECLARE)) {
+      genCode2(LDI, DATA_SIZE[te_tmp->var->dType]);
+      genCode_binary(Mul);
+      genCode(LDA, te_tmp->level, te_tmp->var->code_addr);
+      if (te_tmp->var->dType%2 == 0)
+	codes[code_ct-1].opcode = LOD;
+      genCode_binary(Add);
+      genCode1(VAL_TYPE[te_tmp->var->dType]);
+    } else if (!(parse_flag & BRACKET_ACCESS)) {
+      if (te_tmp->var->arrLen == 0 && (te_tmp->var->dType != STRUCT_T &&te_tmp->var->dType%2 == 0)) {
+	genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
+      } else if (te_tmp->var->arrLen == 0) {
+	genCode(LOD_TYPE[te_tmp->var->dType], te_tmp->level, te_tmp->var->code_addr);
+      } else {
+	genCode(LDA, te_tmp->level, te_tmp->var->code_addr); // for int A[] = {2,3}; A;
+      }
+    }
+    if (left_most_assign >= 1 && (root->tkn->kind == Assign || root->tkn->hKind == CombOpe))
+      to_left_val();
+    break;
+  }
+}
+
 void genCode_tree_Ident(Node *root, Node *self) {
   if (self->r != NULL && (self->r->tkn->kind == Ident || self->r->tkn->kind == IntNum || self->r->tkn->hKind == Operator))
     parse_flag |= BRACKET_ACCESS;
@@ -251,36 +282,8 @@ void genCode_tree_Ident(Node *root, Node *self) {
     left_val = *te_tmp;
   }
 
-  if (te_tmp != NULL) {
-    switch (te_tmp->kind) { // for initialization
-    case func_ID: case proto_ID:
-      genCode2(CALL, te_tmp->var->code_addr);
-      if (te_tmp->var->dType != VOID_T && root == self)
-	genCode1(DEL);
-      break;
-    case var_ID: case arg_ID:
-      if (is_bracket_addressing && !is_declare) {
-	genCode2(LDI, DATA_SIZE[te_tmp->var->dType]);
-	genCode_binary(Mul);
-	genCode(LDA, te_tmp->level, te_tmp->var->code_addr);
-	if (te_tmp->var->dType%2 == 0)
-	  codes[code_ct-1].opcode = LOD;
-	genCode_binary(Add);
-	genCode1(VAL_TYPE[te_tmp->var->dType]);
-      } else if (!is_bracket_addressing) {
-	if (te_tmp->var->arrLen == 0 && (te_tmp->var->dType != STRUCT_T &&te_tmp->var->dType%2 == 0)) {
-	  genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
-	} else if (te_tmp->var->arrLen == 0) {
-	  genCode(LOD_TYPE[te_tmp->var->dType], te_tmp->level, te_tmp->var->code_addr);
-	} else {
-	  genCode(LDA, te_tmp->level, te_tmp->var->code_addr); // for int A[] = {2,3}; A;
-	}
-      }
-      if (left_most_assign >= 1 && (root->tkn->kind == Assign || root->tkn->hKind == CombOpe))
-	to_left_val();
-      break;
-    }
-  }
+  if (te_tmp != NULL)
+    _genCode_tree_Ident(root, self); // actually generate codes
   if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
     genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
 }
