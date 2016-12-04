@@ -177,6 +177,8 @@ void define_type(Node *root, Node *self) {
 	memcpy(varl, varr, sizeof(VarElement));
 	varr = varr->nxtVar;
       }
+      if (root->tkn->kind == '*')
+	left_val.var->dType = STRUCTP_T;
       return;
     }
   }
@@ -321,8 +323,8 @@ void genCode_tree_String(Token *tkn) {
 }
 
 void genCode_tree_operator(Node *root, Node *self) {
-  if (self->l != NULL && self->l->tkn->hKind == Type)
-    return; // TODO : workaround for int *a like.
+  if ((self->l != NULL && self->l->tkn->hKind == Type) || (self->l->l != NULL && self->l->l->tkn->kind == Struct))
+    return; // TODO : workaround for int *a like. and struct TAG *VAL;
   if (self->l != NULL && self->r != NULL) {
     genCode_binary(self->tkn->kind);
   } else {

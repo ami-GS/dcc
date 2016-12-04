@@ -187,7 +187,7 @@ int set_address(TableEntry *te) {
   case var_ID: case arg_ID:
     size = DATA_SIZE[var->dType];
     do {
-      if (te->structEntCount) {
+      if (te->var->dType == STRUCT_T) {
 	var = var->nxtVar;
 	size = DATA_SIZE[var->dType];
       }
@@ -199,11 +199,9 @@ int set_address(TableEntry *te) {
       }
       var->code_addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
       i++;
-    } while (i < te->structEntCount);
-    if (te->structEntCount) {
+    } while (te->var->dType == STRUCT_T && i < te->structEntCount);
+    if (te->var->dType == STRUCT_T)
       te->var->code_addr = te->var->nxtVar->code_addr;
-      te->var->dType = STRUCT_T;
-    }
     break;
   case func_ID:
     // TODO : need to study for seting func addr
