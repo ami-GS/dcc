@@ -24,16 +24,12 @@ static Token expr_tkns[MAX_EXPR_TOKENS];
 static DataType expr_type = NON_T;
 static VarElement left_varelem = {NON_T, "", NON_M, 0, 0};
 static TableEntry left_val = {no_ID, &left_varelem, LOCAL, 0};
-static int addressing = 0;
+TableEntry *te_tmp;
+VarElement *var_tmp; // for struct member addressing
 static int left_most_assign = 0;
 #define MAX_DEFINE_SIZE
-static char is_declare = 0;
-static char is_typedef = 0;
 static int arrayCount = 0;
 static int empty_array = 0;
-static int is_bracket_addressing = 0;
-static int is_dot_arrow_addressing = 0;
-
 
 void expression(Token *t, char endChar);
 int getLowestPriorityIdx(int st, int end);

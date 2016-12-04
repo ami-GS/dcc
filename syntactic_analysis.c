@@ -146,6 +146,8 @@ void genCode_tree_assign() {
 	remove_op_stack_top();
       i++;
     }
+  } else if (var_tmp){
+    genCode1(ASSV_TYPE[var_tmp->dType]);
   } else {
     genCode1(ASSV_TYPE[left_val.var->dType]);
   }
@@ -237,20 +239,19 @@ void genCode_tree_Ident(Node *root, Node *self) {
 
   if ((parse_flag & MEMBER_ACCESS) && root->r == self) {
     int i, match_flag = 0, addr_acc = 0;
-    VarElement *var = left_val.var->nxtVar;
-    for (i = 0; i < left_val.structEntCount; i++) {
-      if (strcmp(var->name, self->tkn->text) == 0) {
+    var_tmp = te_tmp->var->nxtVar;
+    for (i = 0; i < te_tmp->structEntCount; i++) {
+      if (strcmp(var_tmp->name, self->tkn->text) == 0) {
 	match_flag = 1;
 	break;
       }
-      addr_acc += DATA_SIZE[var->dType];
-      var = var->nxtVar;
+      addr_acc += DATA_SIZE[var_tmp->dType];
+      var_tmp = var_tmp->nxtVar;
     }
     if (match_flag) {
       to_left_val();
       genCode2(LDI, addr_acc);
       genCode2(ADDL, addr_acc);
-      left_val.var = var;
       return;
     } else {
       error("no such a member in the struct");
@@ -414,7 +415,7 @@ void genCode_tree(Node *self, Node *root) {
       break; // ignore?
     case Dot:
       if (!left_most_assign)
-	genCode1(VAL_TYPE[left_val.var->dType]);
+	genCode1(VAL_TYPE[var_tmp->dType]);
       break;
     default:
       switch (self->tkn->hKind) {
@@ -459,8 +460,10 @@ void expression(Token *t, char endChar) {
     nextToken(t, 0);
     }
   Node root = nodes[node_used_ct++];
-  left_val.kind = no_ID;
   arrayCount = 0;
+  te_tmp = NULL;
+  var_tmp = NULL;
+  memset(&left_val, 0, sizeof(TableEntry));
   left_val.var = (VarElement *)malloc(sizeof(VarElement));
   memset(left_val.var, 0, sizeof(VarElement));
   parse_flag = 0;
