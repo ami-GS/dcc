@@ -6,7 +6,7 @@ This is for my understandings of interpreter-compiler.
 
 Currently the usage is limited, but you can use example/ directory for testing.
 
-'''sh
+'''shell
 $ git clone https://github.com/ami-GS/dcc
 $ cd dcc
 $ make
@@ -38,6 +38,8 @@ Types below are supported.
 - Int
 
 - Char (string)
+
+- Struct
 
 ### Passed statements
 statements below were properly translated to assembler with simple processing.
@@ -81,16 +83,18 @@ while (a < 5) {
 
 ### Passed expressions
 
-- binary operations (+ - * / %) without pointer addressing
+- binary operations (+, -, *, /, %)
 
-- unary operations (+ - * ! ++ --)
+- unary operations (+, -, *, !, ++, --)
 
-- binary bit operations (& | ^ << >>)
+- binary bit operations (&, |, ^, <<, >>)
 
 - unary bit operation (~)
 
-- binary boolean operations (== != <= => >= =< && ||)
+- addressing ([], ., ->)
 
-- compound operators (+= -= *= /= %= &= |= ^= <<= >>=)
+- binary boolean operations (==, !=, <=, =>, >=, =<, &&, ||)
 
-- comment (// /**/)
+- compound operators (+=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=)
+
+- comment (//, /**/)
