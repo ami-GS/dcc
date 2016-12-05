@@ -177,6 +177,7 @@ void define_type(Node *root, Node *self) {
 	memcpy(varl, varr, sizeof(VarElement));
 	varr = varr->nxtVar;
       }
+      left_val.dataSize = TypeDefTable[i].dataSize;
       if (root->tkn->kind == '*')
 	left_val.var->dType = STRUCTP_T;
       return;
@@ -199,6 +200,7 @@ void define_type(Node *root, Node *self) {
   }
   memcpy(varp, left_val.var, sizeof(VarElement));
   memcpy(varp->name, left_val.var->name, 10); // TODO : temporally
+  TypeDefTable[typedef_ent_ct].dataSize += DATA_SIZE[varp->dType];
   TypeDefTable[typedef_ent_ct].structEntCount++;
 }
 
@@ -211,12 +213,16 @@ void _genCode_tree_Ident(Node *root, Node *self) {
     break;
   case var_ID: case arg_ID:
     if ((parse_flag & BRACKET_ACCESS) == BRACKET_ACCESS && !(parse_flag & IS_DECLARE)) {
-      genCode2(LDI, DATA_SIZE[te_tmp->var->dType]);
+      if (te_tmp->var->dType == STRUCT_T)
+	genCode2(LDI, te_tmp->dataSize);
+      else
+	genCode2(LDI, DATA_SIZE[te_tmp->var->dType]);
       genCode_binary(Mul);
       genCode(LDA, te_tmp->level, te_tmp->var->code_addr);
       if (te_tmp->var->dType%2 == 0)
 	codes[code_ct-1].opcode = LOD;
       genCode_binary(Add);
+      if (te_tmp->var->dType != STRUCT_T)
       genCode1(VAL_TYPE[te_tmp->var->dType]);
     } else if (!(parse_flag & BRACKET_ACCESS)) {
       if (te_tmp->var->arrLen == 0 && (te_tmp->var->dType != STRUCT_T &&te_tmp->var->dType%2 == 0)) {
@@ -251,7 +257,8 @@ void genCode_tree_Ident(Node *root, Node *self) {
       var_tmp = var_tmp->nxtVar;
     }
     if (match_flag) {
-      to_left_val();
+      if (left_most_assign)
+	to_left_val();
       genCode2(LDI, addr_acc);
       genCode2(ADDL, addr_acc);
       return;
@@ -323,7 +330,7 @@ void genCode_tree_String(Token *tkn) {
 }
 
 void genCode_tree_operator(Node *root, Node *self) {
-  if ((self->l != NULL && self->l->tkn->hKind == Type) || (self->l->l != NULL && self->l->l->tkn->kind == Struct))
+  if ((self->l != NULL && self->l->tkn->hKind == Type) || (self->l != NULL && self->l->l != NULL && self->l->l->tkn->kind == Struct))
     return; // TODO : workaround for int *a like. and struct TAG *VAL;
   if (self->l != NULL && self->r != NULL) {
     genCode_binary(self->tkn->kind);
@@ -418,6 +425,10 @@ void genCode_tree(Node *self, Node *root) {
     case Comma:
       break; // ignore?
     case Dot:
+      if (!left_most_assign)
+	genCode1(VAL_TYPE[var_tmp->dType]);
+      break;
+    case Arrow:
       if (!left_most_assign)
 	genCode1(VAL_TYPE[var_tmp->dType]);
       break;
