@@ -168,16 +168,9 @@ void define_type(Node *root, Node *self) {
       parse_flag |= IS_DECLARE;
       parse_flag &= ~IS_TYPEDEF; // not define type, but declaration
       left_val.var->dType = STRUCT_T;
-      VarElement *varr = TypeDefTable[i].var;
-      VarElement *varl = left_val.var;
       left_val.structEntCount = TypeDefTable[i].structEntCount;
-      for (j = 0; j < left_val.structEntCount; j++) {
-	varl->nxtVar = (VarElement *)malloc(sizeof(VarElement));
-	varl = varl->nxtVar;
-	memcpy(varl, varr, sizeof(VarElement));
-	varr = varr->nxtVar;
-      }
       left_val.dataSize = TypeDefTable[i].dataSize;
+      left_val.var->nxtVar = TypeDefTable[i].var;
       if (root->tkn->kind == '*')
 	left_val.var->dType = STRUCTP_T;
       return;
