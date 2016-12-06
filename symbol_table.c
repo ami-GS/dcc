@@ -50,11 +50,12 @@ TableEntry *enter_table_item(TableEntry* ent) {
     // apply func setting
     ent->var->code_addr = -table_ent_ct;
     TableEntry* e = get_table_entry(ent->var->name);
-  if (e != NULL && e->kind == proto_ID)
+    if (e != NULL && e->kind == proto_ID)
       e->var->code_addr = -table_ent_ct;
   } else if (ent->kind == proto_ID) {
     ent->var->code_addr = -table_ent_ct; // code.opdata -> SymbolTable[code] ->
   }
+
   SymbolTable[table_ent_ct] = *ent;
   SymbolTable[table_ent_ct].var = (VarElement *)malloc(sizeof(VarElement));
   SymbolTable[table_ent_ct].var->dType = ent->var->dType;
