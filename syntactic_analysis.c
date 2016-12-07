@@ -216,7 +216,7 @@ void _genCode_tree_Ident(Node *root, Node *self) {
 	codes[code_ct-1].opcode = LOD;
       genCode_binary(Add);
       if (te_tmp->var->dType != STRUCT_T)
-      genCode1(VAL_TYPE[te_tmp->var->dType]);
+	genCode1(VAL_TYPE[te_tmp->var->dType]);
     } else if (!(parse_flag & BRACKET_ACCESS)) {
       if (te_tmp->var->arrLen == 0 && (te_tmp->var->dType != STRUCT_T &&te_tmp->var->dType%2 == 0)) {
 	genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
@@ -374,7 +374,7 @@ void go_right_node(Node *self, Node *root) {
   if (self->r != NULL)
     genCode_tree(self->r, self);
   if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
-    parse_flag ^= MEMBER_ACCESS;
+    parse_flag &= ~MEMBER_ACCESS;
 }
 
 void genCode_tree(Node *self, Node *root) {
@@ -417,13 +417,10 @@ void genCode_tree(Node *self, Node *root) {
       break;
     case Comma:
       break; // ignore?
-    case Dot:
+    case Dot: case Arrow:
       if (!left_most_assign)
 	genCode1(VAL_TYPE[var_tmp->dType]);
       break;
-    case Arrow:
-      if (!left_most_assign)
-	genCode1(VAL_TYPE[var_tmp->dType]);
       break;
     default:
       switch (self->tkn->hKind) {

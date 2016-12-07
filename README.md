@@ -6,11 +6,11 @@ This is for my understandings of interpreter-compiler.
 
 Currently the usage is limited, but you can use example/ directory for testing.
 
-'''shell
+'''
 $ git clone https://github.com/ami-GS/dcc
 $ cd dcc
 $ make
-$ dcc example/fib.c -sm
+$ dcc example/fib.c -srm
 '''
 
 ## TODO
