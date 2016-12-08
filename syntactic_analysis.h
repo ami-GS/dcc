@@ -12,7 +12,7 @@ struct Node {
 };
 
 typedef enum {
-    IS_LEFT = 0x1, IS_DECLARE = 0x2, IS_STRUCT = 0x4, MEMBER_ACCESS = 0x8, BRACKET_ACCESS = 0x10, IS_TYPEDEF = 0x20,
+    IS_LEFT = 0x1, IS_DECLARE = 0x2, IS_STRUCT = 0x4, MEMBER_ACCESS = 0x8, BRACKET_ACCESS = 0x10, IS_TYPEDEF = 0x20, DEC_ARRAY = 0x40, DEC_EMPTY_ARRAY = 0x80
 } ParseFlag;
 static ParseFlag parse_flag = 0;
 
@@ -29,7 +29,6 @@ VarElement *var_tmp; // for struct member addressing
 static int left_most_assign = 0;
 #define MAX_DEFINE_SIZE
 static int arrayCount = 0;
-static int empty_array = 0;
 
 void expression(Token *t, char endChar);
 int getLowestPriorityIdx(int st, int end);

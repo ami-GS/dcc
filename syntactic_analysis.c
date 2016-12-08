@@ -133,11 +133,11 @@ void dumpRevPolish(Node *root) {
 
 void genCode_tree_assign() {
   if (arrayCount > 0) {
-    if (empty_array) { // for int A[] = {1,2...}; initialization
+    if (parse_flag & DEC_EMPTY_ARRAY) {
       TableEntry *te_tmp = search(left_val.var->name);
       te_tmp->var->arrLen = arrayCount;
       malloc_more(te_tmp, DATA_SIZE[te_tmp->var->dType] * (arrayCount-1)); // first address is already allocated
-      empty_array = 0;
+      parse_flag &= ~DEC_EMPTY_ARRAY;
     }
     int i = 0;
     while (i < arrayCount) {
@@ -205,7 +205,7 @@ void _genCode_tree_Ident(Node *root, Node *self) {
       genCode1(DEL);
     break;
   case var_ID: case arg_ID:
-    if ((parse_flag & BRACKET_ACCESS) == BRACKET_ACCESS && !(parse_flag & IS_DECLARE)) {
+    if ((parse_flag & BRACKET_ACCESS) && !(parse_flag & IS_DECLARE)) {
       if (te_tmp->var->dType == STRUCT_T)
 	genCode2(LDI, te_tmp->dataSize);
       else
@@ -295,7 +295,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
 
 void genCode_tree_IntNum(Node *root, Node *self) {
   if (self->tkn->text[0] == '[') // for int A[] = {1,2,..};
-    empty_array = 1;
+    parse_flag |= DEC_EMPTY_ARRAY;
   genCode2(LDI, self->tkn->intVal);
   if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
     genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
@@ -310,7 +310,7 @@ void genCode_tree_CharSymbol(Node *root, Node *self) {
 void genCode_tree_String(Token *tkn) {
   if (left_val.var->arrLen == 0)
     left_val.var->arrLen = tkn->intVal; // this is for A[]
-  if (left_val.var->dType == CHAR_T || empty_array) {
+  if (left_val.var->dType == CHAR_T || parse_flag & DEC_EMPTY_ARRAY) {
     do {
       genCode_tree_addressing(arrayCount);
       genCode2(LDI, *(tkn->text+arrayCount++)); // TODO : LDI?
@@ -378,8 +378,8 @@ void go_right_node(Node *self, Node *root) {
 }
 
 void genCode_tree(Node *self, Node *root) {
-  if (root->tkn->kind == Comma && self->tkn->kind != Comma && (parse_flag & IS_DECLARE) && (left_val.var->arrLen > 0 || empty_array)) {
-    if (arrayCount >= left_val.var->arrLen && !empty_array)
+    if (root->tkn->kind == Comma && self->tkn->kind != Comma && (parse_flag & IS_DECLARE) && (left_val.var->arrLen > 0 || parse_flag & DEC_EMPTY_ARRAY)) {
+      if (arrayCount >= left_val.var->arrLen && !(parse_flag & DEC_EMPTY_ARRAY))
       error("initialize length overflowing");
     genCode_tree_addressing(arrayCount++);
   }
