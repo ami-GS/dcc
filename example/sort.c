@@ -52,9 +52,8 @@ void quick_loop(int len) {
       if (l >= r)
 	break;
       tmp = A[l];
-      A[l] = A[r];
-      A[r] = tmp;
-      ++l; --r;
+      A[l++] = A[r];
+      A[r--] = tmp;
     }
     if (r_base > r + 1) {
       // right side
@@ -80,10 +79,8 @@ void quick_rec(int *list, int st, int en) {
     if (i >= j)
       break;
     tmp = list[i];
-    list[i] = list[j];
-    list[j] = tmp;
-    ++i;
-    --j;
+    list[i++] = list[j];
+    list[j--] = tmp;
   }
   if (st < i - 1)
     quick_rec(list, st, i-1);
