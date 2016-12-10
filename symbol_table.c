@@ -64,6 +64,7 @@ TableEntry *enter_table_item(TableEntry* ent) {
   SymbolTable[table_ent_ct].var->code_addr = ent->var->code_addr;
   SymbolTable[table_ent_ct].var->arrLen = ent->var->arrLen;
   SymbolTable[table_ent_ct].var->nxtVar = ent->var->nxtVar;
+  SymbolTable[table_ent_ct].var->tagName = ent->var->tagName;
 
   return &SymbolTable[table_ent_ct++];
 }
@@ -80,6 +81,17 @@ TableEntry *search(char *text) {
     if (SymbolTable[i].kind != arg_ID && strcmp(SymbolTable[i].var->name, text) == 0) {
       return SymbolTable + i;
     }
+  }
+  return NULL;
+}
+
+TypeDefEntry *searchTag(char *text) {
+  if (text == NULL)
+    return NULL;
+  int i;
+  for (i = 0; i < typedef_ent_ct; i++) {
+    if (strcmp(TypeDefTable[i].tagName, text) == 0)
+      return TypeDefTable + i;
   }
   return NULL;
 }
