@@ -193,8 +193,6 @@ int set_address(TableEntry *te) {
       te->var->code_addr = malloc_G(size);
     else
       te->var->code_addr = malloc_L(size); // ENHANCE : malloc_L & G can be unified?
-    if (te->var->dType == STRUCT_T)
-      te->var->code_addr = te->var->nxtVar->code_addr;
     break;
   case func_ID:
     te->var->code_addr = code_ct;

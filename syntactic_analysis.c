@@ -162,24 +162,25 @@ void genCode_tree_addressing(int offset) {
 }
 
 void define_type(Node *root, Node *self) {
-  if (self->l->tkn->kind == Struct) { // means tag of struct \
-    parse_flag |= IS_TYPEDEF;
+  if (root == self) { // means tag of struct, come here at last of struct decleration
     TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
     memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
-    return;
+  } else { // member decleratino
+    VarElement *varp = &TypeDefTable[typedef_ent_ct].var;
+    if (TypeDefTable[typedef_ent_ct].structEntCount > 0) { // == 0 is for first entry
+      while (varp->nxtVar != NULL)
+	varp = varp->nxtVar;
+      varp->nxtVar = (VarElement *)malloc(sizeof(VarElement)); // TODO : not cool
+      varp = varp->nxtVar;
+    }
+    memcpy(varp, left_val.var, sizeof(VarElement));
+    memcpy(varp->name, left_val.var->name, 10); // TODO : temporally
+    if (varp->dType == STRUCT_T)
+      TypeDefTable[typedef_ent_ct].dataSize += left_val.dataSize;
+    else
+      TypeDefTable[typedef_ent_ct].dataSize += DATA_SIZE[varp->dType];
+    TypeDefTable[typedef_ent_ct].structEntCount++;
   }
-  if (TypeDefTable[typedef_ent_ct].var == NULL)
-    TypeDefTable[typedef_ent_ct].var = (VarElement *)malloc(sizeof(VarElement)); // TODO : not cool
-  VarElement *varp = TypeDefTable[typedef_ent_ct].var;
-  for (i = 0; i < TypeDefTable[typedef_ent_ct].structEntCount; i++) {
-    if (varp->nxtVar == NULL)
-      varp->nxtVar = (VarElement *)malloc(sizeof(VarElement)); // TODO : free
-    varp = varp->nxtVar;
-  }
-  memcpy(varp, left_val.var, sizeof(VarElement));
-  memcpy(varp->name, left_val.var->name, 10); // TODO : temporally
-  TypeDefTable[typedef_ent_ct].dataSize += DATA_SIZE[varp->dType];
-  TypeDefTable[typedef_ent_ct].structEntCount++;
 }
 
 void _genCode_tree_Ident(Node *root, Node *self) {
@@ -223,18 +224,31 @@ void genCode_tree_Ident(Node *root, Node *self) {
   else
     parse_flag &= ~BRACKET_ACCESS;
 
-  if ((parse_flag & MEMBER_ACCESS) && root->r == self) {
+  if (member_nest && root->r == self) {
     int i, match_flag = 0, addr_acc = 0;
-    var_tmp = te_tmp->var->nxtVar;
-    for (i = 0; i < te_tmp->structEntCount; i++) {
+    if (tdef_tmp != NULL)
+      var_tmp = &tdef_tmp->var;
+    else
+      var_tmp = te_tmp->var->nxtVar;
+    for (; var_tmp != NULL; var_tmp = var_tmp->nxtVar) {
       if (strcmp(var_tmp->name, self->tkn->text) == 0) {
 	match_flag = 1;
 	break;
       }
-      addr_acc += DATA_SIZE[var_tmp->dType];
-      var_tmp = var_tmp->nxtVar;
+      if (var_tmp->dType == STRUCT_T) {
+	tdef_tmp = searchTag(var_tmp->tagName);
+	if (tdef_tmp == NULL)
+	  error("no such struct for member");
+	addr_acc += tdef_tmp->dataSize;
+      } else {
+	addr_acc += DATA_SIZE[var_tmp->dType];
+      }
     }
+
     if (match_flag) {
+      tdef_tmp = searchTag(var_tmp->tagName);
+      if (root->tkn->kind == Arrow)
+	genCode1(VAL);
       if (left_most_assign)
 	to_left_val();
       genCode2(LDI, addr_acc);
@@ -274,7 +288,9 @@ void genCode_tree_Ident(Node *root, Node *self) {
 	define_type(root, self); // not cool
 	return;
       }
+      left_val.var->dType += root->tkn->kind == '*';
       enter_table_item(&left_val);
+      left_val.var->dType -= root->tkn->kind == '*';
       if (left_most_assign)
 	te_tmp = &left_val;
     } else if (parse_flag & IS_TYPEDEF){
@@ -328,7 +344,10 @@ void genCode_tree_operator(Node *root, Node *self) {
   if (self->l != NULL && self->r != NULL) {
     genCode_binary(self->tkn->kind);
   } else {
-    genCode_unary(self->tkn->kind);
+    if (!(self->tkn->kind == '&' && parse_flag & BRACKET_ACCESS)) // TODO : workaround for b = &a[1];
+      genCode_unary(self->tkn->kind);
+    else if (te_tmp->var->dType != STRUCT_T) // TODO : workaround for above when these are struct
+      code_ct--;
   }
   if (left_most_assign >= 1)
     to_left_val();
