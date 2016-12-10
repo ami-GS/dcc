@@ -310,8 +310,12 @@ void genCode_tree_Ident(Node *root, Node *self) {
 }
 
 void genCode_tree_IntNum(Node *root, Node *self) {
-  if (self->tkn->text[0] == '[') // for int A[] = {1,2,..};
-    parse_flag |= DEC_EMPTY_ARRAY;
+  if (parse_flag & IS_DECLARE) {
+    if (root->tkn->hKind == Ident)
+      parse_flag |= DEC_ARRAY;
+    if (self->tkn->text[0] == '[') // for int A[] = {1,2,..};
+     parse_flag |= DEC_EMPTY_ARRAY;
+  }
   genCode2(LDI, self->tkn->intVal);
   if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
     genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
@@ -379,7 +383,7 @@ void genCode_tree_incdec(Node *root, Node *self) {
 
 void go_left_node(Node *self, Node *root) {
   if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
-    parse_flag |= MEMBER_ACCESS;
+    member_nest++;
   if (left_most_assign == 0 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe)) {
     left_most_assign = (self->tkn->hKind == CombOpe) + 1; // the most left '='
   }
@@ -393,7 +397,7 @@ void go_right_node(Node *self, Node *root) {
   if (self->r != NULL)
     genCode_tree(self->r, self);
   if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
-    parse_flag &= ~MEMBER_ACCESS;
+    member_nest--;
 }
 
 void genCode_tree(Node *self, Node *root) {
@@ -433,13 +437,15 @@ void genCode_tree(Node *self, Node *root) {
       break;
     case Struct:
       parse_flag |= IS_TYPEDEF;
+      parse_flag |= IS_STRUCT;
+      if (root->r != NULL && root->r->tkn->kind == ';')
+	parse_flag |= SET_MEMBER;
       break;
     case Comma:
       break; // ignore?
     case Dot: case Arrow:
-      if (!left_most_assign)
+      if (!member_nest && !left_most_assign)
 	genCode1(VAL_TYPE[var_tmp->dType]);
-      break;
       break;
     default:
       switch (self->tkn->hKind) {
@@ -447,8 +453,8 @@ void genCode_tree(Node *self, Node *root) {
 	genCode_tree_operator(root, self);
 	break;
       case Type:
-        left_val.var->dType = tkn2dType(self->tkn->kind) + (root->tkn->kind == '*');
-	parse_flag |= IS_DECLARE;
+        left_val.var->dType = tkn2dType(self->tkn->kind);
+	parse_flag |= IS_DECLARE; // TODO : need to consider CAST
 	break;
       }
       break;
@@ -487,6 +493,7 @@ void expression(Token *t, char endChar) {
   arrayCount = 0;
   te_tmp = NULL;
   var_tmp = NULL;
+  tdef_tmp = NULL;
   memset(&left_val, 0, sizeof(TableEntry));
   left_val.var = (VarElement *)malloc(sizeof(VarElement));
   memset(left_val.var, 0, sizeof(VarElement));
