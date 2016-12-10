@@ -162,21 +162,6 @@ void genCode_tree_addressing(int offset) {
 }
 
 void define_type(Node *root, Node *self) {
-  int i, j;
-  for (i = 0; i < typedef_ent_ct; i++) {
-    if (memcmp(TypeDefTable[i].tagName, self->tkn->text, self->tkn->intVal) == 0) {
-      parse_flag |= IS_DECLARE;
-      parse_flag &= ~IS_TYPEDEF; // not define type, but declaration
-      left_val.var->dType = STRUCT_T;
-      left_val.structEntCount = TypeDefTable[i].structEntCount;
-      left_val.dataSize = TypeDefTable[i].dataSize;
-      left_val.var->nxtVar = TypeDefTable[i].var;
-      if (root->tkn->kind == '*')
-	left_val.var->dType = STRUCTP_T;
-      return;
-    }
-  }
-
   if (self->l->tkn->kind == Struct) { // means tag of struct \
     parse_flag |= IS_TYPEDEF;
     TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
@@ -259,6 +244,21 @@ void genCode_tree_Ident(Node *root, Node *self) {
       error("no such a member in the struct");
     }
   }
+  TypeDefEntry *tent = searchTag(self->tkn->text);
+  if (tent != NULL && self->l->tkn->kind == Struct) {
+    left_val.var->dType = STRUCT_T + (root->tkn->kind == '*'); // TODO : this should be te_tmp
+    left_val.structEntCount = tent->structEntCount;
+    left_val.dataSize = tent->dataSize;
+    left_val.var->nxtVar = &tent->var;
+    left_val.var->tagName = tent->tagName;
+    parse_flag |= IS_DECLARE;
+    return;
+  } else if (root == self && parse_flag & SET_MEMBER) {
+    TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
+    memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
+    return;
+  }
+
   te_tmp = search(self->tkn->text);
   if (te_tmp == NULL) {
     if (left_val.var->dType > NON_T || (parse_flag & IS_DECLARE)) {

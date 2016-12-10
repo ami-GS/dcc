@@ -66,7 +66,7 @@ typedef struct {
 
     int      structEntCount; // if 1 <= then struct
     char     *tagName; // if struct
-    VarElement  *var;   // if struct
+    VarElement  var;   // if struct
     int      dataSize;
 } TypeDefEntry;
 
