@@ -134,7 +134,7 @@ void dumpRevPolish(Node *root) {
 void genCode_tree_assign() {
   if (arrayCount > 0) {
     if (parse_flag & DEC_EMPTY_ARRAY) {
-      TableEntry *te_tmp = search(left_val.var->name);
+      te_tmp = search(left_val.var->name);
       te_tmp->var->arrLen = arrayCount;
       malloc_more(te_tmp, DATA_SIZE[te_tmp->var->dType] * (arrayCount-1)); // first address is already allocated
       parse_flag &= ~DEC_EMPTY_ARRAY;
@@ -275,7 +275,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
 
   te_tmp = search(self->tkn->text);
   if (te_tmp == NULL) {
-    if (left_val.var->dType > NON_T || (parse_flag & IS_DECLARE)) {
+    if (parse_flag & IS_DECLARE) {
       int arrLen = 0;
       SymbolKind sKind = var_ID;
       // this stands for bracket addressing, remove LDI of stack top
@@ -284,7 +284,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
       if (funcPtr != NULL && funcPtr->args == -1)
 	sKind = arg_ID;
       set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
-      if ((parse_flag & IS_TYPEDEF) && !left_val.structEntCount) {
+      if (parse_flag & SET_MEMBER) {
 	define_type(root, self); // not cool
 	return;
       }
@@ -293,9 +293,6 @@ void genCode_tree_Ident(Node *root, Node *self) {
       left_val.var->dType -= root->tkn->kind == '*';
       if (left_most_assign)
 	te_tmp = &left_val;
-    } else if (parse_flag & IS_TYPEDEF){
-      define_type(root, self);
-      return;
     } else {
       error("unknown identifier");
     }
