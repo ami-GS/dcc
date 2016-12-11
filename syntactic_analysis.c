@@ -165,7 +165,7 @@ void define_type(Node *root, Node *self) {
   if (root == self) { // means tag of struct, come here at last of struct decleration
     TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
     memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
-  } else { // member decleratino
+  } else { // member decleration
     VarElement *varp = &TypeDefTable[typedef_ent_ct].var;
     if (TypeDefTable[typedef_ent_ct].structEntCount > 0) { // == 0 is for first entry
       while (varp->nxtVar != NULL)
@@ -247,7 +247,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
 
     if (match_flag) {
       tdef_tmp = searchTag(var_tmp->tagName);
-      if (root->tkn->kind == Arrow)
+      if (codes[code_ct-1].opcode == LDA && root->tkn->kind == Arrow) // TODO : workaround
 	genCode1(VAL);
       if (left_most_assign)
 	to_left_val();
@@ -259,12 +259,18 @@ void genCode_tree_Ident(Node *root, Node *self) {
     }
   }
   TypeDefEntry *tent = searchTag(self->tkn->text);
-  if (tent != NULL && self->l->tkn->kind == Struct) {
-    left_val.var->dType = STRUCT_T + (root->tkn->kind == '*'); // TODO : this should be te_tmp
+  if ((tent != NULL && self->l->tkn->kind == Struct)) {
+    left_val.var->dType = STRUCT_T; // this should be te_tmp
     left_val.structEntCount = tent->structEntCount;
     left_val.dataSize = tent->dataSize;
     left_val.var->nxtVar = &tent->var;
     left_val.var->tagName = tent->tagName;
+    parse_flag |= IS_DECLARE;
+    return;
+  } else if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) {
+    left_val.var->dType = STRUCT_T + (root->tkn->kind == '*'); // TODO : this should be te_tmp
+    left_val.dataSize = POINTER_SIZE;
+    left_val.var->tagName = tagName_tmp;
     parse_flag |= IS_DECLARE;
     return;
   } else if (root == self && parse_flag & SET_MEMBER) {
@@ -435,13 +441,15 @@ void genCode_tree(Node *self, Node *root) {
     case Struct:
       parse_flag |= IS_TYPEDEF;
       parse_flag |= IS_STRUCT;
-      if (root->r != NULL && root->r->tkn->kind == ';')
+      if (root->r != NULL && root->r->tkn->kind == ';') {
+	tagName_tmp = root->tkn->text; // save for self reference
 	parse_flag |= SET_MEMBER;
+      }
       break;
     case Comma:
       break; // ignore?
     case Dot: case Arrow:
-      if (!member_nest && !left_most_assign)
+      if (!member_nest && !left_most_assign && var_tmp->dType != STRUCTP_T) // TODO : workaround
 	genCode1(VAL_TYPE[var_tmp->dType]);
       break;
     default:

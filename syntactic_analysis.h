@@ -28,6 +28,7 @@ static TableEntry left_val = {no_ID, &left_varelem, LOCAL, 0};
 TableEntry *te_tmp;
 VarElement *var_tmp; // for struct member addressing
 TypeDefEntry *tdef_tmp;
+char *tagName_tmp;
 static int left_most_assign = 0;
 #define MAX_DEFINE_SIZE
 static int arrayCount = 0;
