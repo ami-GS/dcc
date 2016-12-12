@@ -17,7 +17,7 @@ typedef union {
 } stkData;
 stkData op_stack[OP_STACK_TOP];
 
-extern int stack_ptr;
+static int stack_ptr = OP_STACK_BUTTOM;
 #define PUSH(a) op_stack[stack_ptr++].sINT=a
 #define POP()   op_stack[--stack_ptr].sINT // currently only int
 

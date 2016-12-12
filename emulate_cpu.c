@@ -3,7 +3,6 @@
 #include "opcode.h"
 #include "misc.h"
 
-int stack_ptr = OP_STACK_BUTTOM;
 
 int execute(Instruction *codes, int debug) {
   if (debug) {

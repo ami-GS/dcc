@@ -23,14 +23,14 @@ typedef enum {
     NON_M = 0, STRUCT_M = 1, STATIC_M = 2, CONST_M = 4, UNION_M = 8, EXTERN_M = 16,
 } ModifierMask;
 
-static int DATA_SIZE[] = {-1, -1, POINTER_SIZE, INT_SIZE, POINTER_SIZE,
+static const int DATA_SIZE[] = {-1, -1, POINTER_SIZE, INT_SIZE, POINTER_SIZE,
                           SHORT_SIZE, POINTER_SIZE, CHAR_SIZE, POINTER_SIZE,
                           FLOAT_SIZE, POINTER_SIZE, DOUBLE_SIZE, POINTER_SIZE,
                           -1, POINTER_SIZE};
-static int ASSV_TYPE[] = {-1, -1, -1, ASSV, ASVP, ASVS, ASVP, ASVC, ASVP, ASVF, ASVP, ASVD, ASVP, -1, ASVP};
-static int LOD_TYPE[] = {-1, -1, -1, LOD, LDA, LODS, LDA, LODC, LDA, LODF, LDA, LODD, LDA, LDA, -1};
-static int VAL_TYPE[] = {-1, -1, -1, VAL, VAL, VALS, VAL, VALC, VAL, VALF, VAL, VALD, VAL, -1, -1};
-static int STO_TYPE[] = {-1, -1, -1, STO, STO, STOS, STO, STOC, STO, STOF, STO, STOD, STO, -1, -1};
+static const int ASSV_TYPE[] = {-1, -1, -1, ASSV, ASVP, ASVS, ASVP, ASVC, ASVP, ASVF, ASVP, ASVD, ASVP, -1, ASVP};
+static const int LOD_TYPE[] = {-1, -1, -1, LOD, LDA, LODS, LDA, LODC, LDA, LODF, LDA, LODD, LDA, LDA, -1};
+static const int VAL_TYPE[] = {-1, -1, -1, VAL, VAL, VALS, VAL, VALC, VAL, VALF, VAL, VALD, VAL, -1, -1};
+static const int STO_TYPE[] = {-1, -1, -1, STO, STO, STOS, STO, STOC, STO, STOF, STO, STOD, STO, -1, -1};
 
 typedef enum {
     no_ID, var_ID, func_ID, proto_ID, arg_ID, // TODO : increase
