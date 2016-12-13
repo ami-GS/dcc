@@ -6,12 +6,12 @@ This is for my understandings of interpreter-compiler.
 
 Currently the usage is limited, but you can use example/ directory for testing.
 
-'''
+```sh
 $ git clone https://github.com/ami-GS/dcc
 $ cd dcc
 $ make
 $ dcc example/fib.c -srm
-'''
+```
 
 ## TODO
 These are TODO list specilly I would like to implement.
