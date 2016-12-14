@@ -204,7 +204,7 @@ void _genCode_tree_Ident(Node *root, Node *self) {
       if (te_tmp->var->dType != STRUCT_T)
 	genCode1(VAL_TYPE[te_tmp->var->dType]);
     } else if (!(parse_flag & BRACKET_ACCESS)) {
-      if (te_tmp->var->arrLen == 0 && (te_tmp->var->dType != STRUCT_T &&te_tmp->var->dType%2 == 0)) {
+      if (te_tmp->var->arrLen == 0 && te_tmp->var->dType%2 == 0) {
 	genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
       } else if (te_tmp->var->arrLen == 0) {
 	genCode(LOD_TYPE[te_tmp->var->dType], te_tmp->level, te_tmp->var->code_addr);
@@ -218,48 +218,53 @@ void _genCode_tree_Ident(Node *root, Node *self) {
   }
 }
 
+void genCode_tree_Ident_memb_access(Node *root, Node *self) {
+  int i, match_flag = 0, addr_acc = 0;
+  if (tdef_tmp != NULL)
+    var_tmp = &tdef_tmp->var;
+  else
+    var_tmp = te_tmp->var->nxtVar;
+  for (; var_tmp != NULL; var_tmp = var_tmp->nxtVar) {
+    if (strcmp(var_tmp->name, self->tkn->text) == 0) {
+      match_flag = 1;
+      break;
+    }
+    if (var_tmp->dType == STRUCT_T) {
+      tdef_tmp = searchTag(var_tmp->tagName);
+      if (tdef_tmp == NULL)
+	error("no such struct for member");
+      addr_acc += tdef_tmp->dataSize;
+    } else {
+      addr_acc += DATA_SIZE[var_tmp->dType];
+    }
+  }
+  if (match_flag) {
+    tdef_tmp = searchTag(var_tmp->tagName);
+    if (codes[code_ct-1].opcode == LDA && root->tkn->kind == Arrow) // TODO : workaround
+      genCode1(VAL);
+    if (root->tkn->kind != Arrow && left_most_assign)
+      to_left_val();
+    genCode2(LDI, addr_acc);
+    genCode2(ADDL, addr_acc);
+    return;
+  } else {
+    error("no such a member in the struct");
+  }
+}
+
 void genCode_tree_Ident(Node *root, Node *self) {
   if (self->r != NULL && (self->r->tkn->kind == Ident || self->r->tkn->kind == IntNum || self->r->tkn->hKind == Operator))
     parse_flag |= BRACKET_ACCESS;
   else
     parse_flag &= ~BRACKET_ACCESS;
 
-  if (member_nest && root->r == self) {
-    int i, match_flag = 0, addr_acc = 0;
-    if (tdef_tmp != NULL)
-      var_tmp = &tdef_tmp->var;
-    else
-      var_tmp = te_tmp->var->nxtVar;
-    for (; var_tmp != NULL; var_tmp = var_tmp->nxtVar) {
-      if (strcmp(var_tmp->name, self->tkn->text) == 0) {
-	match_flag = 1;
-	break;
-      }
-      if (var_tmp->dType == STRUCT_T) {
-	tdef_tmp = searchTag(var_tmp->tagName);
-	if (tdef_tmp == NULL)
-	  error("no such struct for member");
-	addr_acc += tdef_tmp->dataSize;
-      } else {
-	addr_acc += DATA_SIZE[var_tmp->dType];
-      }
-    }
-
-    if (match_flag) {
-      tdef_tmp = searchTag(var_tmp->tagName);
-      if (codes[code_ct-1].opcode == LDA && root->tkn->kind == Arrow) // TODO : workaround
-	genCode1(VAL);
-      if (left_most_assign)
-	to_left_val();
-      genCode2(LDI, addr_acc);
-      genCode2(ADDL, addr_acc);
-      return;
-    } else {
-      error("no such a member in the struct");
-    }
+  if (member_nest && root->r == self) { // TODO : temporally conditin. member access, like . ->
+    genCode_tree_Ident_memb_access(root, self);
+    return;
   }
+
   TypeDefEntry *tent = searchTag(self->tkn->text);
-  if ((tent != NULL && self->l->tkn->kind == Struct)) {
+  if ((tent != NULL && self->l->tkn->kind == Struct)) { // declare
     left_val.var->dType = STRUCT_T; // this should be te_tmp
     left_val.structEntCount = tent->structEntCount;
     left_val.dataSize = tent->dataSize;
@@ -267,13 +272,13 @@ void genCode_tree_Ident(Node *root, Node *self) {
     left_val.var->tagName = tent->tagName;
     parse_flag |= IS_DECLARE;
     return;
-  } else if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) {
+  } else if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) { // struct pointer
     left_val.var->dType = STRUCT_T + (root->tkn->kind == '*'); // TODO : this should be te_tmp
     left_val.dataSize = POINTER_SIZE;
     left_val.var->tagName = tagName_tmp;
     parse_flag |= IS_DECLARE;
     return;
-  } else if (root == self && parse_flag & SET_MEMBER) {
+  } else if (root == self && parse_flag & SET_MEMBER) { // declare member when define
     TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
     memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
     return;
