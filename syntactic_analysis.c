@@ -252,6 +252,31 @@ void genCode_tree_Ident_memb_access(Node *root, Node *self) {
   }
 }
 
+int genCode_tree_Ident_struct_dec(Node *root, Node *self) {
+  TypeDefEntry *tent = searchTag(self->tkn->text);
+  if ((tent != NULL && self->l->tkn->kind == Struct)) { // declare
+    left_val.var->dType = STRUCT_T; // this should be te_tmp
+    left_val.structEntCount = tent->structEntCount;
+    left_val.dataSize = tent->dataSize;
+    left_val.var->nxtVar = &tent->var;
+    left_val.var->tagName = tent->tagName;
+    parse_flag |= IS_DECLARE;
+    return 1;
+  } else if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) { // struct pointer in struct member
+    left_val.var->dType = STRUCT_T + (root->tkn->kind == '*'); // TODO : this should be te_tmp
+    left_val.dataSize = POINTER_SIZE;
+    left_val.var->tagName = tagName_tmp;
+    parse_flag |= IS_DECLARE;
+    return 2;
+  } else if (root == self && parse_flag & SET_MEMBER) { // declare member when define
+    TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
+    memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
+    return 3;
+  }
+  return 0;
+}
+
+
 void genCode_tree_Ident(Node *root, Node *self) {
   if (self->r != NULL && (self->r->tkn->kind == Ident || self->r->tkn->kind == IntNum || self->r->tkn->hKind == Operator))
     parse_flag |= BRACKET_ACCESS;
@@ -263,26 +288,10 @@ void genCode_tree_Ident(Node *root, Node *self) {
     return;
   }
 
-  TypeDefEntry *tent = searchTag(self->tkn->text);
-  if ((tent != NULL && self->l->tkn->kind == Struct)) { // declare
-    left_val.var->dType = STRUCT_T; // this should be te_tmp
-    left_val.structEntCount = tent->structEntCount;
-    left_val.dataSize = tent->dataSize;
-    left_val.var->nxtVar = &tent->var;
-    left_val.var->tagName = tent->tagName;
-    parse_flag |= IS_DECLARE;
-    return;
-  } else if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) { // struct pointer
-    left_val.var->dType = STRUCT_T + (root->tkn->kind == '*'); // TODO : this should be te_tmp
-    left_val.dataSize = POINTER_SIZE;
-    left_val.var->tagName = tagName_tmp;
-    parse_flag |= IS_DECLARE;
-    return;
-  } else if (root == self && parse_flag & SET_MEMBER) { // declare member when define
-    TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
-    memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
-    return;
-  }
+
+  int out = genCode_tree_Ident_struct_dec(root, self);
+  if (out)
+    return; // TODO : temporally
 
   te_tmp = search(self->tkn->text);
   if (te_tmp == NULL) {
