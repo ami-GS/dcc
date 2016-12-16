@@ -38,7 +38,7 @@ typedef enum {
 int cType[256];
 
 typedef enum {
-    Specific, Immediate, Function, Operator, CombOpe, Statement, Paren, Type, Modifier,
+    Specific, Immediate, Function, Operator, CombOpe, Statement, LParens, RParens, Type, Modifier,
 } HighLevelKind;
 
 typedef struct {
