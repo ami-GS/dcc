@@ -16,9 +16,9 @@ int getLowestPriorityIdx(int st, int end) {
   int lowest_pri = 128, pri = 129, idx = st;
   int i, nest = 0;
   for (i = st; i <= end; i++) {
-    if (expr_tkns[i].kind == Lparen || expr_tkns[i].kind == Lbracket || expr_tkns[i].kind == Lbrace) {
+    if (expr_tkns[i].hKind == LParens) {
       nest++;
-    } else if (expr_tkns[i].kind == Rparen || expr_tkns[i].kind == Rbracket || expr_tkns[i].kind == Rbrace) {
+    } else if (expr_tkns[i].hKind == RParens) {
       if (nest == 0)
 	error("Invalid ')', ']', '}'");
       nest--;
@@ -499,15 +499,15 @@ void expression(Token *t, char endChar) {
   int i, nest = 0;
   for (i = 0; !(t->kind == endChar && nest == 0); i++) { // TODO ',' should be considered
     expr_tkns[i] = *t;
-    if (expr_tkns[i].kind == Lparen || expr_tkns[i].kind == Lbracket || expr_tkns[i].kind == Lbrace) {
+      if (expr_tkns[i].hKind == LParens) {
       nest++;
-    } else if (expr_tkns[i].kind == Rparen || expr_tkns[i].kind == Rbracket || expr_tkns[i].kind == Rbrace) {
+      } else if (expr_tkns[i].hKind == RParens) {
       if (nest == 0)
 	error("Invalid ')', ']', '}'");
       nest--;
     }
     nextToken(t, 0);
-    }
+  }
   Node root = nodes[node_used_ct++];
   arrayCount = 0;
   te_tmp = NULL;
