@@ -60,7 +60,7 @@ void initKind() {
 void set_hKind(Token *t) {
   if (Lparen == t->kind || Lbracket == t->kind || Lbrace == t->kind) {
     t->hKind = LParens;
-  } else if (Rbrace == t->kind || Rbracket == t->kind || Rbracket == t->kind) {
+  } else if (Rbrace == t->kind || Rbracket == t->kind || Rparen == t->kind) {
     t->hKind = RParens;
   } else if (Add == t->kind || Sub == t->kind || Mul == t->kind || Div == t->kind || Arrow == t->kind ||
 	      Mod == t->kind || Not == t->kind || Band == t->kind || Bor == t->kind || Dot == t->kind ||
