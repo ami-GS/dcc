@@ -230,7 +230,7 @@ void genCode_tree_Ident_memb_access(Node *root, Node *self) {
   }
 }
 
-int genCode_tree_Ident_struct_dec(Node *root, Node *self) {
+void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
   TypeDefEntry *tent = searchTag(self->tkn->text);
   if (parse_flag & SET_MEMBER) {
     if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) {
@@ -259,7 +259,6 @@ int genCode_tree_Ident_struct_dec(Node *root, Node *self) {
 	TypeDefTable[typedef_ent_ct].dataSize += DATA_SIZE[varp->dType];
       TypeDefTable[typedef_ent_ct].structEntCount++;
     }
-    return 1;
   } else if (tent != NULL && self->l->tkn->kind == Struct) { // declare
     left_val.var->dType = STRUCT_T; // this should be te_tmp
     left_val.structEntCount = tent->structEntCount;
@@ -267,9 +266,17 @@ int genCode_tree_Ident_struct_dec(Node *root, Node *self) {
     left_val.var->nxtVar = &tent->var;
     left_val.var->tagName = tent->tagName;
     parse_flag |= IS_DECLARE;
-    return 1;
+  } else {
+    left_val.kind = var_ID;
+    left_val.var->name = malloc(sizeof(char) * (self->tkn->intVal+1));
+    left_val.level = LOCAL;
+    memcpy(left_val.var->name, self->tkn->text, self->tkn->intVal+1);
+    if (parse_flag & DEC_ARRAY)
+      left_val.var->arrLen = codes[--code_ct].opdata;
+    left_val.var->dType += root->tkn->kind == '*';
+    enter_table_item(&left_val);
+    left_val.var->dType -= root->tkn->kind == '*';
   }
-  return 0;
 }
 
 
@@ -285,8 +292,8 @@ void genCode_tree_Ident(Node *root, Node *self) {
   }
 
   if (parse_flag & SET_MEMBER || parse_flag & IS_STRUCT) {
-    if (genCode_tree_Ident_struct_dec(root, self))
-	return;
+    genCode_tree_Ident_struct_dec(root, self);
+    return;
   }
 
   te_tmp = search(self->tkn->text);
@@ -320,7 +327,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
 
 void genCode_tree_IntNum(Node *root, Node *self) {
   if (parse_flag & IS_DECLARE) {
-    if (root->tkn->hKind == Ident)
+    if (root->tkn->kind == Ident)
       parse_flag |= DEC_ARRAY;
     if (self->tkn->text[0] == '[') // for int A[] = {1,2,..};
      parse_flag |= DEC_EMPTY_ARRAY;
