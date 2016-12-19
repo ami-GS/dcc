@@ -161,6 +161,20 @@ void genCode_tree_addressing(int offset) {
   genCode_binary(Add);
 }
 
+void genCode_tree_dec(Node *root, Node *self) {
+  int arrLen = 0;
+  SymbolKind sKind = var_ID;
+      // this stands for bracket addressing, remove LDI of stack top
+  if (parse_flag & DEC_ARRAY)
+	arrLen = codes[--code_ct].opdata;
+  if (funcPtr != NULL && funcPtr->args == -1)
+    sKind = arg_ID;
+  set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
+  left_val.var->dType += root->tkn->kind == '*';
+  enter_table_item(&left_val);
+  left_val.var->dType -= root->tkn->kind == '*';
+}
+
 void _genCode_tree_Ident(Node *root, Node *self) {
   switch (te_tmp->kind) { // for initialization
   case func_ID: case proto_ID:
@@ -267,18 +281,9 @@ void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
     left_val.var->tagName = tent->tagName;
     parse_flag |= IS_DECLARE;
   } else {
-    left_val.kind = var_ID;
-    left_val.var->name = malloc(sizeof(char) * (self->tkn->intVal+1));
-    left_val.level = LOCAL;
-    memcpy(left_val.var->name, self->tkn->text, self->tkn->intVal+1);
-    if (parse_flag & DEC_ARRAY)
-      left_val.var->arrLen = codes[--code_ct].opdata;
-    left_val.var->dType += root->tkn->kind == '*';
-    enter_table_item(&left_val);
-    left_val.var->dType -= root->tkn->kind == '*';
+    genCode_tree_dec(root, self);
   }
 }
-
 
 void genCode_tree_Ident(Node *root, Node *self) {
   if (self->r != NULL && (self->r->tkn->kind == Ident || self->r->tkn->kind == IntNum || self->r->tkn->hKind == Operator))
@@ -299,17 +304,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
   te_tmp = search(self->tkn->text);
   if (te_tmp == NULL) {
     if (parse_flag & IS_DECLARE) {
-      int arrLen = 0;
-      SymbolKind sKind = var_ID;
-      // this stands for bracket addressing, remove LDI of stack top
-      if (parse_flag & BRACKET_ACCESS)
-	arrLen = codes[--code_ct].opdata;
-      if (funcPtr != NULL && funcPtr->args == -1)
-	sKind = arg_ID;
-      set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
-      left_val.var->dType += root->tkn->kind == '*';
-      enter_table_item(&left_val);
-      left_val.var->dType -= root->tkn->kind == '*';
+      genCode_tree_dec(root, self);
       if (left_most_assign)
 	te_tmp = &left_val;
     } else {

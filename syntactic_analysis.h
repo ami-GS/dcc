@@ -43,6 +43,7 @@ void genCode_tree_addressing(int offset);
 void genCode_tree_operator(Node *root, Node *self);
 void genCode_tree_Ident_memb_access(Node *root, Node *self);
 void genCode_tree_Ident_struct_dec(Node *root, Node *self);
+void genCode_tree_dec(Node *root, Node *self);
 void genCode_tree_Ident(Node *root, Node *self);
 void _genCode_tree_Ident(Node *root, Node *self);
 void genCode_tree_IntNum(Node *root, Node *self);
