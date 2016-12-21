@@ -46,11 +46,9 @@ statements below were properly translated to assembler with simple processing.
 like
 
 ```c
-int a;
-a = 0;
-while (a < 5) {
-      a = a + 1;
-}
+int a = 0;
+while (a < 5) {a += 1;}
+for (a = 0; i < 5 ; a+=2) {a -= 2;}
 ```
 
 - whlie, do-while
