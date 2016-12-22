@@ -211,15 +211,21 @@ void _genCode_tree_Ident(Node *root, Node *self) {
 }
 
 void genCode_tree_Ident_memb_access(Node *root, Node *self) {
-  int i, match_flag = 0, addr_acc = 0;
+  int addr_acc = 0;
   if (tdef_tmp != NULL)
     var_tmp = &tdef_tmp->var;
   else
     var_tmp = te_tmp->var->nxtVar;
   for (; var_tmp != NULL; var_tmp = var_tmp->nxtVar) {
     if (strcmp(var_tmp->name, self->tkn->text) == 0) {
-      match_flag = 1;
-      break;
+      tdef_tmp = searchTag(var_tmp->tagName);
+      if (codes[code_ct-1].opcode == LDA && root->tkn->kind == Arrow) // TODO : workaround
+	genCode1(VAL);
+      if (root->tkn->kind != Arrow && left_most_assign)
+	to_left_val();
+      genCode2(LDI, addr_acc);
+      genCode2(ADDL, addr_acc);
+      return;
     }
     if (var_tmp->dType == STRUCT_T) {
       tdef_tmp = searchTag(var_tmp->tagName);
@@ -230,18 +236,7 @@ void genCode_tree_Ident_memb_access(Node *root, Node *self) {
       addr_acc += DATA_SIZE[var_tmp->dType];
     }
   }
-  if (match_flag) {
-    tdef_tmp = searchTag(var_tmp->tagName);
-    if (codes[code_ct-1].opcode == LDA && root->tkn->kind == Arrow) // TODO : workaround
-      genCode1(VAL);
-    if (root->tkn->kind != Arrow && left_most_assign)
-      to_left_val();
-    genCode2(LDI, addr_acc);
-    genCode2(ADDL, addr_acc);
-    return;
-  } else {
-    error("no such a member in the struct");
-  }
+  error("no such a member in the struct");
 }
 
 void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
@@ -420,7 +415,6 @@ void genCode_tree(Node *self, Node *root) {
   go_left_node(self, root);
   go_right_node(self, root);
 
-  int i=0;
   if (self->tkn != NULL) {
     switch (self->tkn->kind) {
     case Assign:
@@ -493,9 +487,9 @@ void expression(Token *t, char endChar) {
   int i, nest = 0;
   for (i = 0; !(t->kind == endChar && nest == 0); i++) { // TODO ',' should be considered
     expr_tkns[i] = *t;
-      if (expr_tkns[i].hKind == LParens) {
+    if (expr_tkns[i].hKind == LParens) {
       nest++;
-      } else if (expr_tkns[i].hKind == RParens) {
+    } else if (expr_tkns[i].hKind == RParens) {
       if (nest == 0)
 	error("Invalid ')', ']', '}'");
       nest--;
