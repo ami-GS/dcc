@@ -478,25 +478,24 @@ void genCode_tree(Node *self, Node *root) {
   }
 }
 
-void expression(Token *t, char endChar) {
+int init_expr(Token *t, char endChar) {
   while (node_used_ct > 0) {
     nodes[--node_used_ct].l = NULL;
     nodes[node_used_ct].r = NULL;
     nodes[node_used_ct].tkn = NULL;
   }
-  int i, nest = 0;
-  for (i = 0; !(t->kind == endChar && nest == 0); i++) { // TODO ',' should be considered
-    expr_tkns[i] = *t;
-    if (expr_tkns[i].hKind == LParens) {
+  int len, nest = 0;
+  for (len = 0; !(t->kind == endChar && nest == 0); len++) { // TODO ',' should be considered
+    expr_tkns[len] = *t;
+    if (expr_tkns[len].hKind == LParens) {
       nest++;
-    } else if (expr_tkns[i].hKind == RParens) {
+    } else if (expr_tkns[len].hKind == RParens) {
       if (nest == 0)
 	error("Invalid ')', ']', '}'");
       nest--;
     }
     nextToken(t, 0);
   }
-  Node root = nodes[node_used_ct++];
   arrayCount = 0;
   te_tmp = NULL;
   var_tmp = NULL;
@@ -505,11 +504,17 @@ void expression(Token *t, char endChar) {
   left_val.var = (VarElement *)malloc(sizeof(VarElement));
   memset(left_val.var, 0, sizeof(VarElement));
   parse_flag = 0;
-  makeTree(&root, 0, i-1);
-  dumpRevPolish(&root);
+  return len;
+}
+
+void expression(Token *t, char endChar) {
+  int len = init_expr(t, endChar);
+  Node *root = &nodes[node_used_ct++];
+  makeTree(root, 0, len-1);
+  dumpRevPolish(root);
   printf("\n");
-  if (root.tkn != NULL)
-    genCode_tree(&root, &root);
+  if (root->tkn != NULL)
+    genCode_tree(root, root);
 }
 
 void expr_with_check(Token *t, char l, char r) {

@@ -34,6 +34,7 @@ static int left_most_assign = 0;
 static int arrayCount = 0;
 static int member_nest = 0;
 
+int init_expr(Token *t, char endChar);
 void expression(Token *t, char endChar);
 int getLowestPriorityIdx(int st, int end);
 void makeTree(Node *root, int st, int end);
