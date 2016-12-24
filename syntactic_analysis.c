@@ -218,13 +218,9 @@ void genCode_tree_Ident_memb_access(Node *root, Node *self) {
     var_tmp = te_tmp->var->nxtVar;
   for (; var_tmp != NULL; var_tmp = var_tmp->nxtVar) {
     if (strcmp(var_tmp->name, self->tkn->text) == 0) {
-      tdef_tmp = searchTag(var_tmp->tagName);
-      if (codes[code_ct-1].opcode == LDA && root->tkn->kind == Arrow) // TODO : workaround
-	genCode1(VAL);
-      if (root->tkn->kind != Arrow && left_most_assign)
-	to_left_val();
       genCode2(LDI, addr_acc);
-      genCode2(ADDL, addr_acc);
+      genCode_binary(Add);
+      genCode1(VAL);
       return;
     }
     if (var_tmp->dType == STRUCT_T) {
@@ -451,8 +447,8 @@ void genCode_tree(Node *self, Node *root) {
     case Comma:
       break; // ignore?
     case Dot: case Arrow:
-      if (!member_nest && !left_most_assign && var_tmp->dType != STRUCTP_T) // TODO : workaround
-	genCode1(VAL_TYPE[var_tmp->dType]);
+      if (left_most_assign && !member_nest)
+	code_ct--; // remove VAL
       break;
     default:
       switch (self->tkn->hKind) {
