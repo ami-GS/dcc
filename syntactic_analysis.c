@@ -282,7 +282,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
   else
     parse_flag &= ~BRACKET_ACCESS;
 
-  if (member_nest && root->r == self) { // TODO : temporally conditin. member access, like . ->
+  if (member_nest && root->r == self && (root->tkn->kind == Arrow || root->tkn->kind == Dot)) { // TODO : temporally conditin. member access, like . ->
     genCode_tree_Ident_memb_access(root, self);
     return;
   }
@@ -448,7 +448,7 @@ void genCode_tree(Node *self, Node *root) {
       break; // ignore?
     case Dot: case Arrow:
       if (left_most_assign && !member_nest)
-	code_ct--; // remove VAL
+	to_left_val();// remove VAL
       break;
     default:
       switch (self->tkn->hKind) {
