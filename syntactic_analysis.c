@@ -172,7 +172,6 @@ void genCode_tree_dec(Node *root, Node *self) {
   set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
   left_val.var->dType += root->tkn->kind == '*';
   enter_table_item(&left_val);
-  left_val.var->dType -= root->tkn->kind == '*';
 }
 
 void _genCode_tree_Ident(Node *root, Node *self) {
@@ -196,12 +195,12 @@ void _genCode_tree_Ident(Node *root, Node *self) {
       if (te_tmp->var->dType != STRUCT_T)
 	genCode1(VAL_TYPE[te_tmp->var->dType]);
     } else if (!(parse_flag & BRACKET_ACCESS)) {
-      if (te_tmp->var->arrLen == 0 && te_tmp->var->dType%2 == 0) {
+      if (!(parse_flag & IS_DECLARE) && te_tmp->var->arrLen == 0 && te_tmp->var->dType%2 == 0) {
 	genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
       } else if (te_tmp->var->arrLen == 0) {
 	genCode(LOD_TYPE[te_tmp->var->dType], te_tmp->level, te_tmp->var->code_addr);
       } else {
-	genCode(LDA, te_tmp->level, te_tmp->var->code_addr); // for int A[] = {2,3}; A;
+	genCode(LDA, te_tmp->level, te_tmp->var->code_addr); // for int A[] = {2,3}; A; and int *A = &B;
       }
     }
     if (left_most_assign >= 1 && (root->tkn->kind == Assign || root->tkn->hKind == CombOpe))
@@ -445,6 +444,7 @@ void genCode_tree(Node *self, Node *root) {
       }
       break;
     case Comma:
+      left_val.var->dType -= root->tkn->kind == '*';
       break; // ignore?
     case Dot: case Arrow:
       if (left_most_assign && !member_nest)
