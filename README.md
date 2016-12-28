@@ -31,9 +31,7 @@ These are TODO list specilly I would like to implement.
 - My own designed assemblers
 
 ### Supported types
-Types below are supported.
-
-& is not supported stil. (this will be supported as unary operation below)
+Types below with pointer are supported.
 
 - Int
 
