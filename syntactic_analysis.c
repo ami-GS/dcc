@@ -218,8 +218,6 @@ void genCode_tree_Ident_memb_access(Node *root, Node *self) {
   for (; var_tmp != NULL; var_tmp = var_tmp->nxtVar) {
     if (strcmp(var_tmp->name, self->tkn->text) == 0) {
       genCode2(LDI, addr_acc);
-      genCode_binary(Add);
-      genCode1(VAL);
       return;
     }
     if (var_tmp->dType == STRUCT_T) {
@@ -385,9 +383,8 @@ void genCode_tree_incdec(Node *root, Node *self) {
 void go_left_node(Node *self, Node *root) {
   if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
     member_nest++;
-  if (left_most_assign == 0 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe)) {
+  if (left_most_assign == 0 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe))
     left_most_assign = (self->tkn->hKind == CombOpe) + 1; // the most left '='
-  }
   if (self->l != NULL)
     genCode_tree(self->l, self);
   if (left_most_assign >= 1 && (self->tkn->kind == Assign || self->tkn->hKind == CombOpe))
@@ -445,10 +442,11 @@ void genCode_tree(Node *self, Node *root) {
       break;
     case Comma:
       left_val.var->dType -= root->tkn->kind == '*';
-      break; // ignore?
+      break;
     case Dot: case Arrow:
-      if (left_most_assign && !member_nest)
-	to_left_val();// remove VAL
+      genCode_binary(Add);
+      if (!left_most_assign || member_nest)
+	genCode1(VAL);
       break;
     default:
       switch (self->tkn->hKind) {
