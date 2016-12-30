@@ -216,12 +216,12 @@ void genCode_tree_Ident_memb_access(Node *root, Node *self) {
   else
     var_tmp = te_tmp->var->nxtVar;
   for (; var_tmp != NULL; var_tmp = var_tmp->nxtVar) {
+    tdef_tmp = searchTag(var_tmp->tagName);
     if (strcmp(var_tmp->name, self->tkn->text) == 0) {
       genCode2(LDI, addr_acc);
       return;
     }
     if (var_tmp->dType == STRUCT_T) {
-      tdef_tmp = searchTag(var_tmp->tagName);
       if (tdef_tmp == NULL)
 	error("no such struct for member");
       addr_acc += tdef_tmp->dataSize;
@@ -235,11 +235,17 @@ void genCode_tree_Ident_memb_access(Node *root, Node *self) {
 void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
   TypeDefEntry *tent = searchTag(self->tkn->text);
   if (parse_flag & SET_MEMBER) {
-    if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) {
-      left_val.var->dType = STRUCT_T + (root->tkn->kind == '*'); // TODO : this should be te_tmp
+    if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) { // self referencing
+      if (root->tkn->kind != '*')
+	error("this struct should be reference");
+      left_val.var->dType = STRUCTP_T;// TODO : this should be te_tmp
       left_val.dataSize = POINTER_SIZE;
       left_val.var->tagName = tagName_tmp;
       parse_flag |= IS_DECLARE;
+    } else if (tent != NULL) { // struct in struct
+      left_val.var->dType = STRUCT_T;
+      left_val.var->tagName = self->tkn->text;
+      left_val.dataSize = tent->dataSize;
     } else if (root == self) { // declare member when define
       TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
       memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
