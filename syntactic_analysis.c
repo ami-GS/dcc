@@ -451,7 +451,7 @@ void genCode_tree(Node *self, Node *root) {
       break;
     case Dot: case Arrow:
       genCode_binary(Add);
-      if (!left_most_assign || member_nest)
+      if ((!left_most_assign || member_nest) && var_tmp->dType != STRUCT_T)
 	genCode1(VAL);
       break;
     default:
