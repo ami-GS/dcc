@@ -114,18 +114,16 @@ int is_ope2(const char *c1, const char *c2) {
   char s[2];
   s[0] = *c1; s[1] = *c2;
   // TODO : //, /* and */ are put here as workaround
-  char ope2[24][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
+  char ope2[][2] = {"++", "--", "||", "&&", "==", "<=", ">=",
 		      "=<", "=>", "!=", "+=", "-=", "*=", "/=",
 		      "%=", "<<", ">>", "&=", "|=", "^=", "//",
-		      "/*", "*/", "->"};
+		      "/*", "*/", "->", "EN"};
   int i;
-  for (i = 0; i < 24; i++) {
-    if (ope2[i][0] == s[0] && ope2[i][1] == s[1]) {
-      return 1;
-    }
+  for (i = 0; ope2[i][0] != 'E'; i++) {
+    if (memcmp(ope2[i], s, 2) == 0)
+    return 1;
   }
-  return 0; // workaround
-  //return strstr(" ++ -- || && == <= >= =< => != ", s) != NULL;
+  return 0;
 }
 
 int is_ope1(Kind k) {
