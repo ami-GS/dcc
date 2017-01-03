@@ -244,7 +244,8 @@ void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
       parse_flag |= IS_DECLARE;
     } else if (tent != NULL) { // struct in struct
       left_val.var->dType = STRUCT_T;
-      left_val.var->tagName = self->tkn->text;
+      left_val.var->tagName = (char *)malloc(self->tkn->intVal);
+      memcpy(left_val.var->tagName, self->tkn->text, self->tkn->intVal);
       left_val.dataSize = tent->dataSize;
     } else if (root == self) { // declare member when define
       TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
@@ -472,6 +473,7 @@ void genCode_tree(Node *self, Node *root) {
     if (!(parse_flag & IS_TYPEDEF))
       remove_op_stack_top();
     left_val.var->dType = NON_T;
+    left_val.var->tagName = NULL;
     parse_flag &= ~IS_DECLARE;
     arrayCount = 0;
     left_val.kind = no_ID;
