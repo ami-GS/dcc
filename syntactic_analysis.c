@@ -91,7 +91,7 @@ void makeTree(Node *root, int st, int end) {
   if (expr_tkns[st].kind == '(' && expr_tkns[end].kind == ')') {
     st++; end--;
   } else if (expr_tkns[st].kind == '[' && expr_tkns[end].kind == ']') {
-    if (st + 1 == end) {
+    if (st + 1 == end) { // for int A[]
       expr_tkns[st].kind = IntNum;
       expr_tkns[st].hKind = Immediate;
       expr_tkns[st].intVal = 0;
@@ -100,7 +100,15 @@ void makeTree(Node *root, int st, int end) {
       st++; end--;
     }
   } else if (expr_tkns[st].kind == '{' && expr_tkns[end].kind == '}') {
-    st++; end--;
+    // for struct AA {int a; ....}; AND int A[] = {1,2,...};
+    // TODO : consider reordering
+    root->tkn = &expr_tkns[st];
+    root->tkn->text[1] = '}';
+    root->tkn->text[2] = '\0';
+    root->tkn->intVal = 2;
+    root->l = &nodes[node_used_ct++];
+    makeTree(root->l, ++st, --end);
+    return;
   }
 
   int idx = getLowestPriorityIdx(st, end);
@@ -442,7 +450,7 @@ void genCode_tree(Node *self, Node *root) {
     case Struct:
       parse_flag |= IS_TYPEDEF;
       parse_flag |= IS_STRUCT;
-      if (root->r != NULL && root->r->tkn->kind == ';') {
+      if (root->r != NULL && root->r->tkn->kind == '{') {
 	tagName_tmp = root->tkn->text; // save for self reference
 	parse_flag |= SET_MEMBER;
       }
