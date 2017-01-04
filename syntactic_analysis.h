@@ -12,10 +12,13 @@ struct Node {
 };
 
 typedef enum {
-    IS_LEFT = 0x1, IS_DECLARE = 0x2, IS_STRUCT = 0x4, MEMBER_ACCESS = 0x8, BRACKET_ACCESS = 0x10, IS_TYPEDEF = 0x20, DEC_ARRAY = 0x40, DEC_EMPTY_ARRAY = 0x80,
-    SET_MEMBER = 0x100,
+    IS_LEFT = 0x1, IS_DECLARE = 0x2, IS_STRUCT = 0x4, MEMBER_ACCESS = 0x8, BRACKET_ACCESS = 0x10, IS_TYPEDEF = 0x20, DEC_ARRAY = 0x40, DEC_EMPTY_ARRAY = 0x80, SET_MEMBER = 0x100,
 } ParseFlag;
-static ParseFlag parse_flag = 0;
+static struct NEST_FLAGS {
+    ParseFlag f[8];
+    int nest;
+} parse_flags;
+static ParseFlag *parse_flag;
 
 #define MAX_NODES 64
 static Node nodes[MAX_NODES];

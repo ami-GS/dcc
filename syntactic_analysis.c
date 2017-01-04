@@ -141,11 +141,11 @@ void dumpRevPolish(Node *root) {
 
 void genCode_tree_assign() {
   if (arrayCount > 0) {
-    if (parse_flag & DEC_EMPTY_ARRAY) {
+    if (*parse_flag & DEC_EMPTY_ARRAY) {
       te_tmp = search(left_val.var->name);
       te_tmp->var->arrLen = arrayCount;
       malloc_more(te_tmp, DATA_SIZE[te_tmp->var->dType] * (arrayCount-1)); // first address is already allocated
-      parse_flag &= ~DEC_EMPTY_ARRAY;
+      *parse_flag &= ~DEC_EMPTY_ARRAY;
     }
     int i = 0;
     while (i < arrayCount) {
@@ -172,8 +172,8 @@ void genCode_tree_addressing(int offset) {
 void genCode_tree_dec(Node *root, Node *self) {
   int arrLen = 0;
   SymbolKind sKind = var_ID;
-      // this stands for bracket addressing, remove LDI of stack top
-  if (parse_flag & DEC_ARRAY)
+  // this stands for bracket addressing, remove LDI of stack top
+  if (*parse_flag & DEC_ARRAY)
 	arrLen = codes[--code_ct].opdata;
   if (funcPtr != NULL && funcPtr->args == -1)
     sKind = arg_ID;
@@ -190,7 +190,7 @@ void _genCode_tree_Ident(Node *root, Node *self) {
       genCode1(DEL);
     break;
   case var_ID: case arg_ID:
-    if ((parse_flag & BRACKET_ACCESS) && !(parse_flag & IS_DECLARE)) {
+    if ((*parse_flag & BRACKET_ACCESS) && !(*parse_flag & IS_DECLARE)) {
       if (te_tmp->var->dType == STRUCT_T)
 	genCode2(LDI, te_tmp->dataSize);
       else
@@ -202,8 +202,8 @@ void _genCode_tree_Ident(Node *root, Node *self) {
       genCode_binary(Add);
       if (te_tmp->var->dType != STRUCT_T)
 	genCode1(VAL_TYPE[te_tmp->var->dType]);
-    } else if (!(parse_flag & BRACKET_ACCESS)) {
-      if (!(parse_flag & IS_DECLARE) && te_tmp->var->arrLen == 0 && te_tmp->var->dType%2 == 0) {
+    } else if (!(*parse_flag & BRACKET_ACCESS)) {
+      if (!(*parse_flag & IS_DECLARE) && te_tmp->var->arrLen == 0 && te_tmp->var->dType%2 == 0) {
 	genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
       } else if (te_tmp->var->arrLen == 0) {
 	genCode(LOD_TYPE[te_tmp->var->dType], te_tmp->level, te_tmp->var->code_addr);
@@ -242,14 +242,14 @@ void genCode_tree_Ident_memb_access(Node *root, Node *self) {
 
 void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
   TypeDefEntry *tent = searchTag(self->tkn->text);
-  if (parse_flag & SET_MEMBER) {
+  if (*parse_flag & SET_MEMBER) {
     if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) { // self referencing
       if (root->tkn->kind != '*')
 	error("this struct should be reference");
       left_val.var->dType = STRUCTP_T;// TODO : this should be te_tmp
       left_val.dataSize = POINTER_SIZE;
       left_val.var->tagName = tagName_tmp;
-      parse_flag |= IS_DECLARE;
+      *parse_flag |= IS_DECLARE;
     } else if (tent != NULL) { // struct in struct
       left_val.var->dType = STRUCT_T;
       left_val.var->tagName = (char *)malloc(self->tkn->intVal);
@@ -282,7 +282,7 @@ void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
     left_val.dataSize = tent->dataSize;
     left_val.var->nxtVar = &tent->var;
     left_val.var->tagName = tent->tagName;
-    parse_flag |= IS_DECLARE;
+    *parse_flag |= IS_DECLARE;
   } else {
     genCode_tree_dec(root, self);
   }
@@ -290,23 +290,23 @@ void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
 
 void genCode_tree_Ident(Node *root, Node *self) {
   if (self->r != NULL && (self->r->tkn->kind == Ident || self->r->tkn->kind == IntNum || self->r->tkn->hKind == Operator))
-    parse_flag |= BRACKET_ACCESS;
+    *parse_flag |= BRACKET_ACCESS;
   else
-    parse_flag &= ~BRACKET_ACCESS;
+    *parse_flag &= ~BRACKET_ACCESS;
 
   if (member_nest && root->r == self && (root->tkn->kind == Arrow || root->tkn->kind == Dot)) { // TODO : temporally conditin. member access, like . ->
     genCode_tree_Ident_memb_access(root, self);
     return;
   }
 
-  if (parse_flag & SET_MEMBER || parse_flag & IS_STRUCT) {
+  if ((*parse_flag & SET_MEMBER) || (*parse_flag & IS_STRUCT)) {
     genCode_tree_Ident_struct_dec(root, self);
     return;
   }
 
   te_tmp = search(self->tkn->text);
   if (te_tmp == NULL) {
-    if (parse_flag & IS_DECLARE) {
+    if (*parse_flag & IS_DECLARE) {
       genCode_tree_dec(root, self);
       if (left_most_assign)
 	te_tmp = &left_val;
@@ -324,11 +324,11 @@ void genCode_tree_Ident(Node *root, Node *self) {
 }
 
 void genCode_tree_IntNum(Node *root, Node *self) {
-  if (parse_flag & IS_DECLARE) {
+  if (*parse_flag & IS_DECLARE) {
     if (root->tkn->kind == Ident)
-      parse_flag |= DEC_ARRAY;
+      *parse_flag |= DEC_ARRAY;
     if (self->tkn->text[0] == '[') // for int A[] = {1,2,..};
-     parse_flag |= DEC_EMPTY_ARRAY;
+      *parse_flag |= DEC_EMPTY_ARRAY;
   }
   genCode2(LDI, self->tkn->intVal);
   if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
@@ -344,7 +344,7 @@ void genCode_tree_CharSymbol(Node *root, Node *self) {
 void genCode_tree_String(Token *tkn) {
   if (left_val.var->arrLen == 0)
     left_val.var->arrLen = tkn->intVal; // this is for A[]
-  if (left_val.var->dType == CHAR_T || parse_flag & DEC_EMPTY_ARRAY) {
+  if (left_val.var->dType == CHAR_T || (*parse_flag & DEC_EMPTY_ARRAY)) {
     do {
       genCode_tree_addressing(arrayCount);
       genCode2(LDI, *(tkn->text+arrayCount++)); // TODO : LDI?
@@ -362,7 +362,7 @@ void genCode_tree_operator(Node *root, Node *self) {
   if (self->l != NULL && self->r != NULL) {
     genCode_binary(self->tkn->kind);
   } else {
-    if (!(self->tkn->kind == '&' && parse_flag & BRACKET_ACCESS)) // TODO : workaround for b = &a[1];
+    if (!(self->tkn->kind == '&' && (*parse_flag & BRACKET_ACCESS))) // TODO : workaround for b = &a[1];
       genCode_unary(self->tkn->kind);
     else if (te_tmp->var->dType != STRUCT_T) // TODO : workaround for above when these are struct
       code_ct--;
@@ -414,8 +414,15 @@ void go_right_node(Node *self, Node *root) {
 }
 
 void genCode_tree(Node *self, Node *root) {
-    if (root->tkn->kind == Comma && self->tkn->kind != Comma && (parse_flag & IS_DECLARE) && (left_val.var->arrLen > 0 || parse_flag & DEC_EMPTY_ARRAY)) {
-      if (arrayCount >= left_val.var->arrLen && !(parse_flag & DEC_EMPTY_ARRAY))
+  if (strcmp(self->tkn->text, "{}\0") == 0) {
+    if (*parse_flag & SET_MEMBER)
+      parse_flags.f[parse_flags.nest+1] = SET_MEMBER;
+    if (*parse_flag & DEC_ARRAY)
+      parse_flags.f[parse_flags.nest+1] = *parse_flag;
+    parse_flag = &parse_flags.f[++parse_flags.nest];
+  }
+  if (root->tkn->kind == Comma && self->tkn->kind != Comma && (*parse_flag & IS_DECLARE) && (left_val.var->arrLen > 0 || (*parse_flag & DEC_EMPTY_ARRAY))) {
+    if (arrayCount >= left_val.var->arrLen && !(*parse_flag & DEC_EMPTY_ARRAY))
       error("initialize length overflowing");
     genCode_tree_addressing(arrayCount++);
   }
@@ -448,11 +455,11 @@ void genCode_tree(Node *self, Node *root) {
       genCode_tree_String(self->tkn);
       break;
     case Struct:
-      parse_flag |= IS_TYPEDEF;
-      parse_flag |= IS_STRUCT;
+      *parse_flag |= IS_TYPEDEF;
+      *parse_flag |= IS_STRUCT;
       if (root->r != NULL && root->r->tkn->kind == '{') {
 	tagName_tmp = root->tkn->text; // save for self reference
-	parse_flag |= SET_MEMBER;
+	*parse_flag |= SET_MEMBER;
       }
       break;
     case Comma:
@@ -463,6 +470,12 @@ void genCode_tree(Node *self, Node *root) {
       if ((!left_most_assign || member_nest) && var_tmp->dType != STRUCT_T)
 	genCode1(VAL);
       break;
+    case Lbrace:
+      if (strcmp(self->tkn->text, "{}\0") == 0) {
+	*parse_flag = 0; // reset
+	parse_flag = &parse_flags.f[--parse_flags.nest];
+      }
+      break;
     default:
       switch (self->tkn->hKind) {
       case Operator: case CombOpe:
@@ -470,7 +483,7 @@ void genCode_tree(Node *self, Node *root) {
 	break;
       case Type:
         left_val.var->dType = tkn2dType(self->tkn->kind);
-	parse_flag |= IS_DECLARE; // TODO : need to consider CAST
+	*parse_flag |= IS_DECLARE; // TODO : need to consider CAST	
 	break;
       }
       break;
@@ -478,11 +491,11 @@ void genCode_tree(Node *self, Node *root) {
   }
 
   if (root->tkn->kind == Semicolon && self->tkn->kind != Semicolon) {
-    if (!(parse_flag & IS_TYPEDEF))
+    if (!(*parse_flag & IS_TYPEDEF))
       remove_op_stack_top();
     left_val.var->dType = NON_T;
     left_val.var->tagName = NULL;
-    parse_flag &= ~IS_DECLARE;
+    *parse_flag &= ~IS_DECLARE;
     arrayCount = 0;
     left_val.kind = no_ID;
   }
@@ -513,7 +526,8 @@ int init_expr(Token *t, char endChar) {
   memset(&left_val, 0, sizeof(TableEntry));
   left_val.var = (VarElement *)malloc(sizeof(VarElement));
   memset(left_val.var, 0, sizeof(VarElement));
-  parse_flag = 0;
+  parse_flags.f[0] = 0;
+  parse_flag = &parse_flags.f[0];
   return len;
 }
 
