@@ -12,7 +12,7 @@ struct Node {
 };
 
 typedef enum {
-    IS_LEFT = 0x1, IS_DECLARE = 0x2, IS_STRUCT = 0x4, MEMBER_ACCESS = 0x8, BRACKET_ACCESS = 0x10, IS_TYPEDEF = 0x20, DEC_ARRAY = 0x40, DEC_EMPTY_ARRAY = 0x80, SET_MEMBER = 0x100, WITH_INIT = 0x200,
+    IS_LEFT = 0x1, IS_DECLARE = 0x2, IS_STRUCT = 0x4, MEMBER_ACCESS = 0x8, BRACKET_ACCESS = 0x10, IS_TYPEDEF = 0x20, DEC_ARRAY = 0x40, DEC_EMPTY_ARRAY = 0x80, SET_MEMBER = 0x100, WITH_INIT = 0x200, CALL_FUNC = 0x400,
 } ParseFlag;
 static struct NEST_FLAGS {
     ParseFlag f[8];
@@ -28,6 +28,7 @@ static Token expr_tkns[MAX_EXPR_TOKENS];
 static DataType expr_type = NON_T;
 static VarElement left_varelem = {NON_T, "", NON_M, 0, 0};
 static TableEntry left_val = {no_ID, &left_varelem, LOCAL, 0};
+static TableEntry te_func; // TODO : this sould be included in val_stack
 TableEntry *te_tmp;
 VarElement *var_tmp; // for struct member addressing
 TypeDefEntry *tdef_tmp;

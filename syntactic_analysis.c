@@ -19,7 +19,7 @@ int getLowestPriorityIdx(int st, int end) {
   for (i = st; i <= end; i++) {
     if (expr_tkns[i].hKind == LParens) {
       nest++;
-      if (nest == 1 && expr_tkns[i].kind != '(') {
+      if (nest == 1) {
 	pri = 14;
 	if (!(pri == 1 && lowest_pri == 1) && lowest_pri >= pri) {
 	  lowest_pri = pri;
@@ -95,10 +95,6 @@ int getLowestPriorityIdx(int st, int end) {
 void makeTree(Node *root, int st, int end) {
   if (st > end)
     return; // finish
-
-  if (expr_tkns[st].kind == '(' && expr_tkns[end].kind == ')') {
-    st++; end--;
-  }
 
   int idx = getLowestPriorityIdx(st, end);
   if (expr_tkns[idx].hKind == LParens) {
@@ -178,9 +174,8 @@ void genCode_tree_dec(Node *root, Node *self) {
 void _genCode_tree_Ident(Node *root, Node *self) {
   switch (te_tmp->kind) { // for initialization
   case func_ID: case proto_ID:
-    genCode2(CALL, te_tmp->var->code_addr);
-    if (te_tmp->var->dType != VOID_T && root == self)
-      genCode1(DEL);
+    *parse_flag |= CALL_FUNC;
+    te_func = *te_tmp;
     break;
   case var_ID: case arg_ID:
     if (*parse_flag & BRACKET_ACCESS) {
@@ -490,6 +485,13 @@ void genCode_tree(Node *self, Node *root) {
       genCode_binary(Add);
       if ((!left_most_assign || member_nest) && var_tmp->dType != STRUCT_T)
 	genCode1(VAL);
+      break;
+     if (*parse_flag & CALL_FUNC) {
+	genCode2(CALL, te_func.var->code_addr); // TODO : te_func should be included in val_stack
+	if (te_func.var->dType != VOID_T && root == self)
+	  genCode1(DEL);
+	*parse_flag &= ~CALL_FUNC;
+      }
       break;
     case Lbrace:
       if (*parse_flag & WITH_INIT)
