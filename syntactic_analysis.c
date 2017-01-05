@@ -299,7 +299,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
     return;
   }
 
-  if ((*parse_flag & SET_MEMBER) || (*parse_flag & IS_STRUCT)) {
+  if (*parse_flag & (SET_MEMBER | IS_STRUCT)) {
     genCode_tree_Ident_struct_dec(root, self);
     return;
   }
@@ -455,8 +455,7 @@ void genCode_tree(Node *self, Node *root) {
       genCode_tree_String(self->tkn);
       break;
     case Struct:
-      *parse_flag |= IS_TYPEDEF;
-      *parse_flag |= IS_STRUCT;
+      *parse_flag |= IS_TYPEDEF | IS_STRUCT;
       if (root->r != NULL && root->r->tkn->kind == '{') {
 	tagName_tmp = root->tkn->text; // save for self reference
 	*parse_flag |= SET_MEMBER;
