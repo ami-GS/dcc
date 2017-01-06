@@ -411,7 +411,7 @@ void go_right_node(Node *self, Node *root) {
 void genCode_tree(Node *self, Node *root) {
   if (strcmp(self->tkn->text, "{}\0") == 0) {
     if (*parse_flag & SET_MEMBER)
-      parse_flags.f[parse_flags.nest+1] = SET_MEMBER;
+      parse_flags.f[parse_flags.nest+1] = SET_MEMBER | IS_TYPEDEF;
     if (*parse_flag & DEC_ARRAY)
       parse_flags.f[parse_flags.nest+1] = *parse_flag;
     parse_flag = &parse_flags.f[++parse_flags.nest];
@@ -485,7 +485,7 @@ void genCode_tree(Node *self, Node *root) {
   }
 
   if (root->tkn->kind == Semicolon && self->tkn->kind != Semicolon) {
-    if (!(*parse_flag & IS_TYPEDEF))
+    if (!(*parse_flag & SET_MEMBER))
       remove_op_stack_top();
     left_val.var->dType = NON_T;
     left_val.var->tagName = NULL;
