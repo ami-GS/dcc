@@ -144,7 +144,7 @@ void genCode_tree_assign() {
     if (*parse_flag & DEC_EMPTY_ARRAY) {
       te_tmp = search(left_val.var->name);
       te_tmp->var->arrLen = arrayCount;
-      malloc_more(te_tmp, DATA_SIZE[te_tmp->var->dType] * (arrayCount-1)); // first address is already allocated
+      malloc_more(te_tmp, get_data_size(te_tmp) * (arrayCount-1)); // first address is already allocated
       *parse_flag &= ~DEC_EMPTY_ARRAY;
     }
     int i = 0;
@@ -162,7 +162,7 @@ void genCode_tree_assign() {
 }
 
 void genCode_tree_addressing(int offset) {
-  genCode2(LDI, DATA_SIZE[left_val.var->dType]);
+  genCode2(LDI, get_data_size(&left_val));
   genCode2(LDI, offset);
   genCode_binary(Mul);
   genCode(LDA, left_val.level, left_val.var->code_addr);
@@ -179,6 +179,7 @@ void genCode_tree_dec(Node *root, Node *self) {
     sKind = arg_ID;
   set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
   left_val.var->dType += root->tkn->kind == '*';
+  left_val.dataSize = get_data_size(&left_val);
   enter_table_item(&left_val);
 }
 
@@ -191,10 +192,7 @@ void _genCode_tree_Ident(Node *root, Node *self) {
     break;
   case var_ID: case arg_ID:
     if ((*parse_flag & BRACKET_ACCESS) && !(*parse_flag & IS_DECLARE)) {
-      if (te_tmp->var->dType == STRUCT_T)
-	genCode2(LDI, te_tmp->dataSize);
-      else
-	genCode2(LDI, DATA_SIZE[te_tmp->var->dType]);
+      genCode2(LDI, get_data_size(te_tmp));
       genCode_binary(Mul);
       genCode(LDA, te_tmp->level, te_tmp->var->code_addr);
       if (te_tmp->var->dType%2 == 0)
@@ -270,10 +268,7 @@ void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
       }
       memcpy(varp, left_val.var, sizeof(VarElement));
       memcpy(varp->name, left_val.var->name, 10); // TODO : temporally
-      if (varp->dType == STRUCT_T)
-	TypeDefTable[typedef_ent_ct].dataSize += left_val.dataSize;
-      else
-	TypeDefTable[typedef_ent_ct].dataSize += DATA_SIZE[varp->dType];
+      TypeDefTable[typedef_ent_ct].dataSize += get_data_size(&left_val);
       TypeDefTable[typedef_ent_ct].structEntCount++;
     }
   } else if (tent != NULL && self->l->tkn->kind == Struct) { // declare

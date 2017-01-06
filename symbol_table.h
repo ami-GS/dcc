@@ -89,5 +89,6 @@ void del_func_entry(TableEntry *f1, TableEntry *f2);
 void open_local_table();
 void close_local_table();
 void dupCheck(TableEntry *ent);
+int get_data_size(TableEntry *ent);
 
 #endif // _DCC_SYMBOL_TABLE_H_

@@ -147,3 +147,10 @@ void set_entry_member(TableEntry *e, SymbolKind k, char *name, int len, Level l,
   e->var->arrLen = arrLen;
   e->args = 0;
 }
+
+int get_data_size(TableEntry *ent) {
+  if (ent->var->dType == STRUCT_T)
+    return ent->dataSize;
+  else
+    return DATA_SIZE[ent->var->dType];
+}
