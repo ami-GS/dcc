@@ -184,9 +184,7 @@ int set_address(TableEntry *te) {
   int i = 0, size;
   switch (te->kind) {
   case var_ID: case arg_ID:
-    size = DATA_SIZE[te->var->dType];
-    if (te->var->dType == STRUCT_T)
-      size = te->dataSize;
+    size = get_data_size(te);
     if (te->var->arrLen != 0)
       size *= te->var->arrLen;
     if (te->level == GLOBAL)
@@ -197,7 +195,7 @@ int set_address(TableEntry *te) {
   case func_ID:
     te->var->code_addr = code_ct;
     for (i = 1; i <= te->args; i++) {
-      size = DATA_SIZE[(te+i)->var->dType];
+      size = get_data_size(te+i);
       (te+i)->var->code_addr = malloc_L(size);
     }
     break;
