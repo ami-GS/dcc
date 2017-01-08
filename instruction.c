@@ -265,21 +265,20 @@ int const_fold(OpCode op) {
   // ADDL
   // -> LDA 12+xxxx
 
-  if (code_ct >= 2 && op == ADDL) {//&& is_binaryOP(op)) {
+  if (code_ct >= 2 && is_binaryOP(op)) {
     if (codes[code_ct-2].opcode == LDI && (codes[code_ct-1].opcode == LDA || codes[code_ct-1].opcode == LOD)) {
       codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
       codes[code_ct-2].opcode = codes[code_ct-1].opcode;
       codes[code_ct-2].flag = codes[code_ct-1].flag;
       code_ct--;
       return 1;
-    } /*else if (codes[code_ct-1].opcode == LDI && codes[code_ct-2].opcode == LOD) {
+    } /*else if (codes[code_ct-1].opcode == LDI && (codes[code_ct-2].opcode == LOD || codes[code_ct-2].opcode == LDA)) {
       codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
-      codes[code_ct-2].opcode = codes[code_ct-1].opcode;
-      codes[code_ct-2].flag = codes[code_ct-1].flag;
       code_ct--;
       return 1;
-      }*/
+    }*/
   }
+
   return 0;
 }
 
