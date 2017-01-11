@@ -96,6 +96,17 @@ TypeDefEntry *searchTag(char *text) {
   return NULL;
 }
 
+DataType searchType(char *name) {
+  if (name == NULL)
+    return NON_T;
+  int i;
+  for (i = 0; i < typedef_ent_ct; i++) {
+    if (strcmp(TypeDefTable[i].newType, name) == 0)
+      return TypeDefTable[i].baseType;
+  }
+  return NON_T;
+}
+
 void del_func_entry(TableEntry *f1, TableEntry *f2) {
   if (f1 == NULL) {
     return;

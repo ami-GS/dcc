@@ -284,6 +284,12 @@ void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
 }
 
 void genCode_tree_Ident(Node *root, Node *self) {
+  if (*parse_flag & IS_TYPEDEF) {
+    TypeDefTable[typedef_ent_ct].newType = (char *)malloc(self->tkn->intVal);
+    memcpy(TypeDefTable[typedef_ent_ct++].newType, self->tkn->text, self->tkn->intVal);
+    return;
+  }
+
   if (self->r != NULL && (self->r->tkn->kind == Ident || self->r->tkn->kind == IntNum || self->r->tkn->hKind == Operator))
     *parse_flag |= BRACKET_ACCESS;
   else
@@ -296,6 +302,13 @@ void genCode_tree_Ident(Node *root, Node *self) {
 
   if (*parse_flag & (SET_MEMBER | IS_STRUCT)) {
     genCode_tree_Ident_struct_dec(root, self);
+    return;
+  }
+
+  DataType dtype = searchType(self->tkn->text);
+  if (dtype) {
+    left_val.var->dType = dtype;
+    *parse_flag |= IS_DECLARE;
     return;
   }
 
@@ -456,6 +469,9 @@ void genCode_tree(Node *self, Node *root) {
 	*parse_flag |= SET_MEMBER;
       }
       break;
+    case Typedef:
+      *parse_flag |= IS_TYPEDEF;
+      break;
     case Comma:
       left_val.var->dType -= root->tkn->kind == '*';
       break;
@@ -476,6 +492,11 @@ void genCode_tree(Node *self, Node *root) {
 	genCode_tree_operator(root, self);
 	break;
       case Type:
+	if (*parse_flag & IS_TYPEDEF) {
+	  TypeDefTable[typedef_ent_ct].baseType = tkn2dType(self->tkn->kind);
+	  TypeDefTable[typedef_ent_ct].dataSize = DATA_SIZE[tkn2dType(self->tkn->kind)];
+	  break;
+	}
         left_val.var->dType = tkn2dType(self->tkn->kind);
 	*parse_flag |= IS_DECLARE; // TODO : need to consider CAST	
 	break;
