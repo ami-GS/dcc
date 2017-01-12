@@ -332,7 +332,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
 }
 
 void genCode_tree_IntNum(Node *root, Node *self) {
-  if (*parse_flag & IS_DECLARE) {
+  if (*parse_flag & (IS_DECLARE | SET_MEMBER)) {
     if (root->tkn->kind == Ident)
       *parse_flag |= DEC_ARRAY;
     if (self->tkn->text[0] == '[') // for int A[] = {1,2,..};
@@ -424,7 +424,7 @@ void go_right_node(Node *self, Node *root) {
 void genCode_tree(Node *self, Node *root) {
   if (strcmp(self->tkn->text, "{}\0") == 0) {
     if (*parse_flag & SET_MEMBER)
-      parse_flags.f[parse_flags.nest+1] = SET_MEMBER | IS_TYPEDEF;
+      parse_flags.f[parse_flags.nest+1] = SET_MEMBER;
     if (*parse_flag & DEC_ARRAY)
       parse_flags.f[parse_flags.nest+1] = *parse_flag;
     parse_flag = &parse_flags.f[++parse_flags.nest];
@@ -463,7 +463,7 @@ void genCode_tree(Node *self, Node *root) {
       genCode_tree_String(self->tkn);
       break;
     case Struct:
-      *parse_flag |= IS_TYPEDEF | IS_STRUCT;
+      *parse_flag |= IS_STRUCT;
       if (root->r != NULL && root->r->tkn->kind == '{') {
 	tagName_tmp = root->tkn->text; // save for self reference
 	*parse_flag |= SET_MEMBER;
