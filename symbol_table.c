@@ -101,7 +101,7 @@ DataType searchType(char *name) {
     return NON_T;
   int i;
   for (i = 0; i < typedef_ent_ct; i++) {
-    if (strcmp(TypeDefTable[i].newType, name) == 0)
+    if (TypeDefTable[i].newType != NULL && strcmp(TypeDefTable[i].newType, name) == 0)
       return TypeDefTable[i].baseType;
   }
   return NON_T;
