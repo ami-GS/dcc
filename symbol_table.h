@@ -21,7 +21,7 @@ typedef enum {
 
 typedef enum {
     NON_M = 0, STRUCT_M = 1, STATIC_M = 2, CONST_M = 4, UNION_M = 8, EXTERN_M = 16,
-} ModifierMask;
+} ModifierType;
 
 static const int DATA_SIZE[] = {-1, -1, POINTER_SIZE, INT_SIZE, POINTER_SIZE,
                           SHORT_SIZE, POINTER_SIZE, CHAR_SIZE, POINTER_SIZE,
@@ -41,7 +41,7 @@ typedef struct VarElement VarElement;
 struct VarElement {
     DataType dType;
     char *name;
-    char modifier;
+    ModifierType modifier;
     int code_addr;
     // for variable
     int       arrLen;

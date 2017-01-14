@@ -472,6 +472,12 @@ void genCode_tree(Node *self, Node *root) {
     case Typedef:
       *parse_flag |= IS_TYPEDEF;
       break;
+    case Const:
+      left_val.var->modifier |= CONST_M;
+      break;
+    case Static:
+      left_val.var->modifier |= STATIC_M;
+      break;
     case Comma:
       left_val.var->dType -= root->tkn->kind == '*';
       break;
