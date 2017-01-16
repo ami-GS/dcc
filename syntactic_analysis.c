@@ -511,16 +511,6 @@ void genCode_tree(Node *self, Node *root) {
       break;
     }
   }
-
-  if (root->tkn->kind == Semicolon && self->tkn->kind != Semicolon) {
-    if (!(*parse_flag & SET_MEMBER))
-      remove_op_stack_top();
-    left_val.var->dType = NON_T;
-    left_val.var->tagName = NULL;
-    *parse_flag &= ~IS_DECLARE;
-    arrayCount = 0;
-    left_val.kind = no_ID;
-  }
 }
 
 int init_expr(Token *t, char endChar) {
