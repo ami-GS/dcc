@@ -429,7 +429,8 @@ void genCode_tree(Node *self, Node *root) {
       parse_flags.f[parse_flags.nest+1] = *parse_flag;
     parse_flag = &parse_flags.f[++parse_flags.nest];
   }
-  if (root->tkn->kind == Comma && self->tkn->kind != Comma && (*parse_flag & IS_DECLARE) && (left_val.var->arrLen > 0 || (*parse_flag & DEC_EMPTY_ARRAY))) {
+
+  if (root->tkn->kind == Comma && self->tkn->kind != Comma && (*parse_flag & (DEC_ARRAY | DEC_EMPTY_ARRAY))) {
     if (arrayCount >= left_val.var->arrLen && !(*parse_flag & DEC_EMPTY_ARRAY))
       error("initialize length overflowing");
     genCode_tree_addressing(arrayCount++);
