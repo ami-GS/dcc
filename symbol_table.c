@@ -58,13 +58,7 @@ TableEntry *enter_table_item(TableEntry* ent) {
 
   SymbolTable[table_ent_ct] = *ent;
   SymbolTable[table_ent_ct].var = (VarElement *)malloc(sizeof(VarElement));
-  SymbolTable[table_ent_ct].var->dType = ent->var->dType;
-  SymbolTable[table_ent_ct].var->name = ent->var->name;
-  SymbolTable[table_ent_ct].var->modifier = ent->var->modifier;
-  SymbolTable[table_ent_ct].var->code_addr = ent->var->code_addr;
-  SymbolTable[table_ent_ct].var->arrLen = ent->var->arrLen;
-  SymbolTable[table_ent_ct].var->nxtVar = ent->var->nxtVar;
-  SymbolTable[table_ent_ct].var->tagName = ent->var->tagName;
+  memcpy(SymbolTable[table_ent_ct].var, ent->var, sizeof(VarElement));
 
   return &SymbolTable[table_ent_ct++];
 }
