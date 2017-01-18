@@ -68,9 +68,9 @@ int getLowestPriorityIdx(int st, int end) {
 	  continue;
 	}
       } else if (expr_tkns[i].kind == Ident) {
-	pri = 15;
+	                            pri = 15;
       } else if (expr_tkns[i].hKind == Type || expr_tkns[i].hKind == Modifier) {
-	pri = 16;
+	                            pri = 16;
       } else {
 	continue;
       }
@@ -191,20 +191,24 @@ void _genCode_tree_Ident(Node *root, Node *self) {
       genCode1(DEL);
     break;
   case var_ID: case arg_ID:
-    if ((*parse_flag & BRACKET_ACCESS) && !(*parse_flag & IS_DECLARE)) {
-      genCode2(LDI, get_data_size(te_tmp));
-      genCode_binary(Mul);
-      genCode(LDA, te_tmp->level, te_tmp->var->code_addr);
-      if (te_tmp->var->dType%2 == 0)
-	codes[code_ct-1].opcode = LOD;
-      genCode_binary(Add);
-      if (te_tmp->var->dType != STRUCT_T)
-	genCode1(VAL_TYPE[te_tmp->var->dType]);
-    } else if (!(*parse_flag & BRACKET_ACCESS)) {
-      if (!(*parse_flag & IS_DECLARE) && te_tmp->var->arrLen == 0 && te_tmp->var->dType%2 == 0) {
-	genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
-      } else if (te_tmp->var->arrLen == 0) {
-	genCode(LOD_TYPE[te_tmp->var->dType], te_tmp->level, te_tmp->var->code_addr);
+    if (*parse_flag & BRACKET_ACCESS) {
+      if (!(*parse_flag & IS_DECLARE)) {
+	genCode2(LDI, get_data_size(te_tmp));
+	genCode_binary(Mul);
+	genCode(LDA, te_tmp->level, te_tmp->var->code_addr);
+	if (is_pointer(te_tmp->var->dType))
+	  codes[code_ct-1].opcode = LOD;
+	genCode_binary(Add);
+	if (te_tmp->var->dType != STRUCT_T)
+	  genCode1(VAL_TYPE[te_tmp->var->dType]);
+      }
+    } else {
+      if (te_tmp->var->arrLen == 0) {
+	if (!(*parse_flag & IS_DECLARE) && is_pointer(te_tmp->var->dType)) {
+	  genCode(LOD, te_tmp->level, te_tmp->var->code_addr); // for loading pointer
+	} else {
+	  genCode(LOD_TYPE[te_tmp->var->dType], te_tmp->level, te_tmp->var->code_addr);
+	}
       } else {
 	genCode(LDA, te_tmp->level, te_tmp->var->code_addr); // for int A[] = {2,3}; A; and int *A = &B;
       }
