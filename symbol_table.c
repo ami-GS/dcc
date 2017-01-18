@@ -165,3 +165,13 @@ int get_data_size(TableEntry *ent) {
   else
     return DATA_SIZE[ent->var->dType];
 }
+
+int is_pointer(DataType dtype) {
+  if (dtype == NON_T) {
+    error("NON_T is comming");
+    return -1;
+  }
+  if (dtype%2 == 0)
+    return 1;
+  return 0;
+}

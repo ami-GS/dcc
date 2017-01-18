@@ -91,5 +91,6 @@ void open_local_table();
 void close_local_table();
 void dupCheck(TableEntry *ent);
 int get_data_size(TableEntry *ent);
+int is_pointer(DataType dtype);
 
 #endif // _DCC_SYMBOL_TABLE_H_
