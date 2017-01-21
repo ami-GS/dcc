@@ -266,7 +266,7 @@ int const_fold(OpCode op) {
   // -> LDA 12+xxxx
 
   if (code_ct >= 2 && is_binaryOP(op)) {
-    if (codes[code_ct-2].opcode == LDI && codes[code_ct-1].opcode == LDA)
+    if (codes[code_ct-2].opcode == LDI && codes[code_ct-1].opcode == LDA) {
       codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
       codes[code_ct-2].opcode = codes[code_ct-1].opcode;
       codes[code_ct-2].flag = codes[code_ct-1].flag;
