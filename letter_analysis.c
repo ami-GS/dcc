@@ -249,7 +249,8 @@ int nextToken(Token *t, int q_lock) {
     if (is_ope2(txt_ptr-1, &c)) {
       *(txt_ptr++) = c;
       nextChar(&c); //to check only <"<=" >">="
-      if (is_ope2(txt_ptr-1, &c)) {
+      if ((memcmp(txt_ptr-2, "<<", 2) == 0 || memcmp(txt_ptr-2, ">>", 2) == 0) &&
+	  is_ope2(txt_ptr-1, &c)) {
 	*(txt_ptr++) = c;
       } else {
 	notUseChar(c);
