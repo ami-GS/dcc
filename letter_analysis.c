@@ -317,7 +317,8 @@ SymbolKind get_func_type() {
       case '{':
 	return func_ID; // function
       default:
-	return no_ID; // TODO : syntax error
+	error("'{' or ';' are expected");
+	return no_ID;
       }
     }
   } while (1);

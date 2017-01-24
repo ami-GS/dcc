@@ -67,10 +67,11 @@ void statement(Token *t) {
     expr_with_check(t, 0, ';');
     break;
   case EOF_token:
-    return; // TODO : unexpected error (occures when ';' is forgotten etc..)
+    error("unknown error : EOF");
+    return;
   default:
-    // TODO : syntax error
-    return; //?
+    error("unknown statement or expression");
+    return;
   }
   if (tk == While || tk == Do || tk == Switch || tk == For) {
     end_continue_break();
@@ -327,7 +328,7 @@ void end_switch() {
 
 void begin_continue_break(Kind k) {
   if (loopNest_ct >= MAX_LOOP_NEST_SIZ) {
-    // TODO : error
+    error("loop nest exceeds limits");
   }
   loopNest[loopNest_ct].st_kind = k;
   loopNest[loopNest_ct].loop_top = code_ct;
