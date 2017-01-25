@@ -52,16 +52,13 @@ void statement(Token *t) {
     // TODO : Build-in function, non-void returns
     st_build_in(t);
     break;
-  case Ident: case IntNum: case Mul:
-  case Incre: case Decre:// TODO : correct?
-    expr_with_check(t, 0, ';');
-    break;
   case Lbrace:
     block(t, NULL);
     break;
   case Semicolon:
     nextToken(t, 0);
     break;
+  case Ident: case IntNum: case Mul: case Incre: case Decre:
   case Int: case Float: case Char: case Double: case Struct: case Typedef: case Static: case Const:
   case IntP: case FloatP: case CharP: case DoubleP:// TODO : enhance here
     expr_with_check(t, 0, ';');
