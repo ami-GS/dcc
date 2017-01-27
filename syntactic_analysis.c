@@ -1,3 +1,4 @@
+#include "dcc.h"
 #include "letter_analysis.h"
 #include "opcode.h"
 #include "symbol_table.h"
@@ -551,8 +552,10 @@ void expression(Token *t, char endChar) {
   int len = init_expr(t, endChar);
   Node *root = &nodes[node_used_ct++];
   makeTree(root, 0, len-1);
-  dumpRevPolish(root);
-  printf("\n");
+  if (DEBUG_FLAG & SHOW_TREE) {
+    dumpRevPolish(root);
+    printf("\n");
+  }
   if (root->tkn != NULL)
     genCode_tree(root, root);
 }
