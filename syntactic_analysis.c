@@ -19,6 +19,13 @@ int getLowestPriorityIdx(int st, int end) {
   for (i = st; i <= end; i++) {
     if (expr_tkns[i].hKind == LParens) {
       nest++;
+      if (nest == 1 && expr_tkns[i].kind == '[') {
+	pri = 14;
+	if (!(pri == 1 && lowest_pri == 1) && lowest_pri >= pri) {
+	  lowest_pri = pri;
+	  idx = i;
+	}
+      }
     } else if (expr_tkns[i].hKind == RParens) {
       if (nest == 0)
 	error("Invalid ')', ']', '}'");
@@ -68,7 +75,7 @@ int getLowestPriorityIdx(int st, int end) {
 	default:
 	  continue;
 	}
-      } else if (expr_tkns[i].kind == Ident) {
+      } else if (expr_tkns[i].kind == Ident || expr_tkns[i].hKind == Immediate) {
 	                            pri = 15;
       } else if (expr_tkns[i].hKind == Type || expr_tkns[i].hKind == Modifier) {
 	                            pri = 16;
@@ -91,15 +98,6 @@ void makeTree(Node *root, int st, int end) {
 
   if (expr_tkns[st].kind == '(' && expr_tkns[end].kind == ')') {
     st++; end--;
-  } else if (expr_tkns[st].kind == '[' && expr_tkns[end].kind == ']') {
-    if (st + 1 == end) { // for int A[]
-      expr_tkns[st].kind = IntNum;
-      expr_tkns[st].hKind = Immediate;
-      expr_tkns[st].intVal = 0;
-      end--;
-    } else {
-      st++; end--;
-    }
   } else if (expr_tkns[st].kind == '{' && expr_tkns[end].kind == '}') {
     // for struct AA {int a; ....}; AND int A[] = {1,2,...};
     // TODO : consider reordering
@@ -113,6 +111,8 @@ void makeTree(Node *root, int st, int end) {
   }
 
   int idx = getLowestPriorityIdx(st, end);
+  if (expr_tkns[idx].hKind == LParens)
+    end--;
   root->tkn = &expr_tkns[idx];
 
   root->l = &nodes[node_used_ct++];
@@ -166,7 +166,8 @@ void genCode_tree_addressing(int offset) {
   genCode2(LDI, get_data_size(&left_val));
   genCode2(LDI, offset);
   genCode_binary(Mul);
-  genCode(LDA, left_val.level, left_val.var->code_addr);
+  if (*parse_flag & IS_DECLARE)
+    genCode(LDA, left_val.level, left_val.var->code_addr);
   genCode_binary(Add);
 }
 
@@ -174,14 +175,12 @@ void genCode_tree_dec(Node *root, Node *self) {
   int arrLen = 0;
   SymbolKind sKind = var_ID;
   // this stands for bracket addressing, remove LDI of stack top
-  if (*parse_flag & DEC_ARRAY)
-	arrLen = codes[--code_ct].opdata;
   if (funcPtr != NULL && funcPtr->args == -1)
     sKind = arg_ID;
   set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
   left_val.var->dType += root->tkn->kind == '*';
   left_val.dataSize = get_data_size(&left_val);
-  enter_table_item(&left_val);
+  te_tmp = enter_table_item(&left_val);
 }
 
 void _genCode_tree_Ident(Node *root, Node *self) {
@@ -194,14 +193,9 @@ void _genCode_tree_Ident(Node *root, Node *self) {
   case var_ID: case arg_ID:
     if (*parse_flag & BRACKET_ACCESS) {
       if (!(*parse_flag & IS_DECLARE)) {
-	genCode2(LDI, get_data_size(te_tmp));
-	genCode_binary(Mul);
 	genCode(LDA, te_tmp->level, te_tmp->var->code_addr);
 	if (is_pointer(te_tmp->var->dType))
 	  codes[code_ct-1].opcode = LOD;
-	genCode_binary(Add);
-	if (te_tmp->var->dType != STRUCT_T)
-	  genCode1(VAL_TYPE[te_tmp->var->dType]);
       }
     } else {
       if (te_tmp->var->arrLen == 0) {
@@ -294,8 +288,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
     memcpy(TypeDefTable[typedef_ent_ct++].newType, self->tkn->text, self->tkn->intVal);
     return;
   }
-
-  if (self->r != NULL && (self->r->tkn->kind == Ident || self->r->tkn->kind == IntNum || self->r->tkn->hKind == Operator))
+  if (root->tkn->kind == '[' && root->l == self)
     *parse_flag |= BRACKET_ACCESS;
   else
     *parse_flag &= ~BRACKET_ACCESS;
@@ -321,8 +314,8 @@ void genCode_tree_Ident(Node *root, Node *self) {
   if (te_tmp == NULL) {
     if (*parse_flag & IS_DECLARE) {
       genCode_tree_dec(root, self);
-      if (left_most_assign)
-	te_tmp = &left_val;
+      if (((*parse_flag & (IS_DECLARE | BRACKET_ACCESS) == (IS_DECLARE | BRACKET_ACCESS)) && left_most_assign) || !left_most_assign)
+	return;
     } else {
       error("unknown identifier");
     }
@@ -375,7 +368,7 @@ void genCode_tree_operator(Node *root, Node *self) {
   if (self->l != NULL && self->r != NULL) {
     genCode_binary(self->tkn->kind);
   } else {
-    if (!(self->tkn->kind == '&' && (*parse_flag & BRACKET_ACCESS))) // TODO : workaround for b = &a[1];
+    if (!(self->tkn->kind == '&' && te_tmp->var->arrLen)) // TODO : workaround for b = &a[1];
       genCode_unary(self->tkn->kind);
     else if (te_tmp->var->dType != STRUCT_T) // TODO : workaround for above when these are struct
       code_ct--;
@@ -448,8 +441,6 @@ void genCode_tree(Node *self, Node *root) {
     case Assign:
       genCode_tree_assign();
       if (root->tkn->kind == Comma || root == self) { // when int A[2] = {1, a=b}; cause error
-	arrayCount = 0;
-	left_val.var->arrLen = 0;
 	remove_op_stack_top();
       }
       break;
@@ -458,6 +449,8 @@ void genCode_tree(Node *self, Node *root) {
       break;
     case Ident:
       genCode_tree_Ident(root, self);
+      if (*parse_flag & BRACKET_ACCESS)
+	member_stack.s[member_stack.idx++] = *te_tmp; // TODO : need limit check
       break;
     case IntNum:
       genCode_tree_IntNum(root, self);
@@ -496,6 +489,29 @@ void genCode_tree(Node *self, Node *root) {
       if (strcmp(self->tkn->text, "{}\0") == 0) {
 	*parse_flag = 0; // reset
 	parse_flag = &parse_flags.f[--parse_flags.nest];
+      }
+      break;
+    case Lbracket:
+      if (!(*parse_flag & IS_DECLARE)) {
+	if (codes[code_ct-1].opcode == LDI)
+	  genCode_tree_addressing(codes[--code_ct].opdata);
+	else {
+	  te_tmp = &member_stack.s[--member_stack.idx];
+	  genCode2(LDI, get_data_size(te_tmp));
+	  genCode_binary(Mul);
+	  genCode_binary(Add);
+	}
+	if (!left_most_assign && te_tmp->var->dType != STRUCTP_T)
+	  genCode1(VAL_TYPE[te_tmp->var->dType]);
+      } else {
+	if (self->r != NULL) {
+	  left_val.var->arrLen = codes[--code_ct].opdata;
+	  malloc_more(te_tmp, get_data_size(te_tmp) * (left_val.var->arrLen-1));
+	  te_tmp->var->arrLen = left_val.var->arrLen;
+	} else {
+	  *parse_flag |= DEC_EMPTY_ARRAY;
+	}
+	*parse_flag |= DEC_ARRAY;
       }
       break;
     default:
@@ -545,6 +561,7 @@ int init_expr(Token *t, char endChar) {
   memset(left_val.var, 0, sizeof(VarElement));
   parse_flags.f[0] = 0;
   parse_flag = &parse_flags.f[0];
+  member_stack.idx = 0;
   return len;
 }
 
