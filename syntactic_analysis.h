@@ -36,6 +36,10 @@ static int left_most_assign = 0;
 #define MAX_DEFINE_SIZE
 static int arrayCount = 0;
 static int member_nest = 0;
+static struct { // flag should be integrated
+    TableEntry s[128];
+    int idx;
+} member_stack; // for like, A[B[i]]
 
 int init_expr(Token *t, char endChar);
 void expression(Token *t, char endChar);
@@ -54,6 +58,7 @@ void genCode_tree_IntNum(Node *root, Node *self);
 void genCode_tree_CharSymbol(Node *root, Node *self);
 void genCode_tree_String(Token *tkn);
 void genCode_tree_incdec(Node *root, Node *self);
+void genCode_tree_Lbracket(Node *root, Node *self);
 void genCode_tree(Node *self, Node * root);
 void go_left_node(Node *self, Node *root);
 void go_right_node(Node *self, Node *root);

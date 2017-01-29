@@ -401,6 +401,30 @@ void genCode_tree_incdec(Node *root, Node *self) {
     genCode1(DEL); // for A++; or ++A;
 }
 
+void genCode_tree_Lbracket(Node *root, Node *self) {
+  if (!(*parse_flag & IS_DECLARE)) {
+    if (codes[code_ct-1].opcode == LDI)
+      genCode_tree_addressing(codes[--code_ct].opdata);
+    else {
+      te_tmp = &member_stack.s[--member_stack.idx];
+      genCode2(LDI, get_data_size(te_tmp));
+      genCode_binary(Mul);
+      genCode_binary(Add);
+    }
+    if (!left_most_assign && te_tmp->var->dType != STRUCTP_T)
+      genCode1(VAL_TYPE[te_tmp->var->dType]);
+  } else {
+    if (self->r != NULL) {
+      left_val.var->arrLen = codes[--code_ct].opdata;
+      malloc_more(te_tmp, get_data_size(te_tmp) * (left_val.var->arrLen-1));
+      te_tmp->var->arrLen = left_val.var->arrLen;
+    } else {
+      *parse_flag |= DEC_EMPTY_ARRAY;
+    }
+    *parse_flag |= DEC_ARRAY;
+  }
+}
+
 void go_left_node(Node *self, Node *root) {
   if (self->tkn->kind == Dot || self->tkn->kind == Arrow)
     member_nest++;
@@ -492,27 +516,7 @@ void genCode_tree(Node *self, Node *root) {
       }
       break;
     case Lbracket:
-      if (!(*parse_flag & IS_DECLARE)) {
-	if (codes[code_ct-1].opcode == LDI)
-	  genCode_tree_addressing(codes[--code_ct].opdata);
-	else {
-	  te_tmp = &member_stack.s[--member_stack.idx];
-	  genCode2(LDI, get_data_size(te_tmp));
-	  genCode_binary(Mul);
-	  genCode_binary(Add);
-	}
-	if (!left_most_assign && te_tmp->var->dType != STRUCTP_T)
-	  genCode1(VAL_TYPE[te_tmp->var->dType]);
-      } else {
-	if (self->r != NULL) {
-	  left_val.var->arrLen = codes[--code_ct].opdata;
-	  malloc_more(te_tmp, get_data_size(te_tmp) * (left_val.var->arrLen-1));
-	  te_tmp->var->arrLen = left_val.var->arrLen;
-	} else {
-	  *parse_flag |= DEC_EMPTY_ARRAY;
-	}
-	*parse_flag |= DEC_ARRAY;
-      }
+      genCode_tree_Lbracket(root, self);
       break;
     default:
       switch (self->tkn->hKind) {
