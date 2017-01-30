@@ -1,3 +1,4 @@
+#include "dcc.h"
 #include "instruction.h"
 #include "opcode.h"
 #include "letter_analysis.h"
@@ -243,40 +244,44 @@ void remove_op_stack_top() {
 }
 
 int const_fold(OpCode op) {
-  if (code_ct >= 1 && codes[code_ct-1].opcode == LDI) {
-    if (op == NOT) {
-      codes[code_ct-1].opdata = !codes[code_ct-1].opdata;
-      return 1;
-    } else if (op == NEG) {
-      codes[code_ct-1].opdata = -codes[code_ct-1].opdata;
-      return 1;
-    } else if (op == BNOT) {
-      codes[code_ct-1].opdata = ~codes[code_ct-1].opdata;
-      return 1;
-    } else if (is_binaryOP(op) && codes[code_ct-2].opcode == LDI) {
-      codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
-      code_ct--;
+  if (DEBUG_FLAG & OPTIMIZE) {
+    if (code_ct >= 1 && codes[code_ct-1].opcode == LDI) {
+      if (op == NOT) {
+	codes[code_ct-1].opdata = !codes[code_ct-1].opdata;
+	return 1;
+      } else if (op == NEG) {
+	codes[code_ct-1].opdata = -codes[code_ct-1].opdata;
+	return 1;
+      } else if (op == BNOT) {
+	codes[code_ct-1].opdata = ~codes[code_ct-1].opdata;
+	return 1;
+      } else if (is_binaryOP(op) && codes[code_ct-2].opcode == LDI) {
+	codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
+	code_ct--;
+	return 1;
+      }
+    }
+    // optimization for array addressing. like A[3]
+    // LDI xxxx
+    // LDA 12 // 3xint size
+    // ADDL
+    // -> LDA 12+xxxx
+    if (code_ct >= 2 && is_binaryOP(op)) {
+      if (codes[code_ct-2].opcode == LDI && codes[code_ct-1].opcode == LDA) {
+	codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
+	codes[code_ct-2].opcode = codes[code_ct-1].opcode;
+	codes[code_ct-2].flag = codes[code_ct-1].flag;
+	code_ct--;
+	return 1;
+      } else if (codes[code_ct-2].opcode == LDA && codes[code_ct-1].opcode == LDI) {
+	codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
+	code_ct--;
+	return 1;
+      }
+    } else if (op == VAL && codes[code_ct-1].opcode == LDA) {
+      codes[code_ct-1].opcode = LOD;
       return 1;
     }
-  }
-  // optimization for array addressing. like A[3]
-  // LDI xxxx
-  // LDA 12 // 3xint size
-  // ADDL
-  // -> LDA 12+xxxx
-
-  if (code_ct >= 2 && is_binaryOP(op)) {
-    if (codes[code_ct-2].opcode == LDI && codes[code_ct-1].opcode == LDA) {
-      codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
-      codes[code_ct-2].opcode = codes[code_ct-1].opcode;
-      codes[code_ct-2].flag = codes[code_ct-1].flag;
-      code_ct--;
-      return 1;
-    } /*else if (codes[code_ct-1].opcode == LDI && (codes[code_ct-2].opcode == LOD || codes[code_ct-2].opcode == LDA)) {
-      codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
-      code_ct--;
-      return 1;
-    }*/
   }
 
   return 0;

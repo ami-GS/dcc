@@ -28,6 +28,7 @@ int  main(int argc, char *argv[]) {
 	case 'r': DEBUG_FLAG |= RUN; break;
 	case 'm': DEBUG_FLAG |= SHOW_MOVEMENT; break;
 	case 't': DEBUG_FLAG |= SHOW_TREE; break;
+	case 'o': DEBUG_FLAG |= OPTIMIZE; break;
 	}
       }
     }
