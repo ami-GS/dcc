@@ -411,7 +411,7 @@ void genCode_tree_Lbracket(Node *root, Node *self) {
       genCode_binary(Mul);
       genCode_binary(Add);
     }
-    if (!left_most_assign && te_tmp->var->dType != STRUCTP_T)
+    if (!left_most_assign && te_tmp->var->dType != STRUCT_T)
       genCode1(VAL_TYPE[te_tmp->var->dType]);
   } else {
     if (self->r != NULL) {
