@@ -102,17 +102,17 @@ void makeTree(Node *root, int st, int end) {
     // for struct AA {int a; ....}; AND int A[] = {1,2,...};
     // TODO : consider reordering
     root->tkn = &expr_tkns[st];
-    root->tkn->text[1] = '}';
-    root->tkn->text[2] = '\0';
-    root->tkn->intVal = 2;
+    add_Rparens(root->tkn);
     root->l = &nodes[node_used_ct++];
     makeTree(root->l, ++st, --end);
     return;
   }
 
   int idx = getLowestPriorityIdx(st, end);
-  if (expr_tkns[idx].hKind == LParens)
+  if (expr_tkns[idx].kind == Lbracket) {
+    add_Rparens(&expr_tkns[idx]);
     end--;
+  }
   root->tkn = &expr_tkns[idx];
 
   root->l = &nodes[node_used_ct++];

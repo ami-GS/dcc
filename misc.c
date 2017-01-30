@@ -38,3 +38,16 @@ void error(char *s) {
   fprintf(stderr, "%s\n", s);
   return;
 }
+
+void add_Rparens(Token *t) {
+  switch (t->kind) {
+  case '{':
+    t->text[1] = '}'; break;
+  case '[':
+    t->text[1] = ']'; break;
+  case '(':
+    t->text[1] = ')'; break; // TODO : currently () is not used
+  }
+  t->text[2] = '\0';
+  t->intVal = 2;
+}
