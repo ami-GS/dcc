@@ -19,7 +19,7 @@ int getLowestPriorityIdx(int st, int end) {
   for (i = st; i <= end; i++) {
     if (expr_tkns[i].hKind == LParens) {
       nest++;
-      if (nest == 1 && expr_tkns[i].kind == '[') {
+      if (nest == 1 && expr_tkns[i].kind != '(') {
 	pri = 14;
 	if (!(pri == 1 && lowest_pri == 1) && lowest_pri >= pri) {
 	  lowest_pri = pri;
@@ -98,18 +98,10 @@ void makeTree(Node *root, int st, int end) {
 
   if (expr_tkns[st].kind == '(' && expr_tkns[end].kind == ')') {
     st++; end--;
-  } else if (expr_tkns[st].kind == '{' && expr_tkns[end].kind == '}') {
-    // for struct AA {int a; ....}; AND int A[] = {1,2,...};
-    // TODO : consider reordering
-    root->tkn = &expr_tkns[st];
-    add_Rparens(root->tkn);
-    root->l = &nodes[node_used_ct++];
-    makeTree(root->l, ++st, --end);
-    return;
   }
 
   int idx = getLowestPriorityIdx(st, end);
-  if (expr_tkns[idx].kind == Lbracket) {
+  if (expr_tkns[idx].hKind == LParens) {
     add_Rparens(&expr_tkns[idx]);
     end--;
   }
@@ -239,22 +231,18 @@ void genCode_tree_Ident_memb_access(Node *root, Node *self) {
 
 void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
   TypeDefEntry *tent = searchTag(self->tkn->text);
-  if (*parse_flag & SET_MEMBER) {
-    if (root != self && tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) { // self referencing
+  if (*parse_flag & SET_MEMBER) { // tent != NULL?
+    if (tagName_tmp != NULL && strcmp(tagName_tmp, self->tkn->text) == 0) { // self referencing
       if (root->tkn->kind != '*')
 	error("this struct should be reference");
       left_val.var->dType = STRUCTP_T;// TODO : this should be te_tmp
       left_val.dataSize = POINTER_SIZE;
-      left_val.var->tagName = tagName_tmp;
-      *parse_flag |= IS_DECLARE;
+      left_val.var->tagName = tagName_tmp; // bit dangerous
     } else if (tent != NULL) { // struct in struct
       left_val.var->dType = STRUCT_T;
       left_val.var->tagName = (char *)malloc(self->tkn->intVal);
       memcpy(left_val.var->tagName, self->tkn->text, self->tkn->intVal);
       left_val.dataSize = tent->dataSize;
-    } else if (root == self) { // declare member when define
-      TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
-      memcpy(TypeDefTable[typedef_ent_ct++].tagName, self->tkn->text, self->tkn->intVal);
     } else {
       left_val.var->name = malloc(sizeof(char) * (self->tkn->intVal + 1)); // TODO : error check, and must free
       memcpy(left_val.var->name, self->tkn->text, self->tkn->intVal);
@@ -269,6 +257,13 @@ void genCode_tree_Ident_struct_dec(Node *root, Node *self) {
       memcpy(varp->name, left_val.var->name, 10); // TODO : temporally
       TypeDefTable[typedef_ent_ct].dataSize += get_data_size(&left_val);
       TypeDefTable[typedef_ent_ct].structEntCount++;
+    }
+  } else if (tent == NULL && !(*parse_flag & IS_DECLARE)) {
+    if (root->tkn->kind == '{') {
+      *parse_flag |= SET_MEMBER;
+      tagName_tmp = root->tkn->text; // save for self reference
+      TypeDefTable[typedef_ent_ct].tagName = (char *)malloc(self->tkn->intVal);
+      memcpy(TypeDefTable[typedef_ent_ct].tagName, self->tkn->text, self->tkn->intVal);
     }
   } else if (tent != NULL && self->l->tkn->kind == Struct) { // declare
     left_val.var->dType = STRUCT_T; // this should be te_tmp
@@ -487,10 +482,6 @@ void genCode_tree(Node *self, Node *root) {
       break;
     case Struct:
       *parse_flag |= IS_STRUCT;
-      if (root->r != NULL && root->r->tkn->kind == '{') {
-	tagName_tmp = root->tkn->text; // save for self reference
-	*parse_flag |= SET_MEMBER;
-      }
       break;
     case Typedef:
       *parse_flag |= IS_TYPEDEF;
@@ -510,10 +501,8 @@ void genCode_tree(Node *self, Node *root) {
 	genCode1(VAL);
       break;
     case Lbrace:
-      if (strcmp(self->tkn->text, "{}\0") == 0) {
-	*parse_flag = 0; // reset
-	parse_flag = &parse_flags.f[--parse_flags.nest];
-      }
+      if (*parse_flag & (IS_STRUCT | SET_MEMBER))
+	typedef_ent_ct++;
       break;
     case Lbracket:
       genCode_tree_Lbracket(root, self);
