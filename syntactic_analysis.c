@@ -447,7 +447,7 @@ void genCode_tree(Node *self, Node *root) {
     parse_flag = &parse_flags.f[++parse_flags.nest];
   }
 
-  if (root->tkn->kind == Comma && self->tkn->kind != Comma && (*parse_flag & (DEC_ARRAY | DEC_EMPTY_ARRAY))) {
+  if (root->tkn->kind == Comma && self->tkn->kind != Comma && (*parse_flag & WITH_INIT)) {
     if (arrayCount >= left_val.var->arrLen && !(*parse_flag & DEC_EMPTY_ARRAY))
       error("initialize length overflowing");
     genCode_tree_addressing(arrayCount++);
@@ -501,10 +501,14 @@ void genCode_tree(Node *self, Node *root) {
 	genCode1(VAL);
       break;
     case Lbrace:
+      if (*parse_flag & WITH_INIT)
+	*parse_flag &= ~WITH_INIT;
       if (*parse_flag & (IS_STRUCT | SET_MEMBER))
 	typedef_ent_ct++;
       break;
     case Lbracket:
+      if (root->tkn->kind == '=' && root->r->tkn->kind == '{') // initialize array
+	*parse_flag |= WITH_INIT;
       genCode_tree_Lbracket(root, self);
       break;
     default:
