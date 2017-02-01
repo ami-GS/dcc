@@ -325,12 +325,6 @@ void genCode_tree_Ident(Node *root, Node *self) {
 }
 
 void genCode_tree_IntNum(Node *root, Node *self) {
-  if (*parse_flag & (IS_DECLARE | SET_MEMBER)) {
-    if (root->tkn->kind == Ident)
-      *parse_flag |= DEC_ARRAY;
-    if (self->tkn->text[0] == '[') // for int A[] = {1,2,..};
-      *parse_flag |= DEC_EMPTY_ARRAY;
-  }
   genCode2(LDI, self->tkn->intVal);
   if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
     genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
@@ -414,10 +408,13 @@ void genCode_tree_Lbracket(Node *root, Node *self) {
       malloc_more(te_tmp, get_data_size(te_tmp) * (left_val.var->arrLen-1));
       te_tmp->var->arrLen = left_val.var->arrLen;
     } else {
-      *parse_flag |= DEC_EMPTY_ARRAY;
+      *parse_flag |= DEC_EMPTY_ARRAY; // for int A[] = {1,2,..};
     }
     *parse_flag |= DEC_ARRAY;
   }
+
+  if (root->tkn->kind == '=' && root->r->tkn->kind == '{') // initialize array
+    *parse_flag |= WITH_INIT;
 }
 
 void go_left_node(Node *self, Node *root) {
@@ -439,14 +436,6 @@ void go_right_node(Node *self, Node *root) {
 }
 
 void genCode_tree(Node *self, Node *root) {
-  if (strcmp(self->tkn->text, "{}\0") == 0) {
-    if (*parse_flag & SET_MEMBER)
-      parse_flags.f[parse_flags.nest+1] = SET_MEMBER;
-    if (*parse_flag & DEC_ARRAY)
-      parse_flags.f[parse_flags.nest+1] = *parse_flag;
-    parse_flag = &parse_flags.f[++parse_flags.nest];
-  }
-
   if (root->tkn->kind == Comma && self->tkn->kind != Comma && (*parse_flag & WITH_INIT)) {
     if (arrayCount >= left_val.var->arrLen && !(*parse_flag & DEC_EMPTY_ARRAY))
       error("initialize length overflowing");
@@ -507,8 +496,6 @@ void genCode_tree(Node *self, Node *root) {
 	typedef_ent_ct++;
       break;
     case Lbracket:
-      if (root->tkn->kind == '=' && root->r->tkn->kind == '{') // initialize array
-	*parse_flag |= WITH_INIT;
       genCode_tree_Lbracket(root, self);
       break;
     default:
