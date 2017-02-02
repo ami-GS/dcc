@@ -299,7 +299,7 @@ void genCode_tree_Ident(Node *root, Node *self) {
   }
 
   DataType dtype = searchType(self->tkn->text);
-  if (dtype) {
+  if (dtype) { // defined type by 'typedef'
     left_val.var->dType = dtype;
     *parse_flag |= IS_DECLARE;
     return;
@@ -437,6 +437,8 @@ void go_right_node(Node *self, Node *root) {
 
 void genCode_tree(Node *self, Node *root) {
   if (root->tkn->kind == Comma && self->tkn->kind != Comma && (*parse_flag & WITH_INIT)) {
+    // for loading array initialization value like below
+    // int A[4] = {1,2,3,4};
     if (arrayCount >= left_val.var->arrLen && !(*parse_flag & DEC_EMPTY_ARRAY))
       error("initialize length overflowing");
     genCode_tree_addressing(arrayCount++);
