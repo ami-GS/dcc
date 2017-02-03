@@ -13,7 +13,7 @@
 typedef enum {
     GLOBAL, LOCAL, NO_LOCATION,
 } Level; //TODO : the locathion should be devided by each scope, which means each function have each level
-static int scopeCnt = 0;
+extern Level scope;
 
 typedef enum {
     NON_T, VOID_T, VOIDP_T, INT_T, INTP_T, SHORT_T, SHORTP_T, CHAR_T, CHARP_T, FLOAT_T, FLOATP_T, DOUBLE_T, DOUBLEP_T, STRUCT_T, STRUCTP_T, // TODO : increase

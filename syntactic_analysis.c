@@ -169,7 +169,7 @@ void genCode_tree_dec(Node *root, Node *self) {
   // this stands for bracket addressing, remove LDI of stack top
   if (funcPtr != NULL && funcPtr->args == -1)
     sKind = arg_ID;
-  set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, LOCAL, arrLen);
+  set_entry_member(&left_val, sKind, self->tkn->text, self->tkn->intVal, scope, arrLen);
   left_val.var->dType += root->tkn->kind == '*';
   left_val.dataSize = get_data_size(&left_val);
   te_tmp = enter_table_item(&left_val);

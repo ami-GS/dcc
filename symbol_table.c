@@ -9,7 +9,7 @@ TableEntry SymbolTable[TABLE_MAX];
 int table_ent_ct = 0;
 TypeDefEntry TypeDefTable[TYPEDEF_MAX];
 int typedef_ent_ct = 0;
-
+Level scope = NO_LOCATION;
 
 TableEntry* get_table_entry(char *name) {
   // TODO : use quick, binary, hash search
