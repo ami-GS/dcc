@@ -28,15 +28,6 @@ TableEntry* get_table_entry(char *name) {
 }
 
 TableEntry *enter_table_item(TableEntry* ent) {
-  // TODO : data validattion
-  /*
-  TableEntry* e = get_table_entry(ent->name);
-  if (e != NULL && e->kind == ent->kind) {
-      // TODO : if both are prototype, then warning
-      return NULL; // TODO : name duplication
-  }
-  */
-
   if (table_ent_ct >= TABLE_MAX) {
     error("symbol table overflow");
   }
