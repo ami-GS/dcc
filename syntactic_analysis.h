@@ -23,6 +23,7 @@ static ParseFlag *parse_flag;
 #define MAX_NODES 64
 static Node nodes[MAX_NODES];
 static int node_used_ct = 0;
+static int semicolon_cnt = 0;
 #define MAX_EXPR_TOKENS 256
 static Token expr_tkns[MAX_EXPR_TOKENS];
 static DataType expr_type = NON_T;
@@ -40,7 +41,7 @@ static int member_nest = 0;
 static struct { // flag should be integrated
     TableEntry s[128];
     int idx;
-} member_stack; // for like, A[B[i]]
+} val_stack; // for like, A[B[i]] and func(a,b,...);
 
 int init_expr(Token *t, char endChar);
 void expression(Token *t, char endChar);

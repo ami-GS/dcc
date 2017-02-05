@@ -390,7 +390,7 @@ void genCode_tree_Lbracket(Node *root, Node *self) {
     if (codes[code_ct-1].opcode == LDI)
       genCode_tree_addressing(codes[--code_ct].opdata);
     else {
-      te_tmp = &member_stack.s[--member_stack.idx];
+      te_tmp = &val_stack.s[--val_stack.idx];
       genCode2(LDI, get_data_size(te_tmp));
       genCode_binary(Mul);
       genCode_binary(Add);
@@ -455,7 +455,7 @@ void genCode_tree(Node *self, Node *root) {
     case Ident:
       genCode_tree_Ident(root, self);
       if (*parse_flag & BRACKET_ACCESS)
-	member_stack.s[member_stack.idx++] = *te_tmp; // TODO : need limit check
+	val_stack.s[val_stack.idx++] = *te_tmp; // TODO : need limit check
       break;
     case IntNum:
       genCode_tree_IntNum(root, self);
@@ -549,7 +549,7 @@ int init_expr(Token *t, char endChar) {
   memset(left_val.var, 0, sizeof(VarElement));
   parse_flags.f[0] = 0;
   parse_flag = &parse_flags.f[0];
-  member_stack.idx = 0;
+  val_stack.idx = 0;
   return len;
 }
 
