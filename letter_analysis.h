@@ -69,7 +69,7 @@ static KeyWordType keyWdType[] = {
   {"==", Equal}, {"!=", NotEq}, {"<", Less}, {"<=", LessEq}, {"=<", EqLess}, {">", Great}, {">=", GreatEq}, {"=>", EqGreat},
   {"+=", AddAss}, {"-=", SubAss}, {"*=", MulAss}, {"/=", DivAss}, {"%=", ModAss},
   {"++", Incre}, {"--", Decre}, {"&&", And}, {"||", Or},
-  {"+", Add}, {"-", Sub}, {"*", Mul}, {"/", Div}, {"%", Mod}, {"=", Assign},
+  {"+", Add}, {"-", Sub}, {"*", Mul}, {"/", Div}, {"%", Mod}, {"=", Assign}, {"!", Not},
   {"&", Band}, {"|", Bor}, {"^", Bxor}, {"~", Bnot}, {"#", Sharp},
   {"&=", BandAss}, {"|=", BorAss}, {"^=", BxorAss}, {".", Dot}, {"->", Arrow},
   {"(", Lparen}, {")", Rparen}, {"{", Lbrace}, {"}", Rbrace}, {"[", Lbracket}, {"]", Rbracket},
