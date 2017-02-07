@@ -502,6 +502,9 @@ void genCode_tree(Node *self, Node *root) {
     case Lbracket:
       genCode_tree_Lbracket(root, self);
       break;
+    case Return:
+      *parse_flag |= ST_RETURN;
+      break;
     default:
       switch (self->tkn->hKind) {
       case Operator: case CombOpe:
@@ -553,6 +556,20 @@ int init_expr(Token *t, char endChar) {
   return len;
 }
 
+void genCode_last(Node *root) {
+  if (*parse_flag & ST_RETURN) {
+    if (root->tkn->kind == Return) {
+      if (funcPtr->var->dType != VOID_T)
+	error("Warnning : this function must return something");
+    } else if (funcPtr->var->dType != VOID_T) {
+      if (codes[code_ct-1].opcode == DEL)
+	code_ct--;
+    } else
+      error("Warnning : this function returns void");
+    genCode2(JMP, NO_FIX_RET_ADDR);
+  }
+}
+
 void expression(Token *t, char endChar) {
   int len = init_expr(t, endChar);
   Node *root = &nodes[node_used_ct++];
@@ -561,8 +578,10 @@ void expression(Token *t, char endChar) {
     dumpRevPolish(root);
     printf("\n");
   }
-  if (root->tkn != NULL)
+  if (root->tkn != NULL) {
     genCode_tree(root, root);
+    genCode_last(root);
+  }
 }
 
 void expr_with_check(Token *t, char l, char r) {

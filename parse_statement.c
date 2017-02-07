@@ -40,9 +40,6 @@ void statement(Token *t) {
   case If:
     st_if(t);
     break;
-  case Return:
-    st_return(t);
-    break;
 
   case Printf: case Exit:
     // TODO : Built-in fucntion, no returns
@@ -58,7 +55,7 @@ void statement(Token *t) {
   case Semicolon:
     nextToken(t, 0);
     break;
-  case Ident: case IntNum: case Mul: case Incre: case Decre:
+  case Ident: case IntNum: case Mul: case Incre: case Decre: case Return:
   case Int: case Float: case Char: case Double: case Struct: case Typedef: case Static: case Const:
   case IntP: case FloatP: case CharP: case DoubleP:// TODO : enhance here
     expr_with_check(t, 0, ';');
