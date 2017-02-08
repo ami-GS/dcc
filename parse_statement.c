@@ -265,26 +265,6 @@ void st_for(Token *t) {
   return;
 }
 
-void st_return(Token *t) {
-  nextToken(t, 0);
-  if (t->kind == ';') {
-    // check func return type, if not void, then error
-    if (funcPtr->var->dType != VOID_T)
-      error("Warnning : this function must return void");
-  } else {
-    expr_with_check(t, 0, ';');
-    // return type comparison t->kind, func type
-    if (funcPtr->var->dType != VOID_T) {
-      if (codes[code_ct-1].opcode == DEL)
-	code_ct--;
-    } else {
-      error("Warnning : this function must not return anything");
-    }
-  }
-  // jump to caller
-  genCode2(JMP, NO_FIX_RET_ADDR);
-}
-
 void st_build_in_void(Token *t) {
   return;
 }

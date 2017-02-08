@@ -39,7 +39,6 @@ void st_for(Token *t);
 void st_do(Token *t);
 void st_while(Token *t);
 void st_if(Token *t);
-void st_return(Token *t);
 void st_build_in_void(Token *t);
 void st_build_in(Token *t);
 void st_ident(Token *t);
