@@ -1,11 +1,12 @@
+#include "dcc.h"
 #include "emulate_cpu.h"
 #include "instruction.h"
 #include "opcode.h"
 #include "misc.h"
 
 
-int execute(Instruction *codes, int debug) {
-  if (debug) {
+int execute(Instruction *codes) {
+  if (DEBUG_FLAG & SHOW_MOVEMENT) {
     printf("****instructions****\n");
     printf("program counter\t\topcode\t\topdata\t\tstackvalue\n");
   }
@@ -34,13 +35,18 @@ int execute(Instruction *codes, int debug) {
     } else {
       addr = dat; // absolute addr
     }
-    if (debug) {
+    if (DEBUG_FLAG & SHOW_MOVEMENT) {
       printf("%d:\t\t\t %s\t\t %d\t\t", pc, OpCodeStr[op], dat);
       int k;
       for (k = stack_ptr-1; k >= 0; k--) {
 	printf("%d ", op_stack[k].sINT);
       }
-      printf("\n");
+      if (DEBUG_FLAG & STEP_PROC) {
+	char c;
+	gets(&c);
+      } else {
+	printf("\n");
+      }
     }
     pc++;
 

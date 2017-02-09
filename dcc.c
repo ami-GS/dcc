@@ -29,6 +29,7 @@ int  main(int argc, char *argv[]) {
 	case 'm': DEBUG_FLAG |= SHOW_MOVEMENT; break;
 	case 't': DEBUG_FLAG |= SHOW_TREE; break;
 	case 'o': DEBUG_FLAG |= OPTIMIZE; break;
+	case 'p': DEBUG_FLAG |= STEP_PROC; break;
 	}
       }
     }
@@ -50,5 +51,5 @@ int  main(int argc, char *argv[]) {
     error("'main' function is missing");
 
   if (DEBUG_FLAG & RUN)
-    execute(codes, (DEBUG_FLAG & SHOW_MOVEMENT) >> 2);
+    execute(codes);
 }
