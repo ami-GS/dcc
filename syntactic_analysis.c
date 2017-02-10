@@ -486,6 +486,7 @@ void genCode_tree(Node *self, Node *root) {
       if ((!left_most_assign || member_nest) && var_tmp->dType != STRUCT_T)
 	genCode1(VAL);
       break;
+    case Lparen:
      if (*parse_flag & CALL_FUNC) {
 	genCode2(CALL, te_func.var->code_addr); // TODO : te_func should be included in val_stack
 	if (te_func.var->dType != VOID_T && root == self)
