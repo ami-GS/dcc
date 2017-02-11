@@ -42,6 +42,6 @@ static int global_memory_addr = 0;
 #define ASSIGN_FLOAT(addr, dat) MEMINT(addr) = dat
 #define ASSIGN_DOUBLE(addr, dat) MEMDOUBLE(addr) = dat
 
-int execute(Instruction *codes, int debug);
+int execute(Instruction *codes);
 
 #endif //_DCC_EMULATE_CPU_H_
