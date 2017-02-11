@@ -23,12 +23,15 @@ void compile(char *fname) {
       set_dtype(&entryTmp, &t);
       set_name(&entryTmp, &t);
       if (checkNxtTokenKind('(')) {
+	scope = LOCAL;
 	declare_func(&entryTmp, &t);
       } else { // in case of ',' or '['
+	scope = GLOBAL;
 	//expression(&t, ';');
 	declare_var(&entryTmp, &t);
       }
     } else if (t.hKind == Modifier) {
+      scope = GLOBAL;
       statement(&t);
       // TBD
     } else {
