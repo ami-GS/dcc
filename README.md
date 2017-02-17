@@ -10,10 +10,20 @@ Currently the usage is limited, but you can use example/ directory for testing.
 $ git clone https://github.com/ami-GS/dcc
 $ cd dcc
 $ make
-$ dcc example/fib.c -srm
-$ dcc example/sort.c -srm
-$ dcc example/list.c -srm
+$ dcc example/fib.c -srmo
+$ dcc example/sort.c -srmo
+$ dcc example/list.c -srmo
 ```
+
+## Options
+options below can be used with command
+- -r : run the code
+- -i : leave '.i' file after precompile
+- -s : show assembly generated
+- -m : show move of assembly
+- -p : step execution by assembly level
+- -t : show tree parsed from expression/statement
+- -o : optimize code. remove/marge nonsense code
 
 ## TODO
 These are TODO list specilly I would like to implement.
