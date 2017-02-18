@@ -99,7 +99,14 @@ int nextChar(char *c);
 int is_ope2(const char *c1, const char *c2);
 int is_ope1(Kind k);
 int set_kind(Token *t);
+void nxtLetter(Token *t, char *txt_ptr, char c);
+void nxtDigit(Token *t, char *txt_ptr, char c);
+void nxtDquote(Token *t, char *txt_ptr, char c);
+void nxtSquote(Token *t, char *txt_ptr, char c);
+void nxtSpaceTab(Token *t, char *txt_ptr, char c);
+void nxtDefault(Token *t, char *txt_ptr, char c);
 int nextToken(Token *t, int q_lock);
+
 int checkNxtTokenKind(Kind k);
 SymbolKind get_func_type();
 static int prevC = -2;

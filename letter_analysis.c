@@ -147,6 +147,101 @@ int set_kind(Token *t) {
   return 1;
 }
 
+void nxtLetter(Token *t, char *txt_ptr, char c) {
+    for (; cType[c] == Letter || cType[c] == Digit; nextChar(&c)) {
+      if (txt_ptr - t->text < ID_SIZ)
+	*(txt_ptr++) = c;
+      // TODO : if length exceeds the limit, emit error?
+    }
+    notUseChar(c);
+    *txt_ptr = '\0';
+    t->intVal = txt_ptr - t->text; // lenth
+    return; // TODO : or return length of txt_ptr?
+}
+
+void nxtDigit(Token *t, char *txt_ptr, char c) {
+  for (; cType[c] == Digit; nextChar(&c)) {
+    t->intVal = t->intVal*10 + (c - '0');
+    *(txt_ptr++) = c;
+  }
+  if (c == '.') {
+    float power;
+    *(txt_ptr++) = c;
+    nextChar(&c);
+    for (power = 1.0; cType[c] == Digit; nextChar(&c)) {
+      t->intVal = t->intVal*10 + (c - '0');
+      power *= 10.0;
+      *(txt_ptr++) = c;
+    }
+    t->dVal = (double)t->intVal / power;
+    t->kind = FloatNum;
+  } else {
+    t->kind = IntNum;
+  }
+  *txt_ptr = '\0';
+  notUseChar(c);
+  return;
+}
+
+void nxtDquote(Token *t, char *txt_ptr, char c) {
+  for (nextChar(&c); c != '"' && c != EOF; nextChar(&c)) {
+    if (txt_ptr - t->text < TOKEN_TXT_SIZ)
+      *(txt_ptr++) = c;
+    // TODO ; if length exceeds the limit, emit error
+  }
+  if (c != '"')
+    error("end \" is missing");
+  *txt_ptr = '\0';
+  t->kind = String;
+  t->intVal = txt_ptr - t->text;
+  return;
+}
+
+void nxtSquote(Token *t, char *txt_ptr, char c) {
+  for (nextChar(&c); c != '\'' && c != EOF; nextChar(&c))
+    *(txt_ptr++) = t->intVal = c;
+  if (c != '\'')
+    error("end \' is missing");
+  if (txt_ptr - t->text > 1)
+    error("Single quote must have single char");
+  t->kind = CharSymbol;
+  *txt_ptr = '\0';
+  return;
+}
+
+void nxtSpaceTab(Token *t, char *txt_ptr, char c) {
+  while (c == ' ' || c == '\t') {
+    *(txt_ptr++) = c;
+    nextChar(&c);
+  }
+  *txt_ptr = '\0';
+  t->intVal = txt_ptr - t->text;
+  if (t->intVal > 1) {
+    t->kind = Blanks;
+  }
+  notUseChar(c);
+  return;
+}
+
+void nxtDefault(Token *t, char *txt_ptr, char c) {
+  *(txt_ptr++) = c;
+  nextChar(&c); //to check 2 length operaiton
+  if (is_ope2(txt_ptr-1, &c)) {
+    *(txt_ptr++) = c;
+    nextChar(&c); //to check only <"<=" >">="
+    if ((memcmp(txt_ptr-2, "<<", 2) == 0 || memcmp(txt_ptr-2, ">>", 2) == 0) &&
+	is_ope2(txt_ptr-1, &c)) {
+      *(txt_ptr++) = c;
+    } else {
+      notUseChar(c);
+    }
+  } else {
+    notUseChar(c);
+  }
+  *txt_ptr = '\0';
+  return;
+}
+
 // TODO : define error type?
 int nextToken(Token *t, int q_lock) {
   if (t_buf_head != t_buf_tail && !q_lock) {
@@ -173,92 +268,27 @@ int nextToken(Token *t, int q_lock) {
     return err;
   }
 
-  float power;
   char *txt_ptr = t->text;
   switch (cType[c]) {
   case Letter:
-    for (; cType[c] == Letter || cType[c] == Digit; nextChar(&c)) {
-      if (txt_ptr - t->text < ID_SIZ)
-	*(txt_ptr++) = c;
-      // TODO : if length exceeds the limit, emit error?
-    }
-    notUseChar(c);
-    *txt_ptr = '\0';
-    t->intVal = txt_ptr - t->text; // lenth
+    nxtLetter(t, txt_ptr, c);
     break;
   case Digit:
-    for (; cType[c] == Digit; nextChar(&c)) {
-      t->intVal = t->intVal*10 + (c - '0');
-      *(txt_ptr++) = c;
-    }
-    if (c == '.') {
-      *(txt_ptr++) = c;
-      nextChar(&c);
-      for (power = 1.0; cType[c] == Digit; nextChar(&c)) {
-	t->intVal = t->intVal*10 + (c - '0');
-	power *= 10.0;
-	*(txt_ptr++) = c;
-      }
-      t->dVal = (double)t->intVal / power;
-      t->kind = FloatNum;
-    } else {
-      t->kind = IntNum;
-    }
-    *txt_ptr = '\0';
-    notUseChar(c);
+    nxtDigit(t, txt_ptr, c);
     break;
   case Dquote:
-    for (nextChar(&c); c != '"' && c != EOF; nextChar(&c)) {
-      if (txt_ptr - t->text < TOKEN_TXT_SIZ)
-	*(txt_ptr++) = c;
-      // TODO ; if length exceeds the limit, emit error
-    }
-    if (c != '"')
-      error("end \" is missing");
-    *txt_ptr = '\0';
-    t->kind = String;
-    t->intVal = txt_ptr - t->text;
+    nxtDquote(t, txt_ptr, c);
     break;
   case Squote:
     // TODO : need to check how fgetc(FILE*) read escape. like '\' + 'n' or '\n';
-    for (nextChar(&c); c != '\'' && c != EOF; nextChar(&c))
-      *(txt_ptr++) = t->intVal = c;
-    if (c != '\'')
-      error("end \' is missing");
-    if (txt_ptr - t->text > 1)
-      error("Single quote must have single char");
-    t->kind = CharSymbol;
-    *txt_ptr = '\0';
+    nxtSquote(t, txt_ptr, c);
     break;
   case Space: case Tab:
-    while (c == ' ' || c == '\t') {
-      *(txt_ptr++) = c;
-      nextChar(&c);
-    }
-    *txt_ptr = '\0';
-    t->intVal = txt_ptr - t->text;
-    if (t->intVal > 1) {
-      t->kind = Blanks;
-    }
-    notUseChar(c);
+    nxtSpaceTab(t, txt_ptr, c);
     break;
   default:
     // TODO : add more cases?
-    *(txt_ptr++) = c;
-    nextChar(&c); //to check 2 length operaiton
-    if (is_ope2(txt_ptr-1, &c)) {
-      *(txt_ptr++) = c;
-      nextChar(&c); //to check only <"<=" >">="
-      if ((memcmp(txt_ptr-2, "<<", 2) == 0 || memcmp(txt_ptr-2, ">>", 2) == 0) &&
-	  is_ope2(txt_ptr-1, &c)) {
-	*(txt_ptr++) = c;
-      } else {
-	notUseChar(c);
-      }
-    } else {
-      notUseChar(c);
-    }
-    *txt_ptr = '\0';
+    nxtDefault(t, txt_ptr, c);
   }
   if (t->kind == NulKind)
     set_kind(t);
