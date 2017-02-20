@@ -131,19 +131,26 @@ int is_ope1(Kind k) {
 }
 
 int set_kind(Token *t) {
-  t->kind = Others;
-  int i;
-  for (i = 0; keyWdType[i].kind != END_list; i++) {
-    if (strcmp(t->text, keyWdType[i].word) == 0) {
-      t->kind = keyWdType[i].kind;
-      return 1;
+  if (t->kind == NulKind) {
+    int i;
+    t->kind = Others;
+    for (i = 0; keyWdType[i].kind != END_list; i++) {
+      if (strcmp(t->text, keyWdType[i].word) == 0) {
+	t->kind = keyWdType[i].kind;
+	break;
+      }
     }
   }
-  if (cType[*t->text] == Letter) {
-    t->kind = Ident;
-  } else {
-    error("unknown kind");
+
+
+  if (t->kind == Others) {
+    if (cType[*t->text] == Letter) {
+      t->kind = Ident;
+    } else {
+      error("unknown kind");
+    }
   }
+  set_hKind(t);
   return 1;
 }
 
@@ -290,13 +297,7 @@ int nextToken(Token *t, int q_lock) {
     // TODO : add more cases?
     nxtDefault(t, txt_ptr, c);
   }
-  if (t->kind == NulKind)
-    set_kind(t);
-  if (t->kind == Others) {
-    error("unknown token kind");
-  } else {
-    set_hKind(t);
-  }
+  set_kind(t);
   return 1;
 }
 
