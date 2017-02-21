@@ -35,19 +35,8 @@ int execute(Instruction *codes) {
     } else {
       addr = dat; // absolute addr
     }
-    if (DEBUG_FLAG & SHOW_MOVEMENT) {
-      printf("%d:\t\t\t %s\t\t %d\t\t", pc, OpCodeStr[op], dat);
-      int k;
-      for (k = stack_ptr-1; k >= 0; k--) {
-	printf("%d ", op_stack[k].sINT);
-      }
-      if (DEBUG_FLAG & STEP_PROC) {
-	char c;
-	gets(&c);
-      } else {
-	printf("\n");
-      }
-    }
+    if (DEBUG_FLAG & SHOW_MOVEMENT)
+      debug_emulate(op, dat);
     pc++;
 
     switch (op) {
@@ -73,31 +62,31 @@ int execute(Instruction *codes) {
     case LIB:
       */
     case LOD:
-      PUSH(MEMINT(addr)); break;
+      PUSHINT(MEMINT(addr)); break;
     case LODV:
-      PUSH(MEMINT(MEMINT(addr))); break;
+      PUSHINT(MEMINT(MEMINT(addr))); break;
     case LODS:
-      PUSH(MEMSHORT(addr)); break;
+      PUSHSRT(MEMSHORT(addr)); break;
     case LODF:
-      PUSH(MEMINT(addr)); break;
+      PUSHFLT(MEMINT(addr)); break;
     case LODD:
-      PUSH(MEMDOUBLE(addr)); break; // TODO : this should not work well
+      PUSHDBL(MEMDOUBLE(addr)); break; // TODO : this should not work well
     case LODC:
-      PUSH(*(memory+addr)); break;
+      PUSHCHAR(*(memory+addr)); break;
     case LDA:
-      PUSH(addr); break;
+      PUSHINT(addr); break;
     case LDI:
-      PUSH(dat); break;
+      PUSHINT(dat); break; // TODO : need LDC, LDF LDD etc.
     case STO:
       ASSIGN(addr, op_stack[stack_ptr-1].sINT);
       stack_ptr--;
       break;
     case STOS:
-      ASSIGN(addr, op_stack[stack_ptr-1].sSRT);
+      ASSIGN_SHORT(addr, op_stack[stack_ptr-1].sSRT);
       stack_ptr--;
       break;
     case STOF:
-      ASSIGN(addr, op_stack[stack_ptr-1].sSRT);
+      ASSIGN_FLOAT(addr, op_stack[stack_ptr-1].sFLT);
       stack_ptr--;
       break;
     case STOC:
@@ -105,7 +94,7 @@ int execute(Instruction *codes) {
       stack_ptr--;
       break;
     case STOD:
-      ASSIGN(addr, op_stack[stack_ptr-1].sDBL);
+      ASSIGN_DOUBLE(addr, op_stack[stack_ptr-1].sDBL);
       stack_ptr--;
     case ADBR:  // research frame for calling func
       baseReg += dat;
@@ -140,19 +129,19 @@ int execute(Instruction *codes) {
       op_stack[stack_ptr-2].sCHAR = op_stack[stack_ptr-1].sCHAR;
       stack_ptr--; break;
     case ASVS:
-      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sSRT);
+      ASSIGN_SHORT(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sSRT);
       op_stack[stack_ptr-2].sSRT = op_stack[stack_ptr-1].sSRT;
       stack_ptr--; break;
     case ASVF:
-      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sFLT);
+      ASSIGN_FLOAT(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sFLT);
       op_stack[stack_ptr-2].sFLT = op_stack[stack_ptr-1].sFLT;
       stack_ptr--; break;
     case ASVD:
-      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sDBL);
+      ASSIGN_DOUBLE(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sDBL);
       op_stack[stack_ptr-2].sDBL = op_stack[stack_ptr-1].sDBL;
       stack_ptr--; break;
     case ASVP:
-      ASSIGN_CHAR(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
+      ASSIGN(op_stack[stack_ptr-2].sINT, op_stack[stack_ptr-1].sINT);
       op_stack[stack_ptr-2].sINT = op_stack[stack_ptr-1].sINT;
       stack_ptr--; break;
     case CPY:
@@ -163,19 +152,19 @@ int execute(Instruction *codes) {
     case VALC:
       op_stack[stack_ptr-1].sCHAR = memory[op_stack[stack_ptr-1].sINT]; break;
     case VALS:
-      op_stack[stack_ptr-1].sSRT = memory[op_stack[stack_ptr-1].sINT]; break;
+      op_stack[stack_ptr-1].sSRT = MEMSHORT(op_stack[stack_ptr-1].sINT); break;
     case VALF:
-      op_stack[stack_ptr-1].sFLT = memory[op_stack[stack_ptr-1].sINT]; break;
+      op_stack[stack_ptr-1].sFLT = MEMINT(op_stack[stack_ptr-1].sINT); break;
     case VALD:
-      op_stack[stack_ptr-1].sDBL = memory[op_stack[stack_ptr-1].sINT]; break;
+      op_stack[stack_ptr-1].sDBL = MEMDOUBLE(op_stack[stack_ptr-1].sINT); break;
     case EQCMP:
       // TODO : suspicious
       if (dat == op_stack[stack_ptr-1].sINT) {
 	op_stack[stack_ptr-1].sINT = 1; break;
       }
-      PUSH(0); break;
+      PUSHINT(0); break;
     case CALL:
-      PUSH(pc); pc = dat; break;
+      PUSHINT(pc); pc = dat; break;
     case RET:
       pc = POP(); break;
     case INCL:
@@ -227,5 +216,27 @@ int execute(Instruction *codes) {
     case RSHIFTL:
       BIN_OP_DWORD(>>); break;
     }
+  }
+}
+
+
+void debug_emulate(int opcode, int opdata) {
+  printf("%d:\t\t\t %s\t\t %d\t\t", pc, OpCodeStr[opcode], opdata);
+  int k;
+  for (k = stack_ptr-1; k >= 0; k--) {
+    switch (op_stack[k].type) {
+    case 0: printf("%c ", op_stack[k].sCHAR); break;
+    case 1: printf("%d ", op_stack[k].sSRT); break;
+    case 2: printf("%d ", op_stack[k].sINT); break;
+    case 3: printf("%f ", op_stack[k].sFLT); break;
+    case 4: printf("%lf ", op_stack[k].sDBL); break;
+    }
+  }
+
+  if (DEBUG_FLAG & STEP_PROC) {
+    char c;
+    gets(&c);
+  } else {
+    printf("\n");
   }
 }

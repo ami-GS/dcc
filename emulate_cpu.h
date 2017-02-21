@@ -8,17 +8,25 @@ static int baseReg; // base register
 
 #define OP_STACK_TOP 200
 #define OP_STACK_BUTTOM 0
-typedef union {
-    char   sCHAR; //not used yet
-    short  sSRT; //not used yet
-    int    sINT;
-    float  sFLT;  //not used yet
-    double sDBL;  //not used yet
+
+typedef struct {
+    union {
+        char   sCHAR; //not used yet
+        short  sSRT; //not used yet
+        int    sINT;
+        float  sFLT;  //not used yet
+        double sDBL;  //not used yet
+    };
+    char type;
 } stkData;
 stkData op_stack[OP_STACK_TOP];
 
 static int stack_ptr = OP_STACK_BUTTOM;
-#define PUSH(a) op_stack[stack_ptr++].sINT=a
+#define PUSHCHAR(a) op_stack[stack_ptr].sCHAR=a; op_stack[stack_ptr++].type=0;
+#define PUSHSRT(a) op_stack[stack_ptr].sSRT=a; op_stack[stack_ptr++].type=1;
+#define PUSHINT(a) op_stack[stack_ptr].sINT=a; op_stack[stack_ptr++].type=2;
+#define PUSHFLT(a) op_stack[stack_ptr].sFLT=a; op_stack[stack_ptr++].type=3;
+#define PUSHDBL(a) op_stack[stack_ptr].sDBL=a; op_stack[stack_ptr++].type=4;
 #define POP()   op_stack[--stack_ptr].sINT // currently only int
 
 #define MEM_MAX 65535 // TODO : more ?
@@ -43,5 +51,6 @@ static int global_memory_addr = 0;
 #define ASSIGN_DOUBLE(addr, dat) MEMDOUBLE(addr) = dat
 
 int execute(Instruction *codes);
+void debug_emulate(int opcode, int opdata);
 
 #endif //_DCC_EMULATE_CPU_H_
