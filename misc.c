@@ -19,7 +19,7 @@ void code_dump() {
 	  if (op == RET || op == STOP)
 	    printf("\n");
 	  break;
-	case LOD: case LODC: case LODV: case LDA: case LDI: case STO:
+	case LOD: case LODC: case LODV: case LDA: case LDI: case LDIF: case STO:
 	case STOC: case STOD: case STOS: case STOF: case CALL: case ADBR:
 	case LIB: case JMP: case JPT: case JPF: case EQCMP:
 	  printf("%s\t%d", OpCodeStr[op], codes[i].opdata);
