@@ -364,6 +364,17 @@ void genCode_tree_operator(Node *root, Node *self) {
   }
 }
 
+void genCode_tree_type(Node *self) {
+  if (*parse_flag & IS_TYPEDEF) {
+    TypeDefTable[typedef_ent_ct].baseType = tkn2dType(self->tkn->kind);
+    TypeDefTable[typedef_ent_ct].dataSize = DATA_SIZE[tkn2dType(self->tkn->kind)];
+    return;
+  }
+  left_val.var->dType = tkn2dType(self->tkn->kind);
+  *parse_flag |= IS_DECLARE; // TODO : need to consider CAST
+  return;
+}
+
 void genCode_tree_incdec(Node *root, Node *self) {
   if (codes[code_ct-1].opcode == LOD) {
     if (self->r != NULL) { // for ++A;
@@ -505,20 +516,11 @@ void genCode_tree(Node *self, Node *root) {
     default:
       switch (self->tkn->hKind) {
       case Immediate:
-	genCode_tree_Immediate(root, self);
-	break;
+	genCode_tree_Immediate(root, self); break;
       case Operator: case CombOpe:
-	genCode_tree_operator(root, self);
-	break;
+	genCode_tree_operator(root, self); break;
       case Type:
-	if (*parse_flag & IS_TYPEDEF) {
-	  TypeDefTable[typedef_ent_ct].baseType = tkn2dType(self->tkn->kind);
-	  TypeDefTable[typedef_ent_ct].dataSize = DATA_SIZE[tkn2dType(self->tkn->kind)];
-	  break;
-	}
-        left_val.var->dType = tkn2dType(self->tkn->kind);
-	*parse_flag |= IS_DECLARE; // TODO : need to consider CAST	
-	break;
+	genCode_tree_type(self); break;
       }
       break;
     }

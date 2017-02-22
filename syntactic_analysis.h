@@ -51,6 +51,7 @@ void dumpRevPolish(Node *root);
 void genCode_tree_assign();
 void genCode_tree_addressing(int offset);
 void genCode_tree_operator(Node *root, Node *self);
+void genCode_tree_type(Node *self);
 void genCode_tree_Ident_memb_access(Node *root, Node *self);
 void genCode_tree_Ident_struct_dec(Node *root, Node *self);
 void genCode_tree_dec(Node *root, Node *self);
