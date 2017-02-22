@@ -319,14 +319,13 @@ void genCode_tree_Ident(Node *root, Node *self) {
     genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
 }
 
-void genCode_tree_IntNum(Node *root, Node *self) {
-  genCode2(LDI, self->tkn->intVal);
-  if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
-    genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
-}
+void genCode_tree_Immediate(Node *root, Node *self) {
+  if (self->tkn->kind == FloatNum) {
+    genCode2(LDIF, self->tkn->dVal);
+  } else {
+    genCode2(LDI, self->tkn->intVal);
+  }
 
-void genCode_tree_CharSymbol(Node *root, Node *self) {
-  genCode2(LDI, self->tkn->intVal);
   if (left_most_assign == 2 && root->tkn->hKind == CombOpe)
     genCode(LOD_TYPE[left_val.var->dType], left_val.level, left_val.var->code_addr);
 }
@@ -457,11 +456,8 @@ void genCode_tree(Node *self, Node *root) {
       if (*parse_flag & BRACKET_ACCESS)
 	val_stack.s[val_stack.idx++] = *te_tmp; // TODO : need limit check
       break;
-    case IntNum:
-      genCode_tree_IntNum(root, self);
-      break;
     case CharSymbol:
-      genCode_tree_CharSymbol(root, self);
+      genCode_tree_Immediate(root, self);
       break;
     case String:
       genCode_tree_String(self->tkn);
@@ -508,6 +504,9 @@ void genCode_tree(Node *self, Node *root) {
       break;
     default:
       switch (self->tkn->hKind) {
+      case Immediate:
+	genCode_tree_Immediate(root, self);
+	break;
       case Operator: case CombOpe:
 	genCode_tree_operator(root, self);
 	break;
