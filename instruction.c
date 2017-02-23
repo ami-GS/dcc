@@ -6,11 +6,15 @@
 
 int code_ct = 0;
 
-int genCode(OpCode op, int flag, int dat) {
+int genCode(OpCode op, int flag, int dat) { // TODO : this dat should be more flexible
   if (const_fold(op)) {
     return code_ct-1;
   }
-  Instruction inst = {op, flag, dat};
+  DataType dtype = INT_T;
+  if (op == LDIF) // TODO : expand needed
+    dtype = FLOAT_T;
+  Instruction inst = {op, flag, dtype};
+  inst.opdatai = dat; // TODO : last dat should be assigned to proper name
 
   if (code_ct >= CODE_SIZ) {
     error("generated code size overflow");
@@ -113,50 +117,50 @@ int genCode_binary(Kind k) {
 }
 
 void backpatch(int c_ct, int addr) {
-  codes[c_ct].opdata = addr;
+  codes[c_ct].opdatai = addr;
 }
 
 void backpatch_break(int loop_top) {
   int i;
   for (i = code_ct-1; i >= loop_top; i--) {
-    if (codes[i].opcode == JMP && codes[i].opdata == NO_FIX_BREAK_ADDR) {
+    if (codes[i].opcode == JMP && codes[i].opdatai == NO_FIX_BREAK_ADDR) {
       code_ct--;
     } else {
       break;
     }
   }
   for (i = code_ct-1; i >= loop_top; i--) {
-    if (codes[i].opcode == JMP && codes[i].opdata == NO_FIX_BREAK_ADDR)
-      codes[i].opdata = code_ct;
+    if (codes[i].opcode == JMP && codes[i].opdatai == NO_FIX_BREAK_ADDR)
+      codes[i].opdatai = code_ct;
   }
 }
 
 void backpatch_return(int return_address) {
   int i;
   for (i = code_ct-1; i >= return_address; i--) {
-    if (codes[i].opcode == JMP && codes[i].opdata == NO_FIX_RET_ADDR) {
+    if (codes[i].opcode == JMP && codes[i].opdatai == NO_FIX_RET_ADDR) {
       code_ct--;
     } else {
       break;
     }
   }
   for (i = code_ct-1; i >= return_address; i--) {
-    if (codes[i].opcode == JMP && codes[i].opdata == NO_FIX_RET_ADDR)
-      codes[i].opdata = code_ct;
+    if (codes[i].opcode == JMP && codes[i].opdatai == NO_FIX_RET_ADDR)
+      codes[i].opdatai = code_ct;
   }
 }
 
 void backpatch_calladdr() {
   int i;
   for (i = 0; i < code_ct; i++) {
-    if (codes[i].opcode == CALL && codes[i].opdata <= 0) {
-      int addr = SymbolTable[-(codes[i].opdata)].var->code_addr;
+    if (codes[i].opcode == CALL && codes[i].opdatai <= 0) {
+      int addr = SymbolTable[-(codes[i].opdatai)].var->code_addr;
       if (addr <= 0) {
-	codes[i].opdata = SymbolTable[-addr].var->code_addr;
+	codes[i].opdatai = SymbolTable[-addr].var->code_addr;
       } else {
-	codes[i].opdata = addr; // workaround
+	codes[i].opdatai = addr; // workaround
       }
-      if (codes[i].opdata < 0) {
+      if (codes[i].opdatai < 0) {
 	error("unknown function"); // is this true?
       }
     }
@@ -247,16 +251,16 @@ int const_fold(OpCode op) {
   if (DEBUG_FLAG & OPTIMIZE) {
     if (code_ct >= 1 && codes[code_ct-1].opcode == LDI) {
       if (op == NOT) {
-	codes[code_ct-1].opdata = !codes[code_ct-1].opdata;
+	codes[code_ct-1].opdatai = !codes[code_ct-1].opdatai;
 	return 1;
       } else if (op == NEG) {
-	codes[code_ct-1].opdata = -codes[code_ct-1].opdata;
+	codes[code_ct-1].opdatai = -codes[code_ct-1].opdatai;
 	return 1;
       } else if (op == BNOT) {
-	codes[code_ct-1].opdata = ~codes[code_ct-1].opdata;
+	codes[code_ct-1].opdatai = ~codes[code_ct-1].opdatai;
 	return 1;
       } else if (is_binaryOP(op) && codes[code_ct-2].opcode == LDI) {
-	codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
+	codes[code_ct-2].opdatai = binary_expr(op, codes[code_ct-2].opdatai, codes[code_ct-1].opdatai);
 	code_ct--;
 	return 1;
       }
@@ -268,13 +272,13 @@ int const_fold(OpCode op) {
     // -> LDA 12+xxxx
     if (code_ct >= 2 && is_binaryOP(op)) {
       if (codes[code_ct-2].opcode == LDI && codes[code_ct-1].opcode == LDA) {
-	codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
+	codes[code_ct-2].opdatai = binary_expr(op, codes[code_ct-2].opdatai, codes[code_ct-1].opdatai);
 	codes[code_ct-2].opcode = codes[code_ct-1].opcode;
 	codes[code_ct-2].flag = codes[code_ct-1].flag;
 	code_ct--;
 	return 1;
       } else if (codes[code_ct-2].opcode == LDA && codes[code_ct-1].opcode == LDI) {
-	codes[code_ct-2].opdata = binary_expr(op, codes[code_ct-2].opdata, codes[code_ct-1].opdata);
+	codes[code_ct-2].opdatai = binary_expr(op, codes[code_ct-2].opdatai, codes[code_ct-1].opdatai);
 	code_ct--;
 	return 1;
       }

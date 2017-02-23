@@ -10,7 +10,14 @@
 typedef struct {
     OpCode opcode;
     char flag;
-    int  opdata;
+    DataType type;
+    union {
+        char   opdatac;
+        short  opdatas;
+        int    opdatai;
+        float  opdataf;
+        double opdatad;
+    };
 } Instruction;
 
 // TODO : should this be big as much as possible?

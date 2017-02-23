@@ -126,7 +126,7 @@ void st_case(Token *t) {
   expr_with_check(t, 0 , ':');
   int val;
   if (codes[code_ct-1].opcode == LDI) {
-    val = codes[code_ct-1].opdata; // TODO : suspicious
+    val = codes[code_ct-1].opdatai; // TODO : suspicious
   }
   code_ct--; // remove LDI and its const
   int i;

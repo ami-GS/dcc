@@ -22,13 +22,13 @@ void code_dump() {
 	case LOD: case LODC: case LODV: case LDA: case LDI: case LDIF: case STO:
 	case STOC: case STOD: case STOS: case STOF: case CALL: case ADBR:
 	case LIB: case JMP: case JPT: case JPF: case EQCMP:
-	  printf("%s\t%d", OpCodeStr[op], codes[i].opdata);
+	  printf("%s\t%d", OpCodeStr[op], codes[i].opdatai); // TODO : separate for each data type
 	  if (codes[i].flag && (op == LOD || op == LODC || op == LDA || op == STO))
 	    printf("[b]"); // TODO : ???
 	  printf("\n");
 	  break;
 	default:
-	  printf("invalid operand OP=%d, DAT=%d\n", op, codes[i].opdata);
+	  printf("invalid operand OP=%d, DAT=%d\n", op, codes[i].opdatai);
 	}
     }
 }

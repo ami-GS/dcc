@@ -398,7 +398,7 @@ void genCode_tree_incdec(Node *root, Node *self) {
 void genCode_tree_Lbracket(Node *root, Node *self) {
   if (!(*parse_flag & IS_DECLARE)) {
     if (codes[code_ct-1].opcode == LDI)
-      genCode_tree_addressing(codes[--code_ct].opdata);
+      genCode_tree_addressing(codes[--code_ct].opdatai);
     else {
       te_tmp = &val_stack.s[--val_stack.idx];
       genCode2(LDI, get_data_size(te_tmp));
@@ -409,7 +409,7 @@ void genCode_tree_Lbracket(Node *root, Node *self) {
       genCode1(VAL_TYPE[te_tmp->var->dType]);
   } else {
     if (self->r != NULL) {
-      left_val.var->arrLen = codes[--code_ct].opdata;
+      left_val.var->arrLen = codes[--code_ct].opdatai;
       malloc_more(te_tmp, get_data_size(te_tmp) * (left_val.var->arrLen-1));
       te_tmp->var->arrLen = left_val.var->arrLen;
     } else {

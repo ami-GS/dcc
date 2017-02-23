@@ -166,7 +166,7 @@ int set_array(TableEntry* ent, Token *t) {
     expr_with_check(t, '[', ']');
     // expr_with_check folds const expression.
     // the result assigned var->arrLen and it is not needed on codes
-    ent->var->arrLen = codes[--code_ct].opdata; // TODO : suspicious, my implementation
+    ent->var->arrLen = codes[--code_ct].opdatai; // TODO : suspicious, my implementation
     if (ent->var->arrLen <= 0) {
       error("invalid array length");
     }

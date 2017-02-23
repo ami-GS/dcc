@@ -47,7 +47,7 @@ int  main(int argc, char *argv[]) {
   if (DEBUG_FLAG & SHOW_ASSEMBLY)
     code_dump();
 
-  if (codes[0].opdata < 0)
+  if (codes[0].opdatai < 0)
     error("'main' function is missing");
 
   if (DEBUG_FLAG & RUN)
