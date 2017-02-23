@@ -14,7 +14,8 @@ int execute(Instruction *codes) {
   baseReg = MEM_MAX-1;
   stack_ptr = 0;
 
-  int op, dat, addr;
+  int dat, addr;
+  OpCode op;
   while (1) {
     if (pc < 0 || code_ct < pc) {
       return -1; // invalid operation
@@ -29,14 +30,15 @@ int execute(Instruction *codes) {
       preprocessing
     */
     op = codes[pc].opcode;
-    dat = codes[pc].opdata;
+    dat = codes[pc].opdatai;
     if ( (codes[pc].flag & 0x01) ) {
       addr = baseReg + dat; // reative addr
     } else {
       addr = dat; // absolute addr
     }
-    if (DEBUG_FLAG & SHOW_MOVEMENT)
-      debug_emulate(op, dat);
+    if (DEBUG_FLAG & SHOW_MOVEMENT) {
+      debug_emulate(pc, &codes[pc]);
+    }
     pc++;
 
     switch (op) {
@@ -220,8 +222,14 @@ int execute(Instruction *codes) {
 }
 
 
-void debug_emulate(int opcode, int opdata) {
-  printf("%d:\t\t\t %s\t\t %d\t\t", pc, OpCodeStr[opcode], opdata);
+void debug_emulate(int pc, Instruction *code) {
+  switch (code->opcode) {
+  case LDIF:
+    printf("%d:\t\t\t %s\t\t %f\t\t", pc, OpCodeStr[code->opcode], code->opdataf);
+  default:
+    printf("%d:\t\t\t %s\t\t %d\t\t", pc, OpCodeStr[code->opcode], code->opdatai);
+  }
+
   int k;
   for (k = stack_ptr-1; k >= 0; k--) {
     switch (op_stack[k].type) {
