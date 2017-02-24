@@ -11,7 +11,7 @@ int genCode(OpCode op, int flag, int dat) { // TODO : this dat should be more fl
     return code_ct-1;
   }
   DataType dtype = INT_T;
-  if (op == LDIF) // TODO : expand needed
+  if (op == LDIF || op == LODF) // TODO : expand needed
     dtype = FLOAT_T;
   Instruction inst = {op, flag, dtype};
   inst.opdatai = dat; // TODO : last dat should be assigned to proper name

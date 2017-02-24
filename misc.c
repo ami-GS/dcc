@@ -21,7 +21,7 @@ void code_dump() {
 	  break;
 	case LOD: case LODC: case LODV: case LDA: case LDI: case LDIF: case STO:
 	case STOC: case STOD: case STOS: case STOF: case CALL: case ADBR:
-	case LIB: case JMP: case JPT: case JPF: case EQCMP:
+	case LIB: case JMP: case JPT: case JPF: case EQCMP: case LODF:
 	  printf("%s\t%d", OpCodeStr[op], codes[i].opdatai); // TODO : separate for each data type
 	  if (codes[i].flag && (op == LOD || op == LODC || op == LDA || op == STO))
 	    printf("[b]"); // TODO : ???

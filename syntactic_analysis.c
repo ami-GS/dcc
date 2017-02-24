@@ -321,7 +321,8 @@ void genCode_tree_Ident(Node *root, Node *self) {
 
 void genCode_tree_Immediate(Node *root, Node *self) {
   if (self->tkn->kind == FloatNum) {
-    genCode2(LDIF, self->tkn->dVal);
+    genCode2(LDIF, 0); // TODO : workaround
+    codes[code_ct-1].opdataf = self->tkn->dVal;
   } else {
     genCode2(LDI, self->tkn->intVal);
   }
