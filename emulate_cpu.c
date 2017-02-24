@@ -70,7 +70,7 @@ int execute(Instruction *codes) {
     case LODS:
       PUSHSRT(MEMSHORT(addr)); break;
     case LODF:
-      PUSHFLT(MEMINT(addr)); break;
+      PUSHFLT(MEMFLOAT(addr)); break;
     case LODD:
       PUSHDBL(MEMDOUBLE(addr)); break; // TODO : this should not work well
     case LODC:
@@ -79,6 +79,8 @@ int execute(Instruction *codes) {
       PUSHINT(addr); break;
     case LDI:
       PUSHINT(dat); break; // TODO : need LDC, LDF LDD etc.
+    case LDIF:
+      PUSHFLT(codes[pc-1].opdataf); break;
     case STO:
       ASSIGN(addr, op_stack[stack_ptr-1].sINT);
       stack_ptr--;
@@ -156,7 +158,7 @@ int execute(Instruction *codes) {
     case VALS:
       op_stack[stack_ptr-1].sSRT = MEMSHORT(op_stack[stack_ptr-1].sINT); break;
     case VALF:
-      op_stack[stack_ptr-1].sFLT = MEMINT(op_stack[stack_ptr-1].sINT); break;
+      op_stack[stack_ptr-1].sFLT = MEMFLOAT(op_stack[stack_ptr-1].sINT); break;
     case VALD:
       op_stack[stack_ptr-1].sDBL = MEMDOUBLE(op_stack[stack_ptr-1].sINT); break;
     case EQCMP:

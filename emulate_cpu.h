@@ -36,6 +36,7 @@ static int global_memory_addr = 0;
 #define ZERO_CHK_DWORD() if(op_stack[stack_ptr-1].sINT == 0) return -1; // TODO : zero division
 #define ZERO_CHK_QWORD() if(op_stack[stack_ptr-1].sDBL == 0) return -1; // TODO : zero division
 #define MEMINT(n) (* (int *)(memory+n))
+#define MEMFLOAT(n) (* (float *)(memory+n))
 #define MEMDOUBLE(n) (* (double *)(memory+n))
 #define MEMSHORT(n) (* (short *)(memory+n))
 #define UNI_OP_DWORD(op) op_stack[stack_ptr-1].sINT = op op_stack[stack_ptr-1].sINT
@@ -47,7 +48,7 @@ static int global_memory_addr = 0;
 #define ASSIGN(addr, dat) MEMINT(addr) = dat
 #define ASSIGN_CHAR(addr, dat) *(memory+addr) = dat
 #define ASSIGN_SHORT(addr, dat) MEMSHORT(addr) = dat
-#define ASSIGN_FLOAT(addr, dat) MEMINT(addr) = dat
+#define ASSIGN_FLOAT(addr, dat) MEMFLOAT(addr) = dat
 #define ASSIGN_DOUBLE(addr, dat) MEMDOUBLE(addr) = dat
 
 int execute(Instruction *codes);
