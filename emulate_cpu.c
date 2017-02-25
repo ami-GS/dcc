@@ -186,7 +186,7 @@ int execute(Instruction *codes) {
       BIN_OP_DWORD(/); break;
     case MODL:
       ZERO_CHK_DWORD();
-      BIN_OP_DWORD(%); break;
+      BIN_OP_BIT(%); break;
     case ADDL:
       BIN_OP_DWORD(+); break;
     case SUBL:
@@ -210,15 +210,15 @@ int execute(Instruction *codes) {
     case ORL:
       BIN_OP_DWORD(||); break;
     case BANDL:
-      BIN_OP_DWORD(&); break;
+      BIN_OP_BIT(&); break;
     case BORL:
-      BIN_OP_DWORD(|); break;
+      BIN_OP_BIT(|); break;
     case BXORL:
-      BIN_OP_DWORD(^); break;
+      BIN_OP_BIT(^); break;
     case LSHIFTL:
-      BIN_OP_DWORD(<<); break;
+      BIN_OP_BIT(<<); break;
     case RSHIFTL:
-      BIN_OP_DWORD(>>); break;
+      BIN_OP_BIT(>>); break;
     }
   }
 }
@@ -235,11 +235,11 @@ void debug_emulate(int pc, Instruction *code) {
   int k;
   for (k = stack_ptr-1; k >= 0; k--) {
     switch (op_stack[k].type) {
-    case 0: printf("%c ", op_stack[k].sCHAR); break;
-    case 1: printf("%d ", op_stack[k].sSRT); break;
-    case 2: printf("%d ", op_stack[k].sINT); break;
-    case 3: printf("%f ", op_stack[k].sFLT); break;
-    case 4: printf("%lf ", op_stack[k].sDBL); break;
+    case CHAR_T: printf("%c ", op_stack[k].sCHAR); break;
+    case SHORT_T: printf("%d ", op_stack[k].sSRT); break;
+    case INT_T: printf("%d ", op_stack[k].sINT); break;
+    case FLOAT_T: printf("%f ", op_stack[k].sFLT); break;
+    case DOUBLE_T: printf("%lf ", op_stack[k].sDBL); break;
     }
   }
 
