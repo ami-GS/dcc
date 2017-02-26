@@ -78,9 +78,15 @@ int execute(Instruction *codes) {
     case LDA:
       PUSHINT(addr); break;
     case LDI:
-      PUSHINT(dat); break; // TODO : need LDC, LDF LDD etc.
+      PUSHINT(dat); break;
+    case LDIC:
+      PUSHCHAR(codes[pc-1].opdatac); break;
+    case LDIS:
+      PUSHSRT(codes[pc-1].opdatas); break;
     case LDIF:
       PUSHFLT(codes[pc-1].opdataf); break;
+    case LDID:
+      PUSHDBL(codes[pc-1].opdatad); break;
     case STO:
       ASSIGN(addr, op_stack[stack_ptr-1].sINT);
       stack_ptr--;

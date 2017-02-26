@@ -19,11 +19,19 @@ void code_dump() {
 	  if (op == RET || op == STOP)
 	    printf("\n");
 	  break;
-	case LOD: case LODC: case LODV: case LDA: case LDI: case LDIF: case STO:
-	case STOC: case STOD: case STOS: case STOF: case CALL: case ADBR:
-	case LIB: case JMP: case JPT: case JPF: case EQCMP: case LODF:
-	  printf("%s\t%d", OpCodeStr[op], codes[i].opdatai); // TODO : separate for each data type
-	  if (codes[i].flag && (op == LOD || op == LODC || op == LDA || op == STO))
+	case LOD: case LODC: case LODV: case LDA: case LDI: case LDIF: case STO: case LDIS:
+	case STOC: case STOD: case STOS: case STOF: case CALL: case ADBR: case LDID: case LDIC:
+	case LIB: case JMP: case JPT: case JPF: case EQCMP: case LODF: case LODD: case LODS:
+	  printf("%s\t", OpCodeStr[op]); // TODO : separate for each data type
+	  switch (codes[i].type) {
+	  case CHAR_T: printf("%c", codes[i].opdatac); break;
+	  case SHORT_T: printf("%d", codes[i].opdatas); break;
+	  case INT_T: printf("%d", codes[i].opdatai); break;
+	  case FLOAT_T: printf("%f", codes[i].opdataf); break;
+	  case DOUBLE_T: printf("%lf", codes[i].opdatad); break;
+	  }
+	  if (codes[i].flag && (op == LOD || op == LODC || op == LODF || op == LODS
+				|| op == LODD || op == LDA || op == STO))
 	    printf("[b]"); // TODO : ???
 	  printf("\n");
 	  break;
