@@ -55,8 +55,8 @@ typedef struct {
 } KeyWordType;
 
 static KeyWordType keyWdType[] = {
-  {"void", Void}, {"int", Int}, {"char", Char}, {"float", Float}, {"double", Double},
-  {"void*", VoidP}, {"int*", IntP}, {"char*", CharP}, {"float*", FloatP}, {"double*", DoubleP},
+  {"void", Void}, {"int", Int}, {"char", Char}, {"float", Float}, {"double", Double}, {"short", Short},
+  {"void*", VoidP}, {"int*", IntP}, {"char*", CharP}, {"float*", FloatP}, {"double*", DoubleP}, {"short*", ShortP},
   {"struct", Struct}, {"static", Static}, {"const", Const}, {"union", Union},  {"typedef", Typedef}, {"extern", Extern},
   {"if", If}, {"else", Else},
   {"for", For}, {"while", While}, {"do", Do},

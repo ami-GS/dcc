@@ -56,8 +56,9 @@ void statement(Token *t) {
     nextToken(t, 0);
     break;
   case Ident: case IntNum: case Mul: case Incre: case Decre: case Return:
-  case Int: case Float: case Char: case Double: case Struct: case Typedef: case Static: case Const:
-  case IntP: case FloatP: case CharP: case DoubleP:// TODO : enhance here
+  case Int: case Float: case Char: case Double: case Short:
+  case Struct: case Typedef: case Static: case Const:
+  case IntP: case FloatP: case CharP: case DoubleP: case ShortP:// TODO : enhance here
     expr_with_check(t, 0, ';');
     break;
   case EOF_token:

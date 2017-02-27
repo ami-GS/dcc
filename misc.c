@@ -9,7 +9,7 @@ void code_dump() {
         op = codes[i].opcode;
 	printf("%d:\t", i);
         switch (op) {
-	case RET: case ASS: case ASSV: case ASSC: case ASSF: case ASSS: case ASSP: case ASVC:
+	case RET: case ASS: case ASSV: case ASSC: case ASSF: case ASSD: case ASSS: case ASSP: case ASVC:
 	case ASVF: case ASVS: case ASVP: case NOT: case INCL: case DECL: case NEG: case ADDL:
 	case SUBL: case MULL: case DIVL: case MODL: case LESSL: case LSEQL: case GRTL: case GTEQL:
 	case EQUL: case NTEQL: case ANDL: case ORL: case BANDL: case BORL: case BXORL: case BNOT:
