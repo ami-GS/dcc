@@ -287,8 +287,8 @@ int const_fold(OpCode op) {
 	code_ct--;
 	return 1;
       }
-    } else if (op == VAL && codes[code_ct-1].opcode == LDA) {
-      codes[code_ct-1].opcode = LOD;
+    } else if ((op == VAL || op == VALS || op == VALF || op == VALC || op == VALD) && codes[code_ct-1].opcode == LDA) {
+      codes[code_ct-1].opcode = LOD + op - VAL;
       return 1;
     }
   }
