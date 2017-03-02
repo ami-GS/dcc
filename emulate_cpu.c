@@ -234,6 +234,8 @@ void debug_emulate(int pc, Instruction *code) {
   switch (code->opcode) {
   case LDIF:
     printf("%d:\t\t\t %s\t\t %f\t\t", pc, OpCodeStr[code->opcode], code->opdataf); break;
+  case LDID:
+    printf("%d:\t\t\t %s\t\t %f\t\t", pc, OpCodeStr[code->opcode], code->opdatad); break;
   default:
     printf("%d:\t\t\t %s\t\t %d\t\t", pc, OpCodeStr[code->opcode], code->opdatai);
   }
