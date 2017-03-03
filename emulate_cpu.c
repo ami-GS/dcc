@@ -243,7 +243,7 @@ void debug_emulate(int pc, Instruction *code) {
   int k;
   for (k = stack_ptr-1; k >= 0; k--) {
     switch (op_stack[k].type) {
-    case CHAR_T: printf("%c ", op_stack[k].sCHAR); break;
+    case CHAR_T: printf("%d ", op_stack[k].sCHAR); break;
     case SHORT_T: printf("%d ", op_stack[k].sSRT); break;
     case INT_T: printf("%d ", op_stack[k].sINT); break;
     case FLOAT_T: printf("%f ", op_stack[k].sFLT); break;
