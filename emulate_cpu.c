@@ -6,10 +6,6 @@
 
 
 int execute(Instruction *codes) {
-  if (DEBUG_FLAG & SHOW_MOVEMENT) {
-    printf("****instructions****\n");
-    printf("program counter\t\topcode\t\topdata\t\tstackvalue\n");
-  }
   pc = 0; // proram counter
   baseReg = MEM_MAX-1;
   stack_ptr = 0;
@@ -231,6 +227,11 @@ int execute(Instruction *codes) {
 
 
 void debug_emulate(int pc, Instruction *code) {
+  if (pc == 0) {
+    printf("****instructions****\n");
+    printf("program counter\t\topcode\t\topdata\t\tstackvalue\n");
+  }
+
   switch (code->opcode) {
   case LDIF:
     printf("%d:\t\t\t %s\t\t %f\t\t", pc, OpCodeStr[code->opcode], code->opdataf); break;
