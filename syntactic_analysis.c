@@ -354,12 +354,13 @@ void genCode_tree_String(Token *tkn) {
 void genCode_tree_operator(Node *root, Node *self) {
   if ((self->l != NULL && self->l->tkn->hKind == Type) || (self->l != NULL && self->l->l != NULL && self->l->l->tkn->kind == Struct))
     return; // TODO : workaround for int *a like. and struct TAG *VAL;
-  if (self->l != NULL && self->r != NULL) {
+  if (self->l != NULL && self->l->tkn->hKind != Statement && self->r != NULL) {
     genCode_binary(self->tkn->kind);
   } else {
-    if (!(self->tkn->kind == '&' && te_tmp->var->arrLen)) // TODO : workaround for b = &a[1];
-      genCode_unary(self->tkn->kind);
-    else if (te_tmp->var->dType != STRUCT_T) // TODO : workaround for above when these are struct
+    if (!(self->tkn->kind == '&' && te_tmp->var->arrLen)) { // TODO : workaround for b = &a[1];
+      if (!(*parse_flag & IS_DECLARE))
+	genCode_unary(self->tkn->kind);
+    } else if (te_tmp->var->dType != STRUCT_T) // TODO : workaround for above when these are struct
       code_ct--;
   }
   if (left_most_assign >= 1)
