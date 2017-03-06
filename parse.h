@@ -4,6 +4,8 @@
 #include "symbol_table.h"
 #include "letter_analysis.h"
 
+#define is_main(p) (strcmp(p, "main")==0)
+
 static int blockNest_ct = 0;
 extern TableEntry* funcPtr;
 

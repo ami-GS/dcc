@@ -9,7 +9,6 @@
 #include "misc.h"
 
 TableEntry* funcPtr = NULL;
-#define is_main(p) (strcmp(p, "main")==0)
 
 void compile(char *fname) {
   fOpen(fname, "r");
