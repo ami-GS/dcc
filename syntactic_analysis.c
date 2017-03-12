@@ -9,6 +9,7 @@
 #include "malloc.h"
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 int getLowestPriorityIdx(int st, int end) {
   if (st == end)
@@ -104,6 +105,8 @@ void makeTree(Node *root, int st, int end) {
   root->tkn = &expr_tkns[idx];
 
   root->l = &nodes[node_used_ct++];
+  root->l->depth = root->depth+1;
+  root->l->loc = root->loc-1;
   makeTree(root->l, st, idx-1);
   if (root->l->tkn == NULL) {
     root->l = NULL;
@@ -112,11 +115,50 @@ void makeTree(Node *root, int st, int end) {
 
   root->r = &nodes[node_used_ct++];
   makeTree(root->r, idx+1, end);
+    root->r->depth = root->depth+1;
+    root->r->loc = root->loc+1;
   if (root->r->tkn == NULL) {
     root->r = NULL;
     node_used_ct--;
   }
+  if (TreeMaxDepth < root->depth)
+    TreeMaxDepth = root->depth;
+  if (TreeMaxWidth < root->loc)
+    TreeMaxWidth = root->loc;
+  if (TreeMinWidth > root->loc)
+    TreeMinWidth = root->loc;
   return;
+}
+
+void dumpRevPolishBFS(Node *root) {
+  if (root == NULL)
+    return;
+  int qc = 0, cp = 0;
+  int befdepth = 0;
+  bfsq[qc++] = root;
+  while (qc-cp != 0) {
+    Node *nxt = bfsq[cp++];
+    double spaceN = pow(2.0, (double)(TreeMaxDepth-nxt->depth));
+
+    if (befdepth != nxt->depth) {
+      printf("\n");
+      befdepth = nxt->depth;
+    } else if(root != nxt) {
+      spaceN *= 2;
+    }
+    for (int i = 0; i < spaceN ; i++) {
+      printf(" ");
+    }
+
+    if (nxt->tkn)
+      printf("%s", nxt->tkn->text);
+
+    if (nxt->l != NULL)
+      bfsq[qc++] = nxt->l;
+    if (nxt->r != NULL)
+      bfsq[qc++] = nxt->r;
+  }
+  printf("\n");
 }
 
 void dumpRevPolish(Node *root) {
@@ -539,8 +581,14 @@ int init_expr(Token *t, char endChar) {
     nodes[--node_used_ct].l = NULL;
     nodes[node_used_ct].r = NULL;
     nodes[node_used_ct].tkn = NULL;
+    nodes[node_used_ct].depth = 0;
+    nodes[node_used_ct].loc = 0;
   }
-  int len, nest = 0;
+  TreeMaxWidth = 0;
+  TreeMaxDepth = 0;
+  TreeMinWidth = 0;
+
+    int len, nest = 0;
   for (len = 0; !(t->kind == endChar && nest == 0); len++) { // TODO ',' should be considered
     expr_tkns[len] = *t;
     if (expr_tkns[len].hKind == LParens) {
@@ -584,8 +632,10 @@ void expression(Token *t, char endChar) {
   Node *root = &nodes[node_used_ct++];
   makeTree(root, 0, len-1);
   if (DEBUG_FLAG & SHOW_TREE) {
+    printf("\n-------------tree-S(");
     dumpRevPolish(root);
-    printf("\n");
+    printf(")-------------\n");
+    dumpRevPolishBFS(root);
   }
   if (root->tkn != NULL) {
     genCode_tree(root, root);

@@ -9,7 +9,14 @@ typedef struct Node Node;
 struct Node {
   Node *l, *r;
   Token *tkn;
+  char depth;
+  char loc; // location from the most left
 };
+static int TreeMaxDepth = 0;
+static int TreeMaxWidth = 0;
+static int TreeMinWidth = 0;
+#define QUEUE_SIZ 256
+Node *bfsq[QUEUE_SIZ];
 
 typedef enum {
     IS_LEFT = 0x1, IS_DECLARE = 0x2, IS_STRUCT = 0x4, MEMBER_ACCESS = 0x8, BRACKET_ACCESS = 0x10, IS_TYPEDEF = 0x20, DEC_ARRAY = 0x40, DEC_EMPTY_ARRAY = 0x80, SET_MEMBER = 0x100, WITH_INIT = 0x200, CALL_FUNC = 0x400, ST_RETURN = 0x800,
@@ -48,6 +55,7 @@ void expression(Token *t, char endChar);
 int getLowestPriorityIdx(int st, int end);
 void makeTree(Node *root, int st, int end);
 void dumpRevPolish(Node *root);
+void dumpRevPolishBSF(Node *root);
 void genCode_tree_assign();
 void genCode_tree_addressing(int offset);
 void genCode_tree_operator(Node *root, Node *self);
