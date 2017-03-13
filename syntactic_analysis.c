@@ -106,7 +106,7 @@ void makeTree(Node *root, int st, int end) {
 
   root->l = &nodes[node_used_ct++];
   root->l->depth = root->depth+1;
-  root->l->loc = root->loc-1;
+  root->l->loc = root->loc*2;
   makeTree(root->l, st, idx-1);
   if (root->l->tkn == NULL) {
     root->l = NULL;
@@ -114,36 +114,41 @@ void makeTree(Node *root, int st, int end) {
   }
 
   root->r = &nodes[node_used_ct++];
+  root->r->depth = root->depth+1;
+  root->r->loc = root->loc*2+1;
   makeTree(root->r, idx+1, end);
-    root->r->depth = root->depth+1;
-    root->r->loc = root->loc+1;
   if (root->r->tkn == NULL) {
     root->r = NULL;
     node_used_ct--;
   }
   if (TreeMaxDepth < root->depth)
     TreeMaxDepth = root->depth;
-  if (TreeMaxWidth < root->loc)
-    TreeMaxWidth = root->loc;
-  if (TreeMinWidth > root->loc)
-    TreeMinWidth = root->loc;
   return;
 }
 
 void dumpRevPolishBFS(Node *root) {
   if (root == NULL)
     return;
-  int qc = 0, cp = 0;
-  int befdepth = 0;
+  int qc = 0, cp = 0, befdepth = -1;
   bfsq[qc++] = root;
   while (qc-cp != 0) {
     Node *nxt = bfsq[cp++];
     double spaceN = pow(2.0, (double)(TreeMaxDepth-nxt->depth));
 
     if (befdepth != nxt->depth) {
-      printf("\n");
+      if (nxt->depth != 0)
+	printf("\n");
       befdepth = nxt->depth;
-    } else if(root != nxt) {
+      for (int i = 0; i < nxt->loc; i++) {
+	for (int j = 0; j < spaceN ; j++) {
+	  printf(" ");
+	  if (i != 0)
+	    printf(" ");
+	}
+      }
+    }
+
+    if (nxt->loc != 0) {
       spaceN *= 2;
     }
     for (int i = 0; i < spaceN ; i++) {
@@ -158,7 +163,6 @@ void dumpRevPolishBFS(Node *root) {
     if (nxt->r != NULL)
       bfsq[qc++] = nxt->r;
   }
-  printf("\n");
 }
 
 void dumpRevPolish(Node *root) {
@@ -584,9 +588,7 @@ int init_expr(Token *t, char endChar) {
     nodes[node_used_ct].depth = 0;
     nodes[node_used_ct].loc = 0;
   }
-  TreeMaxWidth = 0;
   TreeMaxDepth = 0;
-  TreeMinWidth = 0;
 
     int len, nest = 0;
   for (len = 0; !(t->kind == endChar && nest == 0); len++) { // TODO ',' should be considered

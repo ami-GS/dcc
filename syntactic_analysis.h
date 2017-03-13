@@ -13,8 +13,6 @@ struct Node {
   char loc; // location from the most left
 };
 static int TreeMaxDepth = 0;
-static int TreeMaxWidth = 0;
-static int TreeMinWidth = 0;
 #define QUEUE_SIZ 256
 Node *bfsq[QUEUE_SIZ];
 
