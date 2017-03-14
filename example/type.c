@@ -1,7 +1,8 @@
 char f_char() {
-  char c;
+  char c, *cc;
   c = 256;
-  return c;
+  cc = &c;
+  return *cc;
 }
 
 short f_short() {
@@ -23,9 +24,10 @@ double f_double() {
 }
 
 int f_int() {
-  int i;
-  i = 98765;
-  return i;
+  int i, *ii;
+  i = 12;
+  ii = &i;
+  return *ii;
 }
 
 int main() {
