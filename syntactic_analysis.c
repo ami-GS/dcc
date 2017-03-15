@@ -133,31 +133,28 @@ void dumpRevPolishBFS(Node *root) {
   bfsq[qc++] = root;
   while (qc-cp != 0) {
     Node *nxt = bfsq[cp++];
-    double spaceN = pow(2.0, (double)(TreeMaxDepth-nxt->depth));
+    double spaceN = pow(2.0, (double)(TreeMaxDepth-nxt->depth)) - 1;
 
     if (befdepth != nxt->depth) {
-      if (nxt->depth != 0)
+      if (nxt->depth)
 	printf("\n");
       befdepth = nxt->depth;
-      for (int i = 0; i < nxt->loc; i++) {
-	for (int j = 0; j < spaceN ; j++) {
+      for (int i = 0; i < nxt->loc*2; i++) {
+	for (int j = 0; j < spaceN; j++)
 	  printf(" ");
-	  if (i != 0)
-	    printf(" ");
-	}
+	printf(" ");
       }
     }
 
-    if (nxt->loc != 0) {
-      spaceN *= 2;
-    }
-    for (int i = 0; i < spaceN ; i++) {
+    for (int i = 0; i < spaceN; i++)
       printf(" ");
-    }
-
     if (nxt->tkn)
-      printf("%s", nxt->tkn->text);
-
+      printf("%c", nxt->tkn->text[0]);
+    for (int i = 0; i < spaceN; i++)
+      printf(" ");
+    if (nxt->depth)
+      printf(" ");
+      
     if (nxt->l != NULL)
       bfsq[qc++] = nxt->l;
     if (nxt->r != NULL)
