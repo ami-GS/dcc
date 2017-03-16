@@ -129,27 +129,26 @@ void makeTree(Node *root, int st, int end) {
 void dumpRevPolishBFS(Node *root) {
   if (root == NULL)
     return;
-  int qc = 0, cp = 0, befdepth = -1;
+  int qc = 0, cp = 0, befdepth = 0;
+  int befloc = -1;
   bfsq[qc++] = root;
   while (qc-cp != 0) {
     Node *nxt = bfsq[cp++];
     double spaceN = pow(2.0, (double)(TreeMaxDepth-nxt->depth)) - 1;
 
     if (befdepth != nxt->depth) {
-      if (nxt->depth)
-	printf("\n");
+      befloc = -1;
       befdepth = nxt->depth;
-      for (int i = 0; i < nxt->loc*2; i++) {
-	for (int j = 0; j < spaceN; j++)
-	  printf(" ");
-	printf(" ");
-      }
+      printf("\n");
     }
-
-    for (int i = 0; i < spaceN; i++)
-      printf(" ");
-    if (nxt->tkn)
+    for (int i = 0; i < nxt->loc - befloc; i++) {
+      for (int j = 0; j < spaceN; j++)
+	printf(" ");
+    }
+    if (nxt->tkn) {
       printf("%c", nxt->tkn->text[0]);
+      befloc = nxt->loc;
+    }
     for (int i = 0; i < spaceN; i++)
       printf(" ");
     if (nxt->depth)
