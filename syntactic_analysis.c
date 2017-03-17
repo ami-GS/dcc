@@ -143,16 +143,25 @@ void dumpRevPolishBFS(Node *root) {
     }
     for (int i = 0; i < nxt->loc - befloc; i++) {
       for (int j = 0; j < spaceN; j++)
-	printf(" ");
-    }
-    if (nxt->tkn) {
-      printf("%c", nxt->tkn->text[0]);
-      befloc = nxt->loc;
+	if (j < (int)spaceN/2+1)
+	  printf(" ");
+	else
+	  printf("_");
+      if (nxt->tkn && i == nxt->loc - befloc - 1) {
+	printf("%c", nxt->tkn->text[0]);
+      } else {
+	for (int j = 0; j < spaceN+2; j++)
+	  printf(" ");
+      }
     }
     for (int i = 0; i < spaceN; i++)
-      printf(" ");
+      if (i < (int)spaceN/2)
+	printf("_");
+      else
+	printf(" ");
     if (nxt->depth)
-      printf(" ");
+          printf(" ");
+    befloc = nxt->loc;
       
     if (nxt->l != NULL)
       bfsq[qc++] = nxt->l;
