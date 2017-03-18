@@ -252,10 +252,8 @@ void debug_emulate(int pc, Instruction *code) {
     }
   }
 
-  if (DEBUG_FLAG & STEP_PROC) {
-    char c;
-    gets(&c);
-  } else {
+  if (DEBUG_FLAG & STEP_PROC)
+    getchar();
+  else
     printf("\n");
-  }
 }
