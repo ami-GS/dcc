@@ -13,6 +13,7 @@ $ make
 $ dcc example/fib.c -srmo
 $ dcc example/sort.c -srmo
 $ dcc example/list.c -srmo
+$ dcc example/test.c -srmo
 ```
 
 ## Options

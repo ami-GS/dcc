@@ -5,8 +5,9 @@ dcc: dcc.c
 clean:
 	rm -f dcc
 test:
-	@./dcc example/sort.c -srm
-	@./dcc example/fib.c -srm
-	@./dcc example/list.c -srm
-	@./dcc example/operator.c -srm
-	@./dcc example/arithmetic.c -srm
+	@./dcc example/sort.c -srmo
+	@./dcc example/fib.c -srmo
+	@./dcc example/list.c -srmo
+	@./dcc example/operator.c -srmo
+	@./dcc example/arithmetic.c -srmo
+	@./dcc example/type.c -srmo
