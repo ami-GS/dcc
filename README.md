@@ -46,7 +46,7 @@ These are TODO list specilly I would like to implement.
 ### Supported types
 Types below with pointer are supported.
 
-- Int, Short, Float, Double Char(string)
+- Int, Short, Float, Double, Char(string) and these pointer
 
 - Struct
 
